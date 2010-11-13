@@ -1,0 +1,24 @@
+VID Extension Kit - Developers Reference
+
+	Author: Henrik Mikael Kristensen
+
+===Introduction
+
+This document is for those who wish to develop new styles for the VID Extension Kit and also help fixing issues in the source code for the VID Extension Kit
+
+===Building
+
+The VID Extension Kit consists of multiple source files that can be combined into one uncompressed file, using the vid-build.r file:
+
+	>> do %vid-build.r
+	Script: "VID Build" (5-Apr-2009)
+	Building VID Extension Kit
+	Wrote 157821 bytes. Done.
+	>> _
+
+The output file, vid-ext-kit.r is put in the same directory as the source files.
+
+===Source Overview
+
+Here is a descriptive and auto-generated list of each source file:
+

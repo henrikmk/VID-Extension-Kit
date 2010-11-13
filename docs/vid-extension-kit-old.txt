@@ -1,0 +1,647 @@
+VID Extension Kit
+
+	Author: Henrik Mikael Kristensen
+	Version: 0.0.1
+
+=options no-nums
+
+===Introduction
+
+The basic intentions of the <strong>VID Extension Kit</strong> comes from frustrations over a lack of depth with how certain styles are implemented, such as FIELD, and how hard it is to provide a fairly detailed description for a form solely inside a layout.
+
+Without keyboard navigation, proper field validation tools and good fault tolerance and methods for restricting the contents of fields, the user experience is primitive and awkward for those who have no experience in using VID interfaces.
+
+From there, the VID Extension Kit was built, and is continuously being built, to allow you to build complex and complete forms in minutes with a much greater user experience. This has led to other enhancements.
+
++++The VID Extension Kit is:
+
+* A collection of new styles for VID to make it more complete.
+
+* Heavy modifications to existing styles to make them more flexible.
+
+* A set of rules defined to restrict, but also lift the capability of the user interface. This helps to:
+
+\in
+
+* Simplify the creation, validation and data gathering of forms.
+
+* Provide tabbed keyboard navigation.
+
+* Provide a consistent skin across the entire UI using a single skin file.
+
+* Provide full window resizing and face alignment extensions in the dialect.
+
+* Give a user interface meaning and structure as opposed to being a bunch of faces, you have to address absolutely.
+
+/in
+
+* A collection of functions for managing faces, such as:
+
+\in
+
+* Very easy face traversal, moving back and forth, up and down in the face tree. Faces become aware of their surroundings.
+
+* Face traversal based on criteria, useful for finding a specific face by style, flag or any other method.
+
+* Individual keyboard navigation per style.
+
+* Disabling and enabling faces and panels, also with customizable setups per style.
+
+* Validating INPUT faces and panels.
+
+/in
+
+* A collection of new styles that are data-only, i.e. invisible styles that provide new operations to the dialect at parse time and connect faces.
+
+* A collection of more sensible requesters that take full advantage of the new window layout, resizing and styles.
+
++++What the VID Extension Kit tries not to do:
+
+* It does not try to fix "unfixable" low-level bugs with complicated hacks. The philosophy is "good design" over "capability at all costs".
+
+* It does not use anti-aliased fonts.
+
+* It does not provide overly flexible face/graphics layout. No transparent windows or other extensions to the layout engine on a lower level.
+
+===Usage
+
+To use the VID Extension Kit, use the following line:
+
+	do http://www.hmkdesign.dk/rebol/vid/vid-ext-kit.r
+
+And you are ready to go! Be ware that you can't 'do the file again in the same console session.
+
+---Windows
+
+Creating a window happens with the MAKE-WINDOW function. This creates a resizable layout with tab navigation.
+
+Example:
+
+	main: make-window [
+		h3 "Main Window"
+		bar
+		label "Enter Name"
+		field
+		ok-cancel
+	]
+
+To view the window:
+
+	view main
+
+---Dialect
+
+The dialect is largely the same as the original VID dialect.
+
+---Faces
+
+Each face is basically a normal VID face with a few extensions:
+
+:Spring - Determines how the face is positioned and stretched when the parent face is resized, such as during a window resize. Face resizing is always a change in size of either 0 or equal to the size change of an axis of the parent face. Not created or used internally. The input is a block of words, which are:
+
+\in
+
+:left - makes the distance of the left edge of the face constant to the right edge of the parent face
+
+:right - makes the distance of the right edge of the face constant to the left edge of the parent face
+
+:top - makes the distance of the top edge of the face constant to the bottom edge of the parent face
+
+:bottom - makes the distance of the bottom edge of the face constant to the top edge of the parent face
+
+:horizontal - makes the distances of the left and right edges of the face constant to the left and right edges of the parent face
+
+:vertical - makes the distances of the top and bottom edges of the face constant to the top and bottom edges of the parent face
+
+/in
+
+:Align - Aligns the face to <strong>left</strong>, <strong>right</strong>, <strong>top</strong>, <strong>bottom</strong> or <strong>center</strong> of the parent face. Words are used as is, or combined in a block. Horizontal center is applied by using left and right in conjunction. Vertical center is applied by using top and bottom in conjunction. Alignment happens at layout time. Not created or used internally.
+
+:Fill - Pair! value. When an axis is set to 0, the value given for the face size is used. When an axis is set to 1, the size is set to be the size of the parent face minus offset and margins. Fill happens at layout time. Not created or used internally.
+
+:Origin - The origin of the face in relation to the parent face as set during layout using the ORIGIN keyword. Created and used internally.
+
+:Saved-feel - Can contain a saved copy of the feel object of the face. This is used in cases where the feel object must be removed, such as when a face is disabled and later restored when the face is enabled again. Created and used internally.
+
+:Saved-font - Can contain a saved copy of the font object of the face. This is used when the font needs to be changed, such as when the face is disabled and is later restored when the face is enabled again. Created and used internally.
+
+:Saved-para - Can contain a saved copy of the para object of the face. This is used when the para object needs to be changed, such as when the face is disabled and is later restored when the face is enabled again. Created and used internally.
+
+:Old-value - The last set value of the face, set by SET-FACE. Created and used internally.
+
+:Tags - A block of words to describe where this style belongs. Used for cataloging purposes.
+
+---Styles
+
+Styles are grouped in several sections:
+
+:Bars -  Lines, scrollers, dividers
+
+:Texts - Labels, headers, text, doc
+
+:Fields - Single line fields, info, area, date field, pop-file, pop-face
+
+:Panels - Panel, tab panel, instance tab panel, balance
+
+:Frames - Decorative frames, aspect frames, images, picture frames
+
+:Constructs - Paper
+
+:Lists - List view, tree view, column view
+
+---Flags
+
+Each style has a specific set of flags. The flag list is as follows:
+
+---Requesters
+
+There are various types of requesters:
+
+:Message - To display a message with a single Close button. Returns FALSE.
+
+:Request - To display a question with a true and false button. Returns TRUE or FALSE, depending on which button was clicked.
+
+:Progress - To display a progress bar along with a text.
+
+===Rule Based Design
+
+With a rule based design as the basis, the VID Extension Kit implements these rules using:
+
+Functions - For navigating and manipulating faces.
+
+Face flags - For putting face styles in specific groups. The face flags list is therefore put in a separate file.
+
+Styles - For implementing specific rules for panels and input faces.
+
+===Rules
+
+---Window
+
++++Finding Faces and Visibility
+
+Finding faces is based on their visibility. If a face is in a pane that is hidden, it will not be found and cannot return a value. A face does not count as hidden, if the pane in which the face exists is selected for viewing and has an offset outside the boundaries of the parent face or if the size of the parent face is zero.
+
++++Focusing a Face
+
+A specific sequence of events occur when the face topology of the window is established at window open or changed when switching pane. Face focusing rules are used through out the system.
+
+# If a face is visible and has a TABBED flag, it can be focused.
+
++++Opening a Window
+
+The rules that are invoked during the opening of a window are implemented in the INIT-WINDOW function.
+
+When opening a window, the following things are checked in sequence:
+
+# If a focus face was specified, 
+
+# If the window has visible INPUT faces, the first one is automatically focused.
+
+# If the window has no visible INPUT face, the first FALSE face is automatically focused.
+
+# If the window has no visible FALSE face, the first TRUE face is automatically focused.
+
+# If the window has no visible TRUE face, the first TABBED face is automatically focused.
+
+# If the window has no visible TABBED face, no faces are focused.
+
++++Closing a Window
+
+When closing a window, it can happen in one of 4 ways:
+
+# By clicking a FALSE button. In this case, the RESULT is set to FALSE.
+
+# By clicking a TRUE button. In this case, the RESULT is set to TRUE.
+
+# By clicking the window close button. In this case, RESULT is set to FALSE.
+
+# By using the UNVIEW function. RESULT will not be altered.
+
+---Panel
+
++++Switching panes
+
+When switching panes, the visibility rules are invoked.
+
+The pane switching rules are implemented in the PANEL style.
+
+If a pane is switched, the following things are checked in sequence:
+
+# If the old pane has a focused face, that face is unfocused.
+
+# If the old pane does not have a focused face, no face focus change occurs.
+
+# If the new pane has a visible INPUT face, the first one is automatically focused.
+
+# If the new pane has no visible INPUT face, the first FALSE face is automatically focused.
+
+# If the new pane has no visible FALSE face, the first TRUE face is automatically focused.
+
+# If the new pane has no visible TRUE face, the first TABBED face is automatically focused.
+
+# If the new pane has no visible TABBED face, no faces are focused.
+
++++Using GET-FACE on a Panel
+
+When using GET-FACE on a face with the PANEL flag set, all sub-faces with an INPUT flag, will invoke the rule for GET-FACE.
+
++++Using SET-FACE on a Panel
+
+When using SET-FACE on a face with the PANEL flag set, all sub-faces with the INPUT flag, will invoke the rule for SET-FACE.
+
+---Input
+
++++Using SET-FACE on an Input face
+
+When using SET-FACE on a face with the INPUT flag set, the face will set its value through its SET-FACE accessor. This is implemented using the SET-FACE function.
+
++++Using GET-FACE on an Input face
+
+When using GET-FACE on a face with the INPUT flag set, the face returns a value through its GET-FACE* accessor. This is implemented using the GET-FACE function.
+
+---Enable/Disable
+
+When a face is enabled, the DISABLED flag is removed.
+
+When a face is disabled, the DISABLED flag is set.
+
+No matter whether a face is enabled or disabled, a face with an INPUT flag will still be set.
+
+---A
+
+---Tab Navigation
+
+* If a face has the TABBED flag set, it will be focusable using tab navigation.
+
+* If a face has the DISABLED flag set, it will be skipped during tab navigation.
+
+---Showcase
+
+Here's a simple form that would be normally difficult to do:
+
+	view make-window [
+		h3 "Person Information"
+		bar
+		panel [
+			across
+			label "Name" field validate [not empty? value] valid-indicator return
+			label "Age" field numeric range [0 99] return
+			label "Address" field return
+			label "Postcode" field return
+			label "City"	 valid-field return
+		]
+		ok-cancel
+	]
+
+What can't be seen, is that there is full keyboard navigation and window resizability.
+
+---Patched FACE
+
+VID-FACE (get-style 'face) has been patched for all styles to provide extra options:
+
+* SAVED-FEEL to store the FEEL object for the face, so that it becomes inactive. You can use the SAVE-FEEL function to replace the FEEL object with a new one, to alter the behavior of a face on the fly. Use RESTORE-FEEL to restore the original behavior.
+
+* DEFAULT logic flag. This determines whether the face used is default. This means it will respond to the Enter/Return key with a DO-FACE action. The appearance of the face can also be made different this way.
+
+* KEY-FACE*, ENABLE-FACE*, DISABLE-FACE* accessors in ACCESS.
+
+---Overview of Implemented Rules
+
+VID and its styles adhere to new rules, and so if you wish to extend them, VID will work best with the rules intact:
+
+* All faces must have a PARENT-FACE.
+
+* The EFFECT facet is used to illustrate disabled faces.
+
+* The ACCESS facet has a new KEY-FACE* function to provide keyboard navigation, which is only active, if the face is tabbed.
+
+* A window face is now always a WINDOW style. This makes it possible to run the INIT-WINDOW function on it, which performs various standard operations.
+
+* A window face with a face with DEFAULT flag is focused first when opened.
+
+* A window face without a face with DEFAULT flag focuses the first TABBED face.
+
+
+
+---Window Opening Process
+
+When a window is opened, several things happen in the following order:
+
+# If the window can be validated as a form, because it contains VALIDATE faces, validation occurs here. If validation fails, the first INPUT face which does not validate is focused.
+
+# If the window contains INPUT faces, but no VALIDATE faces, the first one is focused.
+
+# If the window neither contains INPUT nor VALIDATE faces, the first CLOSE face is focused.
+
+---Window Closing Process
+
+Depending on the window type, there are multiple ways to handling a window being closed.
+
+Typically a normal window is closed with UNVIEW, if it has been opened with VIEW. If there is a CLOSE-FALSE face in the window and it's used, a FALSE value will be stored in the layout's RESULT word.
+
+Example:
+
+	view file-window
+	if file-window/result [
+		; ...act on result...
+	]
+
+---Style Types
+
+Style types are indicated through flags. In this documentation, if the word "TABBED style" occurs, it means the flag TABBED, is enabled for that style. Each style can have multiple flags:
+
+:TABBED - The face can be tabbed to and from via keyboard navigation. It is also editable, can be enabled/disabled, and can be validated.
+
+:INPUT - The face content can be retrieved by GET-FACE, if its parent panel is GET-FACEd. Typically form elements in a panel would have the INPUT flag.
+
+:ACTION - The face can be manipulated to operate the user interface. An example would be a button that performs an action. ACTION faces can be disabled.
+
+:TEXT-EDIT - The face contains text editing, such as FIELD or AREA.
+
+:DISABLED - The face is disabled, it will be skipped during keyboard navigation, and is unclickable. A TABBED face is made not TABBED, when it's disabled. The TABBED flag is restored when the face is enabled again.
+
+:PANEL - This is for panels that contain other faces which content should be retrievable with GET-FACE. A panel with form elements would typically have the PANEL flag.
+
+:CLOSE-FALSE - This face is a window-returns-FALSE face, usually set for a single face in a window, that closes the window and returns FALSE. A "Cancel" or "No" button would be a typical example.
+
+:CLOSE-TRUE - This face is a window-returns-TRUE face, usually set for a single face in a window, that closes the window and returns TRUE. An "OK", "Yes" or "Use" button would be a typical example.
+
+---Text Editing
+
+Many changes have been done to CTX-TEXT, the context which holds most text operations. The changes involve:
+
+:Key filtering - so it's possible to produce integer-only fields.
+
+:String reformatting - so you can alter the string as you type.
+
+:Conditional unfocusing - so you can type in a string that upholds a specific condition and then the field will automatically tab away to the next field.
+
+Coincidentally, this is also the sequence in which they are executed as you type.
+
+These changes are available from any face that uses CTX-TEXT, which can be FIELD or AREA.
+
+From these changes, new fields have been created:
+
+:INTEGER-FIELD - Allows only input of integers, using key filtering
+
+:DECIMAL-FIELD - Allows input of decimals (integers and "," and "."), using key filtering
+
+:PASSWORD-FIELD - Secure password field that converts the input string into an SHA1 encrypted string as you type and does not display letters.
+
+---Key Filtering
+
+Currently you can filter for numbers and some keys. Key filtering happens first and if a key is filtered, the remaining functions are not executed, nothing is entered in the field and the cursor position does not change.
+
+After key filtering comes string formatting.
+
+---String Formatting
+
+String formatting involves altering the text in the field either as you type, or as you are leaving the field. This is useful for:
+
+*Auto completion.
+
+*Reformatting for obligatory upper case.
+
+*Capitalizing the first char in a name.
+
+*Password char hiding.
+
+*Numeric restriction.
+
+String formatting both involves setting the text and the highlight for the text depending on the current cursor position. You can also separate the formatting for FACE/TEXT and FACE/DATA.
+
+To provide specific string formatting for a field, you must enable the FORMAT flag for that field. Then CTX-TEXT will perform string formatting for that field, whenever you press a key.
+
+The formatting can be a standardized one that is shipped with the VID Extension Kit or you can provide your own using FACE/FORMAT. Whenever FACE/FORMAT is set, it will be used as formatting option.
+
+It is possible to use several formatters sequentially.
+
+===Faces
+
+---Face Accessors
+
+Each face can be accessed through accessors that are built into each style. Thus, using for example SET-FACE on a FIELD will result its string content to be set and displayed. There are 8 accessors:
+
+:SET-FACE - This sets the value of a face. For fields, generally the rule is to allow passing of FACE/TEXT to set the correct value.
+
+:GET-FACE -
+
+:RESET-FACE - This resets the face to its original value.
+
+:CLEAR-FACE - This clears the face.
+
+:KEY-FACE - This is used for sending a key event to the face. Internally this is happening when the given face has been tabbed to and is focused, thereby activating internal custom keyboard navigation for that face. This is used for example in LIST-VIEW to move the row selector up and down with the cursor keys.
+
+:ENABLE-FACE - 
+
+:DISABLE-FACE - 
+
+:SAVE-FACE - This saves the content of the face and thus makes it possible to do a GET-FACE. This is useful if you are writing in a field and then click a button without unfocusing the field by hand.
+
+:GET-FACE-PATH - This returns the PATH value of the face.
+
+:SET-FACE-PATH - This sets the PATH value of the face.
+
+---Enabling and Disabling Faces
+
+You can enable and disable faces and entire panels using the DISABLE-FACE and ENABLE-FACE. When disabling a TABBED face, you can no longer adjust it with the keyboard or mouse. It will also appear greyed out, but you can still set it via SET-FACE and get the data out with GET-FACE. Faces that are not TABBED faces are not touched.
+
+When using DISABLE-FACE or ENABLE-FACE on a panel, all INPUT faces inside will be disabled/enabled.
+
+When a face is disabled, it's also unfocused and validated.
+
+---Changes
+
+When a face has changed its content by a user, it's "dirty", which means FACE/DIRTY? is set to TRUE for the face. To detect changes in an entire panel of faces, use the DIRTY-FACE? function. When we want to clear the changes, the CLEAN-FACE function is used.
+
+Some special helper styles exist to visually determine dirtyness and act on it:
+
+:TRUE-BUTTON - This style will clean up a window, if its contents validates.
+
+:SAVE-BUTTON - This style will display when the window contains changes. Similar to TRUE-BUTTON, it will clean up the window if the contents validates.
+
+---Validation
+
+Validation occurs with the VALIDATE-FACE and VALIDATE-WINDOW functions. When a window contains VALIDATE faces and optionally VALID-INDICATOR faces, VALIDATE-FACE or VALIDATE-WINDOWS will validate the content to which the VALIDATE faces are attached, and display the validation result in VALID-INDICATOR.
+
+Placement of the VALIDATE face is important: It must be placed right after the face you wish to validate. VALID-INDICATOR is optional, but if it's needed, it must be placed right after the given VALIDATE face.
+
+Example:
+
+	field validate [not empty? get-face face] valid-indicator
+
+This is incorrect:
+
+	validate [not empty? get-face face] field valid-indicator
+
+---Face Paths
+
+When producing complex layouts, deep sets of panels are often used. In the VID extension kit, each panel can have multiple selectable panes, and it's useful to know programmatically which one is selected. It's also useful to set this set of panes programmatically without referring to each panel individually, such as storing a previously selected deep location in a configuration file or bookmark.
+
+Each panel style has the PATH facet, which stores the word name of the panels that are children of this panel. It also has the SET-FACE-PATH* and GET-FACE-PATH* accessors used by the SET-FACE-PATH and GET-FACE-PATH functions.
+
+As such all new PANEL derived styles in the VID extension kit supports SET-FACE-PATH and GET-FACE-PATH.
+
+The only condition is that each panel face that supports this method must be directly parent-faced to each other for this path system to work.
+
+When using the internal panel function, FACE/SET-PANE, this path is set every time the user selects a pane in a TAB-PANEL or when you use SET-FACE on the panel with the word name of the pane.
+
+Example:
+
+	view make-window [
+		outer: tab-panel [
+				entry "Entry" [
+					inner1: tab-panel [
+						single "Single" []
+						multiple "Multiple" []
+					]
+				]
+				settings "Settings" [
+					inner2: tab-panel [
+						general "General" []
+						network "Network" []
+					]
+				]
+			]
+		]
+	]
+
+Whenever the user selects a specific pane, the path is adjusted accordingly to match the word names of the currently visible panes. This information can then be obtained using the GET-FACE-PATH function.
+
+It is from here also possible to specify a path in the 'outer panel to set all inner panels, using the SET-FACE-PATH function.
+
+Examples:
+
+The user selects 'entry and 'multiple:
+
+	get-face-path outer
+	== entry/multiple
+
+The user selects 'settings and 'general
+
+	get-face-path 'outer
+	== settings/general
+
+Paths are relative, so if only the path from inner2 and inwards was required, the parent is not described:
+
+	get-face-path 'inner2
+   == general
+
+Also note here that the returned value is a word instead of a path.
+
+In order to set the path programmatically, you specify the given path, and the corresponding panels will be displayed. If the path exists, TRUE is returned:
+
+	set-face-path outer entry/single
+	== true
+
++++ Panels with multiple other Panels
+
+If you have multiple panels inside a panel, GET-FACE-PATH will return a block of paths, each referring to each panel in the parent panel either as an integer face position in the block pane, or as the attached FACE/VAR.
+
+Examples:
+
+We extend our previous example to have multiple panes in some panels:
+
+	view make-window [
+		outer: tab-panel [
+				entry "Entry" [
+					inner1: tab-panel [
+						single "Single" [
+							display: panel with [
+								panes: [
+									table []
+									search []
+								]
+							]
+							nav: panel with [
+								panes: [
+									simple-nav []
+									advanced-nav []
+								]
+							]
+						]
+						multiple "Multiple" []
+					]
+				]
+				settings "Settings" [
+					inner2: tab-panel [
+						general "General" []
+						network "Network" []
+					]
+				]
+			]
+		]
+	]
+
+If you then want to set SIMPLE-NAV to be visible:
+
+	>> set-face-path outer entry/single/nav/simple-nav
+	== true
+
+If the NAV panel did not have a FACE/VAR, you would use its index position in the parent pane:
+
+	>> set-face-path outer entry/single/2/simple-nav
+	== true
+
+When using GET-FACE-PATH for this setup, multiple paths will be returned in a block:
+
+	>> get-face-path outer
+	== [
+		entry/single/display/table
+		entry/single/nav/simple-nav
+	]
+
+Similarly, it's also possible to set multiple face paths at once:
+
+	>> set-face-path outer [entry/single/display/table entry/single/nav/simple-nav]
+	== true
+
++++ Setting Partial Paths
+
+If you don't want to set all levels, you can settle for the level you want:
+
+	set-face-path outer entry/single
+
+Panels inside this will be set similarly to what would be selected by the user.
+
+<strong>You cannot get-face-path partial paths.</strong>
+
+===Window
+
+---MAKE-WINDOW
+
+This function creates a window face with resizing capabilities.
+
+Example:
+
+  view make-window [field "Hello" button]
+
+This creates a resizable window with resizable elements inside.
+
+===Styles
+
+Some styles
+
+---face-construct
+
+This creates a panel with dynamic content, based on what is input. There are three distinct parameters to use with FACE-CONSTRUCT.
+
+---pop-face
+
+The pop-face creates a panel with an INFO field and a BUTTON. The action of the button determines a specific action for getting new content for the INFO field. This forms the basis for POP-FILE, POP-WINDOW, POP-WINDOW-LIST
+
+===Known Bugs
+
+Since this software is categorized as ALPHA, the list of features is growing and unfortunately also the list of bugs:
+
+* 
+
+===Thanks
+
+Thanks must go to:
+
+	Anton Rolls
+	Brian Hawley
+	Maxim Olivier-Adlhoch
+
+For their gracious help and assistance.

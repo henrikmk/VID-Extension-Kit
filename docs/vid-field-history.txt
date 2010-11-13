@@ -1,0 +1,51 @@
+FIELD History
+
+=options no-nums no-toc
+
+===0.0.5
+
+---Sep 03 2007
+
+:Fix - Error with NONE appearing in the field, when using a specific key range.
+
+:New - Now handles passwords properly with SET-FACE, GET-FACE. Standard FIELD does this incorrectly. This required some changes in SET-FACE and GET-FACE so face text is stored in DATA instead of TEXT. Only limitation at this time is that you can't set the text from LAYOUT. You must use SET-FACE.
+
+===0.0.4
+
+---Mar 29 2007
+
+:New - NAME-FIELD is an example FIELD which will trim the head of the text and capitalize each first letter after a space or at the head. This happens at each key press. Suitable for entering names.
+
+===0.0.3
+
+---Mar 25 2007
+
+:Fix - When <tt>max-length</tt> is used, the field would be locked from editing, if the string length somehow grew longer than given in <tt>max-length</tt>.
+
+:New - <tt>manip-keys</tt> function to determine if +/- or scroll-wheel was used to trigger the <tt>key-action</tt>
+
+:Fix - Rehighlights text after using +/- and scroll-wheel, so you can edit it with keys
+
+:Fix - +/- and scroll-wheel worked on some non-numeric field and replaced the contents with <tt>none</tt>.
+
+:New - Added <tt>back-face</tt> and <tt>next-face</tt> to allow you to tab out of the field to an abitrary face.
+
+===0.0.2
+
+---Mar 24 2007
+
+:New - Added support for +/- and scroll-wheel in numeric fields
+
+:New - Support for direct access to the event port from with in a <tt>key-action</tt> block.
+
+:New - Added <tt>max-length</tt>
+
+:Change - Changed the name to FIELD, so you can drop it into existing layout code.
+
+:Fix - Numeric fields with a range are now by default set to the minimum value in the range.
+
+===0.0.1
+
+---Mar 23 2007
+
+:New - Initial Release
