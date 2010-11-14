@@ -8,9 +8,9 @@ This document is for those who wish to develop new styles for the VID Extension 
 
 ===Building
 
-The VID Extension Kit consists of multiple source files that can be combined into one uncompressed file, using the vid-build.r file:
+The VID Extension Kit consists of multiple source files that can be combined into one uncompressed file, using the <tt>build.r</tt> file:
 
-	>> do %vid-build.r
+	>> do %build.r
 	Script: "VID Build" (5-Apr-2009)
 	Building VID Extension Kit
 	Wrote 157821 bytes. Done.
@@ -20,9 +20,13 @@ The output file, vid-ext-kit.r is put in the same directory as the source files.
 
 ===Including
 
-If you simply want to include the sources as-is in the current work project.
+If you simply want to include the sources as-is in the current work project, use <tt>include.r</tt>:
+
+	>> do %include.r
+	>> _
 
 ===Source Overview
 
 Here is a descriptive and auto-generated list of each source file:
 
+To Be Written
