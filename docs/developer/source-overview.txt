@@ -18,6 +18,10 @@ The VID Extension Kit consists of multiple source files that can be combined int
 
 The output file, vid-ext-kit.r is put in the same directory as the source files.
 
+===Including
+
+If you simply want to include the sources as-is in the current work project.
+
 ===Source Overview
 
 Here is a descriptive and auto-generated list of each source file:
