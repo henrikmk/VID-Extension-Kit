@@ -1,6 +1,7 @@
 VID Extension Kit - Developers Reference
 
 	Author: Henrik Mikael Kristensen
+	Version: $Id$
 
 ===Introduction
 
