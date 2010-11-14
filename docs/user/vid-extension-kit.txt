@@ -8,7 +8,7 @@ VID Extension Kit
 
 ===Introduction
 
-<b>This manual is obsolete. Please refer to later manuals for correct information.</b>
+<b>This manual is obsolete as build 003 no longer exists. Please refer to later manuals for correct information.</b>
 
 =image images/style-browser.png
 
