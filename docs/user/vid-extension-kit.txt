@@ -8,6 +8,8 @@ VID Extension Kit
 
 ===Introduction
 
+<b>This manual is obsolete</b>
+
 =image images/style-browser.png
 
 The VID Extension Kit extends the basic capabilities of VID, while fixing some style bugs.
