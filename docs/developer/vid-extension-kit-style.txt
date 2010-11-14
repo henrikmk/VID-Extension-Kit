@@ -1,0 +1,979 @@
+VID Extension Kit - Style Creation - Build 003
+
+	Author: Henrik Mikael Kristensen
+	Version: 0.0.3
+	Date: 18-Sep-2009
+
+=options no-nums
+
+Note that this document only fits build 003.
+
+===Writing a Style
+
+Writing a style is a simple task, as long as you know how VID works, when <tt>layout</tt> does its job and how the event system works against the <tt>feel</tt> object in your style.
+
+This document describes not only the steps taken to create a style, but also <i>why</i> the steps are taken, and what internal parts of VID you are drawing from. This is done, so you have a better idea on why some things work the way they do. The internal structure of VID cannot be entirely encapsulated and has certain names, words and behaviors and structures formalized (or assumed), and it's important to know the mechanics behind those formalizations.
+
+All styles in the VID Extension Kit was written with the knowledge that is in this document.
+
+The standard VID styles were written a long time ago and they were written sparsely and condensed into one source file. Wherever resources were needed, the standard contexts that lurk in the background step in, and perform deeper operations, like providing <tt>feel</tt> objects or text editing capabilities for a style.
+
+As such, a standard VID style can both be a marvel in simplicity to look at, but also frustrating, because it's an object, and objects in REBOL, particularly those that belong to the system, do not often show their true nature, by just looking at their contents. In short, you can't backtrack where code in an object comes from without having the original source available.
+
+---Peeking into a Style
+
+When using the <tt>get-style</tt> function to spy on the contents of a style, you don't see where feels come from and how various parts of code is bound to various background contexts. As an example, let's take a look at the FIELD style:
+
+	get-style 'field
+
+This returns an object, a face with all contexts and objects calculated in. So if you decide you want to know how text editing works in the field, you can <tt>probe</tt> the <tt>feel</tt> object:
+
+	probe get in get-style 'field 'feel
+
+Some text handling code appears. If you look closer, you'll find entries in the code, that are not present anywhere else in the face object, such as <tt>edit-text</tt>. That is because the feel object for this style is bound to the <tt>ctx-text</tt> context, which you can see like this:
+
+	? ctx-text
+
+<i>By using <tt>probe</tt> here, you would be probing a very large part of the <tt>system</tt> object, which is referenced in the ctx-text context; You might be watching code scrolling by for several minutes!</i>
+
+For a better experience, it helps to look at the original standard VID source for the styles. The original code for <tt>FIELD</tt> is more simple to look at:
+
+	FIELD: FACE 200x24 with [
+		color: none
+		colors: reduce [svvc/field svvc/field-select]
+		edge: [size: 2x2 color: svvc/bevel effect: 'ibevel]
+		font: [color: svvc/field-font style: colors: shadow: none]
+		para: [wrap?: off]
+		feel: ctx-text/edit
+		access: ctx-access/field
+		init: [
+			if color [colors: reduce [color colors/2]]
+			if not string? text [text: either text [form text][copy ""]]
+			if not flag-face? self hide [data: text]
+		]
+		flags: [field return tabbed on-unfocus input]
+		words: [hide [new/data: copy "" flag-face new hide args]]
+	]
+
+Now the resources we use become clear:
+
+* There is <tt>svvc</tt>, which is short for <tt>system/view/vid/vid-colors</tt>.
+
+* There is <tt>ctx-text</tt> which is for text editing
+
+* There is <tt>ctx-access</tt>, which provides standard accessors to styles like <tt>FIELD</tt>.
+
+Like when creating any REBOL object, the definition order is important. But the placement of the <tt>init</tt> block becomes less important, because it will not be executed until after it has been placed in the layout.
+
+---Ways of Making Styles
+
+The official way to create a new style in the VID Extension Kit, is by using <tt>stylize/master</tt>.
+
+But VID can use many different ways it's so simple to derive new styles from older styles. Most of these can be seen more as short term solutions, for programming in the small.
+
++++Inline Style Creation
+
+For example, you create a new temporary style for a layout, when creating a short form for an existing style:
+
+	view make-window [
+		style big-btn button 150 "Big Button"
+		big-btn big-btn big-btn
+	]
+
+=image images/stylize1.png
+
+The method is really useful for simplifying a single layout block, but nothing more than that.
+
++++<tt>Stylize</tt>
+
+You can also use <tt>stylize</tt> and store your styles in a separate style sheet. Then you use your style sheets on a per-layout basis:
+
+	my-styles: stylize [
+		big-btn: button 150 "Big Button"
+	]
+
+	view make-window [
+		styles my-styles
+		big-btn big-btn big-btn
+	]
+
+This was to be seen as useful in cases where you need to create a bunch of styles that could be used by another developer and avoid certain name clashing. However, when using multiple stylesheets with styles that have identical names, those will be overwritten anyway.
+
++++<tt>Stylize/master</tt>
+
+The third way is by using <tt>stylize/master</tt>, the style becomes part of the master stylesheet in <tt>system/view/vid/vid-styles</tt>, and becomes available in all layouts immediately. You don't have to worry about style maintenance to make your style work where you want it.
+
+The caution you must take shifts from worrying about using the correct stylesheet with <tt>stylize</tt>, to not silently overwriting existing styles with identical names on a global level with <tt>stylize/master</tt>.
+
+	stylize/master [
+		big-btn: button 150 "Big Button"
+	]
+	
+	view make-window [
+		big-btn big-btn big-btn
+	]
+
+<i>As a factoid, VID3 for REBOL 3 allows only a method that is similar to <tt>stylize/master</tt>.</i>
+
+Notice the syntax for <tt>stylize</tt> and the <tt>style</tt> keyword in the layout block. They are nearly identical, except that in the case for <tt>stylize</tt>, you make the new style name as a <tt>set-word!</tt>, whereas during layout, the keyword <tt>style</tt> is used, followed by the style name, <tt>big-btn</tt>. Everything after that is the same.
+
+You can use the standard keywords (facets) and input datatypes that follow a single style, but not layout words, such as <tt>pad</tt> or <tt>across</tt>.
+
+An important word is <tt>with</tt>, which you may already have seen in layouts. <tt>with</tt> lets you provide details to the style in the same manner as you would when specifying a normal object. Any facet of the face can be altered using with, and you can run small bits of code as well.
+
+Example:
+
+	view make-window [
+		button with [text: "Some Text"]
+	]
+
+---Creating new Base Styles
+
+This section will detail the creation of a single style from beginning to end. We will call it <tt>S</tt> for short.
+
+Creating a base style involves deriving a style from <tt>FACE</tt>. <tt>FACE</tt> is the lowest level style, or the one, that contains the least amount of extraneous information.
+
+We simply begin with:
+
+	stylize/master [
+		s: face
+	]
+
+The style has been created, but it can't be used in a layout:
+
+	view make-window [s]
+	** Script Error: Cannot use add on none! value
+	** Where: forever
+	** Near: max-off: maximum max-off new/size
+
++++The Minimum Style
+
+We have not reached the minimal level of necessary information for a usable style.
+
+The necessary components are:
+
+:size - For <tt>FACE</tt>, <tt>size</tt> is <tt>none</tt>, and in <tt>layout</tt>, the face size is required, for it to create the layout.
+
+:init - The <tt>init</tt> block is required to be a block. For <tt>FACE</tt>, the default <tt>init</tt> is <tt>none</tt>.
+
+As a quick measure, we can set <tt>size</tt> to <tt>100x100</tt>.
+
+The <tt>init</tt> block is bound to the face instance itself, as it's created. It's important here to discern binding the <tt>init</tt> block to the face that is made, from the style that we are making here; <b>They are two different objects.</b> The binding is handled in the <tt>layout</tt> function.
+
+The modified style:
+
+	stylize/master [
+		s: face with [
+			size: 100x100
+			init: []
+		]
+	]
+
+At this time, the style is ready for use, but it won't look like much:
+
+	view make-window [s]
+
+=image images/basicstyle.png
+
+We can then add text. In View (the basic graphics engine of REBOL), text is rendered from the contents of the string stored in <tt>text</tt>, using the font object stored in <tt>font</tt> with margins and origin stored in <tt>para</tt>.
+
+	stylize/master [
+		s: face with [
+			size: 100x100
+			init: []
+		]
+	]
+
++++Using Init
+
+We can now use the <tt>init</tt> block in a useful manner. We can for example give the style a basic text and manipulate it during init.
+
+	stylize/master [
+		s: face with [
+			text: "My Face"
+			size: 100x100
+			init: [
+				text: uppercase text
+			]
+		]
+	]
+
+This shows that the <tt>init</tt> block is bound to the face instance, which relieves you of referring to the face itself inside the block. If you need to, the word <tt>self</tt> is used. The result should be uppercase text:
+
+	view make-window [t: s]
+
+=image images/styletext.png
+
+As a side note, you may notice that if you study <tt>init</tt> in the face instance now (hence the set-word <tt>'t</tt> above), it's empty. <tt>Layout</tt> copies a new block in place to save memory, otherwise the full <tt>init</tt> block would exist in many copies across the layout.
+
+With even greater usefulness, the text can be used to resize the face to fit around the text. This can be done using the <tt>size-text</tt> function, but here we must know that <b><tt>init</tt> performs its code during layout</b>.
+
+The function <tt>size-text</tt> requires an existing face as an input, and more importantly, identical <tt>font</tt> and <tt>para</tt> setup to work properly. The best method is to set up the face itself so it gets a very large width, to avoid the text wrapping in the face. We can do this without wasting much memory, in that nothing is displayed for this operation.
+
+The <tt>init</tt> block will appear as so:
+
+	init: [
+		text: uppercase text
+		size/x: 1000
+		size: size-text self
+	]
+
+To make the face more visible, we can set <tt>color</tt> to <tt>blue</tt>:
+
+	stylize/master [
+		s: face with [
+			text: "My Face"
+			size: 100x100
+			color: blue
+			init: [
+				text: uppercase text
+				size/x: 1000
+				size: size-text self
+			]
+		]
+	]
+
+The result, after layout:
+
+=image images/sizedstyletext1.png
+
+There is not enough room for the text! The size needs to take the <b>font offset</b> as well as the <b>paragraph origin</b> into account:
+
+	init: [
+		text: uppercase text
+		size/x: 1000
+		size: size-text self
+		size: size + font/offset + para/origin
+	]
+
+=image images/sizedstyletext2.png
+
+...Caveats with <tt>init</tt>
+
+One has to be aware of limitations in what can be done inside init, particularly <i>when</i> it's run; It's run right when the face has been built, but before subfaces or the entire layout has been built.
+
+This means:
+
+* It's not possible to refer to future faces in the <tt>init</tt> block.
+
+* It's not possible to refer to the parent face, since all parent faces are not safely set until the entire layout is complete using the <tt>set-parent-faces</tt> function near the end of the <tt>make-window</tt> function.
+
+* Depending on when you layout faces in a pane inside the face, those faces may or may not have information available at <tt>init</tt> time.
+
++++User Defined Text
+
+Next we want the text to be alterable by the user using a text string, specified in the layout block:
+
+	view make-window [s "This is a long text"]
+
+=image images/sizedstyletext3.png
+
+It already works! <i>But why does it work?</i>
+
++++Facets without Keywords
+
+This is because text is a <b>standard facet</b> for this style. This particular facet is only represented by its datatype, and <tt>layout</tt> detects this facet as a <tt>string!</tt>.
+
+We haven't done anything, but what we haven't seen yet, is that <tt>FACE</tt> provides a standard facet gathering object, called <tt>multi</tt>, which is short for <tt>multi-facet</tt>, which you can study like this:
+
+	probe get in get-style 'face 'multi
+
+This object consists of functions that each are called inside a function called <tt>grow-facets</tt> during <tt>layout</tt>. The <tt>multi</tt> functions are used, when the facet is represented only by the datatype.
+
+We can have a look at the mechanism in <tt>multi</tt>, that makes sure the user defined text ends up in the right place:
+
+	probe get in get in get-style 's 'multi 'text
+	== func [face blk] [
+		if pick blk 1 [
+			face/text: first blk
+			face/texts: copy blk
+		]
+	]
+
+The input is the face itself and a <tt>block!</tt>. Basically, facets of the same datatype can occur multiple times, and <tt>multi</tt> can handle them.
+
+Also note that the function is designed not to set anything, if the input <tt>blk</tt> does not contain anything. This is because <tt>grow-facets</tt> runs the function unconditionally, whether there are facets for it or not in the specification.
+
+The <tt>layout</tt> function first gathers all facets that are not attached to keywords. As standard these are:
+
+:texts - Input is one or more <tt>string!</tt>s, usually for setting <tt>face/text</tt> and <tt>face/texts</tt>.
+
+:pairs - Input is a single <tt>pair!</tt> or <tt>integer!</tt>, usually for setting the size of the face.
+
+:files - Input is a <tt>file!</tt>, which is loaded during layout. Typically, this is used for loading image data into <tt>face/image</tt>.
+
+:images - Input is a single <tt>image!</tt>, set in <tt>face/image</tt>.
+
+:colors - Input is one or two color <tt>tuple!</tt>s, usually for setting the foreground and background color in the face.
+
+:blocks - Input is one or two <tt>block!</tt>s, for setting <tt>face/action</tt> and <tt>face/alt-action</tt>. Creative use of these in the <tt>init</tt> section of some styles allow them to be used for other things than face actions. A notable example of this is <tt>PANEL</tt>.
+
+So, when you enter a <tt>string!</tt> in the layout block, it's parsed in <tt>grow-facets</tt> and placed in <tt>texts</tt>.
+
+Then <tt>grow-facets</tt> calls each <tt>multi</tt> function sequentially in the order as shown above, and applies the facets to the face instance.
+
+The illustration shows the sequence:
+
+=dot images/growfacets.png
+	rankdir=TB
+	dpi=90
+	node [fontname="Helvetica" fontsize=11 shape=rectangle]
+	edge [fontname="Helvetica" fontsize=10]
+	"field 200x20 integer" -> "layout block" [color=blue]
+	"field 200x20 integer" -> "layout block" [color=red]
+	"layout block" -> "layout" [label="style name,\nspecification" color=blue]
+	"layout block" -> "layout" [color=red]
+	"vid-styles" -> "layout" [label="style object"]
+	"layout" -> "grow-facets" [label="new,facets" color=blue]
+	"layout" -> "grow-facets" [color=red]
+	"grow-facets" -> multi [label="facets" color=blue]
+	"grow-facets" -> words [label="custom\nfacets" color=red]
+	words -> integer [label="logic!",color=red]
+	multi -> texts [label="string!"]
+	multi -> files [label="file!"]
+	multi -> colors [label="tuple!"]
+	multi -> pairs [label="pair!",color=blue]
+	multi -> images [label="image!"]
+	multi -> actions [label="block!"]
+	files -> new [label="file!"]
+	images -> new [label="image!"]
+	pairs -> new [label="pair!",color=blue]
+	colors -> new [label="tuple!"]
+	texts -> new [label="string!"]
+	actions -> new [label="block!"]
+	integer -> new [label="logic!",color=red]
+
+The blue path shows how the integer <tt>200x20</tt> is passed into the face instance <tt>new</tt>. The red path, which will be explained in the next section, shows how the <tt>integer</tt> keyword is passed into the <tt>words</tt> block and set for the new face.
+
+Facets are collected and ready for you, prior to the execution of the <tt>init</tt> block.
+
+...Building your own facet functions
+
+Normally you don't need to alter the <tt>multi</tt> functions, as they cover a good amount of datatypes 
+
++++Facets with Keywords
+
+Facets with keywords allows for more flexibility and readability for special parameters. Basically, they are written as words optionally followed by any type.
+
+The facets <tt>default</tt>, <tt>setup</tt>, <tt>align</tt>, <tt>fill</tt> and <tt>spring</tt> mentioned in the beginning of the VID Extension Kit manual are all of this type.
+
+In the <tt>FIELD</tt> style for example, you can specify an <tt>integer</tt> keyword:
+
+	view make-window [
+		field integer
+	]
+
+This will set the word <tt>integer</tt> to <tt>true</tt> in the face, which will in turn alter the behavior of its accessors <tt>set-face*</tt> and <tt>get-face*</tt> to provide numeric functionality instead of using strings.
+
+There are two subsets of facets with keywords:
+
+:Standard facets with keywords - The built in keywords, such as <tt>default</tt>, <tt>setup</tt>, <tt>font</tt>, <tt>edge</tt>, etc.
+
+:Custom facets with keywords - These are keywords defined in the <tt>words</tt> block in the style as a series of words and blocks. They are created and processed in exactly the same way as standard facets with keywords.
+
+...Building a Custom Facet without an Argument
+
+To use custom facets, we can extend the style again with a <tt>words</tt> block. The format for this block is:
+
+	words: [
+		keyword1 [...code...]
+		keyword2 [...code...]
+	]
+
+The <tt>words</tt> block has one caveat: The face specification is handled as a block of arguments <tt>args</tt>, which you must sometimes move the index for.
+
+This is because, <tt>layout</tt> temporarily hands over control of the arguments block <tt>args</tt> to us, so the specification for the face can be parsed in one pass. When each entry in the <tt>words</tt> block has been processed, the arguments block <tt>args</tt> needs to be pointing at the right index. If not, the effect will be that facets in the specification might be ignored or their arguments are ignored.
+
+The conditions are:
+
+* You need to move the <tt>args</tt> index <i>one step</i>, if the keyword has <i>one argument</i>. That is: <tt>next args</tt>.
+
+* You don't need to move the index, if the keyword has no argument. You just return <tt>args</tt>. For the <tt>uppercase</tt> keyword, we therefore don't need to move it.
+
+* You must always return the argument block <tt>args</tt>, so its index is kept up to date for the next function.
+
+Furthermore, referencing the face happens using <tt>new</tt>. The block will look like this:
+
+	[new/uc: true args]
+
+For our style, we specify that the text in the style, should only be uppercased, if the keyword <tt>uppercase</tt> occurs in the layout block.
+
+As a means to store that information, we can specify a <tt>uc</tt> word in the face, for later usage in <tt>init</tt>.
+
+The <tt>init</tt> block has been changed to take advantage of the <tt>uc</tt> word:
+
+	stylize/master [
+		s: face with [
+			text: "My Face"
+			size: 100x100
+			color: blue
+			uc: false
+			init: [
+				if uc [
+					text: uppercase text
+				]
+				size/x: 1000
+				size: size-text self
+				size: size + font/offset + para/origin
+			]
+			words: [
+				uppercase [new/uc: true args]
+			]
+		]
+	]
+
+The result can be seen immediately:
+
+	view make-window [
+		s "lowercase"
+		s "uppercase" uppercase
+	]
+
+=image images/stylefacet1.png
+
+...Building a Custom Facet with an Argument
+
+If we want a keyword with a value, we could create a section in <tt>init</tt> that specifies that the face text may only be displayed up to a certain length, although internally, we will store it at its full length.
+
+This could be a <tt>max-length</tt> keyword along with an <tt>integer!</tt> as argument.
+
+Like before with <tt>uc</tt>, we can store the <tt>max-length</tt> in the face itself.
+
+The words block will now appear as this:
+
+	words: [
+		uppercase [new/uc: true args]
+		max-length [new/max-length: second args next args]
+	]
+
+The use of <tt>second args</tt> indicates the location of the argument in the <tt>args</tt> block. The use of <tt>next args</tt> sets the right index for <tt>args</tt>. Note that we don't need to store the index for <tt>args</tt>, just return it.
+
+If we want to avoid destroying the text internally, we need to store it in two places. Fortunately, faces usually have a place for this in <tt>data</tt>.
+
+The <tt>init</tt> block is altered accordingly:
+
+	init: [
+		if uc [
+			text: uppercase text
+		]
+		if max-length > 0 [
+			data: text
+			text: copy/part text max-length
+		]
+		size/x: 1000
+		size: size-text self
+		size: size + font/offset + para/origin
+	]
+
+We can now use it in the layout to produce layouts with maximum text lengths of 5 chars:
+
+	view make-window [
+		s "My custom text" uppercase max-length 5
+	]
+
+=image images/stylefacet2.png
+
++++Accessors
+
+To further allow manipulation of a style, we can use accessors. Accessors usually consist of an <b><tt>face/access</tt> object</b> inside the style and a public function counterpart for end users.
+
+=dot images/accessordiagram.png
+	rankdir=LR
+	ratio=0.3
+	dpi=72
+	node [fontname = "Helvetica" shape = rectangle fontsize = 11]
+	edge [fontname = "Helvetica" fontsize = 10]
+	"set-face" -> "face" [label = "value" color = blue]
+	face -> access -> "set-face*" -> text [label = "value" color = blue]
+	text -> face
+
+If we visit the <tt>set-face</tt> function, it's revealed, that it uses <tt>access/set-face*</tt> to manipulate the text of the face:
+
+	probe :set-face
+	== func [
+		"Sets the primary value of a face. Returns face object (for show)."
+		face
+		value
+		/no-show "Do not show change yet"
+		/local access
+	][
+		if all [
+			access: get in face 'access
+			in access 'set-face*
+		][
+			access/set-face* face value
+			ctx-format/format face none 'on-set
+		]
+		if not no-show [show face]
+		face
+	]
+
+If we visit the <tt>face/access</tt> object, we see how text really is manipulated for <tt>set-face*</tt>:
+
+	probe get in get in get-style 's 'access 'set-face*
+	== func [face value][face/data: value]
+
+This looks rather simple, so <i>why use accessors at all</i>?
+
+...Why use Accessors?
+
+Accessors are simply a formalized way of accessing the internals of a face, and in object oriented programming circumstances, this would be similar to <i>public functions</i>. Since REBOL does not use the concept of public/private functions for objects, <i>accessors are plain formal</i>. You could just as well access the face directly like this:
+
+	view/new make-window [
+		t: s "My custom text"
+	]
+
+	forever [
+		t/text: form now/precise
+		show t
+		wait 0.2
+	]
+
+But the reasons for formalizing access to the face are:
+
+* The case where you replace the style with a different one of similar capability, like <tt>CHECK-LINE</tt> versus <tt>TOGGLE</tt>. Outwardly, the use of <tt>set-face</tt> would be identical, but inside, <tt>set-face*</tt> might be different.
+
+* You use the face in a larger array of faces, and wish to have uniform access to every single one of them.
+
+* Complex internal handling of the data that is fed to the style.
+
+* Rules for how to handle a face that does not use a specific accessor. How do you use <tt>scroll-face</tt> on a button? You don't and it has to be properly handled.
+
+We are, in this style, handling and manipulating text in ways that another developer may not be aware of. For example, what is the relationship between <tt>face/text</tt> and <tt>face/data</tt> in our style? Sometimes, they are the same and other times, they are copies of eachother. It may not be easily apparent to another developer, who would be forced to spend time reading the source code to your style.
+
+The original VID has weaknesses in that some styles do not have properly set up <tt>access</tt> objects, forcing you to access the face instance directly. This is fixed as much as possible in the VID Extension Kit.
+
+Using accessors, the above example might look like this:
+
+	view/new make-window [
+		t: s "My custom text"
+	]
+
+	forever [
+		set-face t now/precise
+		wait 0.2
+	]
+
+Note the absence of <tt>show</tt> as well as <tt>form</tt>. The style would be able to handle <tt>form</tt> internally, and show is handled automatically in <tt>set-face</tt>. You no longer see the complexity that you had to not just see, but had to write up before.
+
+A simple line like:
+
+	set-face p form-values
+
+where <tt>'p</tt> is a <tt>PANEL</tt> style, perhaps with many form elements of different kinds, can involve hundreds of accesses. If you are using many faces, the code can quickly grow much more complex.
+
+There are a lot of reasons to use accessors!
+
+...A Standard Accessor
+
+VID comes with a lot of standard <tt>access</tt> objects in the <tt>ctx-access</tt> context, and one set is already set up in <tt>FACE</tt>, the style we are basing our style on.
+
+Each object provide different schemes of accessor functions, so it can be wise to investigate the existing ones, before starting to write your own. The VID Extension Kit comes with even more accessor objects. You can explore them with:
+
+	? ctx-access
+	data            object!   [set-face* get-face* clear-face* reset-face*]
+	data-default    object!   [set-face* get-face* clear-face* reset-face*]
+	data-state      object!   [set-face* get-face* clear-face* reset-face*]
+	data-number     object!   [set-face* get-face* clear-face* reset-face*]
+	data-find       object!   [set-face* get-face* clear-face* reset-face*]
+	data-pick       object!   [set-face* get-face* clear-face* reset-face*]
+	text            object!   [set-face* get-face* clear-face* reset-face*]
+	field           object!   [set-face* get-face* clear-face* reset-face*]
+	image           object!   [set-face* get-face* clear-face* reset-face*]
+	panel           object!   [setup-face* set-find-var set-panel set-pane...
+	face-construct  object!   [set-face* get-face* clear-face* reset-face*...
+	selector        object!   [set-face* get-face* clear-face* reset-face*...
+	multi-selector  object!   [set-face* get-face* clear-face* reset-face*...
+	selector-nav    object!   [key-face*]
+
+For this style, the most appropriate one is plain <tt>text</tt>.
+
+It does a slight bit more than we need, but it covers our needs the best, so we simply assign it to our style:
+
+	access: ctx-access/text
+
+Note that we don't need to copy the object. We simply use it directly from the <tt>ctx-access</tt> context.
+
+You can extend or modify accessors in place, by redefining them, as they are always objects. When doing that, it's necessary to copy the object, to avoid distorting the original:
+
+	access: make ctx-access/data [
+		setup-face*: func [face value] [... some code ...]
+	]
+
+...Accessor Functions
+
+So, how do you name the accessor functions?
+
+The existing public functions are a good indicator of what you can use, and they follow a simple scheme:
+
+The <tt>scroll-face</tt> function, it will look for an <tt>access/scroll-face*</tt> function in the face instance. If it's not found, nothing happens. Similarly <tt>get-face</tt> will look for <tt>access/get-face*</tt> and so on.
+
+Not all <tt>*-face</tt> functions cover this, as a function like <tt>back-face</tt> or <tt>center-face</tt> are not made for accessing faces, so it's more appropriate to look at which accessor functions can exist inside <tt>access</tt> objects:
+
+:<tt>set-face*</tt> - Arguments: <tt>face</tt>, <tt>value</tt>. This sets the primary value of the face.
+
+:<tt>get-face*</tt> - Arguments: <tt>face</tt>. This gets the primary value of the face.
+
+:<tt>reset-face*</tt> - Arguments: <tt>face</tt>. This resets the primary value of the face to its default value.
+
+:<tt>clear-face*</tt> - Arguments: <tt>face</tt>. This clears the primary value of the face. Different from reset.
+
+:<tt>key-face*</tt> - Arguments: <tt>face</tt>, <tt>event</tt>. Is used to perform keyboard operations on the face. This function is run after primary keyboard operations like tab navigation has completed. This function only works when the face is focused.
+
+:<tt>scroll-face*</tt> - Arguments: <tt>face</tt>, <tt>x</tt>, <tt>y</tt>. Is used to scroll a face horizontally or vertically. Each direction has separate methods, as for example used in <tt>DATA-LIST</tt> to scroll pixel wise horizontally, but entire rows vertically.
+
+:<tt>get-offset*</tt> - Arguments: <tt>face</tt>. Returns the current offset for the pane inside the face. This is useful for the public <tt>scroll-face</tt> function.
+
+:<tt>resize-face*</tt> - Arguments: <tt>face</tt>, <tt>new-size</tt>, <tt>x-only</tt>, <tt>y-only</tt>. Is used for custom resizing of a face, in case you need special weighting or other atypical resizing behavior.
+
+:<tt>disable-face*</tt> - Arguments: <tt>face</tt>. This is used in case the standard effect for disabled face does not produce a usable result. This function mainly exists for cosmetic purposes.
+
+:<tt>enable-face*</tt> - Arguments: <tt>face</tt>. This is the direct opposite of <tt>disable-face*</tt>.
+
+:<tt>setup-face*</tt> - Arguments: <tt>face</tt>. For complex faces, this function is used to parse the <tt>setup</tt> keyword in the face specification.
+
+All these functions have public counterparts.
+
+...Building our own Accessor Function
+
+You can also define your own accessors, whatever you deem necessary to formalize any particular kind of access to the face. They can have any name you want to give them.
+
+Each one of the functions can have any arguments, where the first one should start with the face itself.
+
+If we want to manipulate the text word in the face, we could build an access function that reads:
+
+	set-face*: func [face value] [face/text: value]
+
+Note that we don't <tt>show</tt> the face here, as this is handled by <tt>set-face</tt>.
+
+Since we have introduced a processing of the maximum length as well as uppercase for the text inside the <tt>init</tt> block, as well as calculating the size of the text, we will need to do exactly the same thing here.
+
+To make this code appear only once in the style, the solution is to move the <tt>max-length</tt>, <tt>uppercase</tt> and text size calculation code inside the <tt>set-face*</tt> function, and use the <tt>set-face*</tt> function directly in the <tt>init</tt> block:
+
+	set-face*: func [face value] [
+		face/data: face/text
+		if face/max-length > 0 [
+			face/text: copy/part face/text face/max-length
+		]
+		if face/uc [
+			face/text: uppercase face/text
+		]
+		calc-text-size self
+	]
+
+and:
+
+	init: [
+		access/set-face* self text
+	]
+
+Note that we could call <tt>set-face/no-show</tt>, but using <tt>access/set-face*</tt> is a little bit faster.
+
+In the code below, we'll add the <tt>set-face*</tt> function inside its <tt>access</tt> object and alter the <tt>init</tt> block to use that function.
+
+	stylize/master [
+		s: face with [
+			text: "My Face"
+			size: 100x100
+			color: blue
+			uc: false
+			max-length: 0
+			calc-text-size: func [face] [
+				face/size/x: 1000
+				face/size: size-text face
+				face/size: face/size + face/font/offset + face/para/origin
+			]
+			access: make object! [
+				set-face*: func [face value] [
+					face/data: face/text: value
+					if face/max-length > 0 [
+						face/text: copy/part face/text face/max-length
+					]
+					if face/uc [
+						face/text: uppercase face/text
+					]
+					calc-text-size self
+				]
+			]
+			init: [
+				access/set-face* self text
+			]
+			words: [
+				uppercase [new/uc: true args]
+				max-length [new/max-length: second args next args]
+			]
+		]
+	]
+
++++Feel
+
+In this section, we want to delve into user input: Respond to a mouse click in the face, alter one of its properties and show the change.
+
+Making the face react to mouse or keyboard input is the hardest part to understand of making a style, in that it involves the understanding of REBOL's event system, particularly caveats and limits.
+
+Fortunately as in other sections, there are some standard feel objects available for common items like buttons in <tt>system/view/vid/vid-feel</tt>.
+
+And so like accessors, they can be assigned to <tt>face/feel</tt>, conveniently using the <tt>svv</tt> shortcut for <tt>system/view/vid</tt>:
+
+	feel: svv/button
+
+<b>But unlike accessors, feels can have sections that rely on the appearance of the style.</b> <tt>svv/button</tt> manipulates already existing colors, edges and gradients in order to produce alternate appearances for click, mouse over, etc. so there is motivation for creating your own.
+
+...The Four Feel Functions
+
+The <tt>feel</tt> object consists of four standard functions, <tt>engage</tt>, <tt>detect</tt>, <tt>over</tt> and <tt>redraw</tt> that each respond to both different events and to events in different ways. It's not possible to specify additional custom functions for processing events, as the <tt>feel</tt> object is specified by the View system.
+
+If there is a specific function, you don't want to use, you should specify <tt>none</tt>, instead of the function, in order to avoid it being evaluated for speed reasons.
+
+It's necessary to explain each one in depth before proceeding, but instead of doing that here, it's easier to refer to the excellent section in the <b>REBOL/View Graphics Reference</b> on the <tt>feel</tt> object <a href="http://www.rebol.com/docs/view-system.html#section-5">here</a>.
+
+...Building your own Feel Functions
+
+Now that we know the capabilities and limitations of each function
+
+The whole style is now looking like this:
+
+	stylize/master [
+		s: face with [
+			text: "My Face"
+			size: 100x100
+			color: blue
+			uc: false
+			max-length: 0
+			calc-text-size: func [face] [
+				face/size/x: 1000
+				face/size: size-text face
+				face/size: face/size + face/font/offset + face/para/origin
+			]
+			access: make object! [
+				set-face*: func [face value] [
+					face/data: face/text: value
+					if face/max-length > 0 [
+						face/text: copy/part face/text face/max-length
+					]
+					if face/uc [
+						face/text: uppercase face/text
+					]
+					calc-text-size self
+				]
+			]
+			init: [
+				access/set-face* self text
+			]
+			words: [
+				uppercase [new/uc: true args]
+				max-length [new/max-length: second args next args]
+			]
+		]
+	]
+
++++Flags
+
+Flags are very important to make your style a good "citizen" in the VID Extension Kit. They are used to determine how the face is perceived by tab navigation, whether the face is enabled or disabled and when <tt>get-face</tt> and <tt>set-face</tt> work on it, especially through panels. The source code to the VID Extension Kit stores all flags separately from the styles, to get a better overview of flags for related styles.
+
+For your own styles you can settle for storing the flags directly in <tt>face/flags</tt>.
+
+All flags are stored in <tt>face/flags</tt>.
+
+...Flag list
+
+:INPUT - The face adheres to <tt>get-face</tt> and <tt>set-face</tt> when in a panel.
+
+:TEXT - contains text
+
+:FIXED - used during layout for backdrop faces, removing them from the calculations of face sizes and offsets.
+
+:DROP - Used during layout for setting the size of backdrop faces.
+
+:FLAGS - ?
+
+:FONT - The face contains a shared font object.
+
+:CHECK - ?
+
+:RADIO - ?
+
+:TOGGLE - ?
+
+:TABBED - Face will be tabbed to, during tab navigation, if the <tt>disabled</tt> flag is not set.
+
+:AS-IS - Does not trim text in <tt>face/text</tt>, if this flag is set. This is used in text faces.
+
+:PANEL - Style is a panel style which contains multiple other faces.
+
+:RESIZE - Face is resizable.
+
+:HIDE - Text is hidden (password style)
+
+:CLOSE-FALSE - For buttons that close windows and return <tt>false</tt>.
+
+:CLOSE-TRUE - For buttons that close windows and return <tt>true</tt>.
+
+:ACTION - Manipulates its <tt>input</tt> directly via mouse and can be disabled.
+
+:TEXT-EDIT - Face can be used for text editing.
+
+:CHANGES - Produces <tt>dirty?</tt> flag to check whether the face has been changed by the user
+
+:AUTO-TAB - Tabs away from a field solely based on cursor movement in text field
+
+:INTEGER - Accepts only integers as keyboard input
+
+:DECIMAL - Accepts only decimal as keyboard input
+
+:TRANSPARENT - For panels, does not <tt>set-face</tt> and returns <tt>none</tt> for <tt>get-face</tt> when <tt>input</tt> faces inside it are disabled.
+
+:SCROLLABLE - Indicates that this style can be scrolled using a <tt>SCROLLER</tt> or <tt>SLIDER</tt>.
+
+:COMPOUND - Styles that contain specific other faces, built in a custom way, like CONSTRUCTs.
+
+:DISABLED - Face is disabled. This is only controlled by <tt>disable-face</tt> and <tt>enable-face</tt>. When disabled, the <tt>tabbed</tt> flag has no effect.
+
+---Optional Additions to Styles
+
+What we've seen above is the minimum that we can do for a style from start to finish. What is described below can be considered additional fundamental parts that won't be directly applicable to the style we have produced above.
+
++++Panes
+
+Using panes in your style can help making your style tremendously flexible: You can build styles from other styles as building blocks, rather than straight derivatives.
+
+These styles are usually called <b>compound styles</b>. A typical example of a compound style is <tt>SCROLLER</tt>, which consists of two <tt>ARROW</tt> styles and a <tt>DRAGGER</tt> style:
+
+=image images/compoundscroller.png
+
+The method to create them is fairly straight forward, but there are at least three ways, depending on your needs:
+
+* You can define them directly in <tt>face/pane</tt> as a series of faces.
+
+* You can define them dynamically using <tt>init</tt> and store the result in <tt>face/pane</tt>.
+
+* You can define them dynamically and easily change them during runtime, by deriving from <tt>FACE-CONSTRUCT</tt> and let it work out how to store the result in <tt>face/pane</tt>.
+
+If we keep in mind that <b><tt>layout</tt> works flatly on layout blocks</b>, it's easy to see that each point requires either premade faces or the use of <tt>layout</tt>.
+
+If we continue with our style, we can add a series of faces to its pane:
+
+...Direct Definition of Pane
+
+If you don't require any decisions on the layout of the pane, the simplest way is to just assign a layout to the pane. This is used in many compound styles, where the standard layout along with a fixed block, provides the necessary functions.
+
+Again if we remember how <tt>layout</tt> works flatly, gradually on deeper levels of panes, <tt>layout</tt> runs <tt>init</tt> blocks in the same order. That means that any initialization of faces in the pane will occur before intializing the face itself.
+
+This might limit the usability of this method, if you are intending to use styles that could require specific values to be set inside them, before they are initialized.
+
+Some styles that are meant to exist inside another style.
+
+...Using <tt>init</tt>
+
+By using <tt>init</tt>, you can add some dynamics to creating the pane layout. This is often used in VID. As an example, the <tt>PANEL</tt> style, uses its <tt>init</tt> block to obtain a sub-layout block from the main layout block:
+
+	panel [h1 "My Panel" button "Click here"]
+
+This sub-block is then processed with <tt>layout</tt> inside the <tt>init</tt> block and the resulting face tree is attached to <tt>face/pane</tt>.
+
+Another example is the above mentioned <tt>SCROLLER</tt>, which forms its pane inside <tt>init</tt> by manually assembling faces from style parts and manually constructed faces. The appearance of the <tt>SCROLLER</tt> is determined by the <tt>size</tt> that is given to it during layout. In the picture above, the scroller had a specified size of <tt>200x20</tt>. This is interpreted in the <tt>init</tt> block that the arrows and dragger must have a horizontal appearance and behavior.
+
+For our style, it would be appropriate
+
+You can then choose to either keep the face that makes the root of the tree. This makes <tt>face/pane</tt> an object.
+
+You can also simply use its pane, which makes <tt>face/pane</tt> a block.
+
+...Using <tt>FACE-CONSTRUCT</tt>
+
+The powerful <tt>FACE-CONSTRUCT</tt> style produces layouts from a <tt>do-setup</tt> function. This is used for creating complex layouts from your own dialect or is somehow difficult to achieve using one of the other methods. It's particularly useful for building lists that internally has interactive components, like <tt>CHOICE</tt> fields, <tt>DATE</tt> fields and other items that changes the structure of the list on the fly. <tt>FACE-CONSTRUCT</tt> is only available through the VID Extension Kit.
+
+This requires that instead of basing our style on <tt>FACE</tt>, we must use <tt>FACE-CONSTRUCT</tt>. It also means the game changes a little bit.
+
+;figure out whether this is really the only thing that needs to be done. it strikes me as if face-construct does its own things with init and setup, so check the selectors on that.
+
+Then you define <tt>face/do-setup</tt>, with these requirements:
+
+* The input must be <tt>face/setup</tt> to gather information about what needs to be set up. The reason for <tt>face/setup</tt> is to store information from the setup facet in the layout block.
+
+* Use the <tt>face/emit</tt> function to add parts to the layout stored in <tt>face/lo</tt>.
+
+* Return value is not required.
+
+	access: make ctx-access/face-construct [
+		setup-face*: func [face] [
+			...figure out how to create a reasonable example for this...
+			face/emit
+			face/setup
+		]
+	]
+
+For our style, we'll stick to an example, where we build a type of flexible form input through a dialect.
+
+something about a dialect that forms a stack of faces like the search items in Finder.
+
+
+
++++Iterated Faces
+
+If you are in the business of building lists, iterated faces might be a choice. Iterated faces are faces that are "painted" in sequence down a vertical or horizontal line. Thus they are not real faces, but using a feature of View in that when a region of a window is painted and not cleared, and then offsetting the face to a new location and showing it there, the effect can get the appearance of being a list. Correct use of an iterated face can save a large amount of memory.
+
+As a sidenote, REBOL 3 doesn't use iterated faces, due to the face that memory savings would be neglible, thanks to its faces having a vastly smaller memory footprint than in REBOL 2. For REBOL 2 they can make sense.
+
+However, this feature makes them a little hard to use:
+
+* It requires a function to describe its pane. With that comes various counters and requirements made to the function.
+
+* You are forced to repaint the entire list, every time a small change is done to the list.
+
+* Faces used in an iterated list may have special properties to work in an iterated face.
+
+Therefore the VID Extension Kit comes with a range of standard styles to deal with iterated faces, to let you define a subface directly for use as a simple list view.
+
+...Describing the Iterated Face Function
+
+describe function
+something about subface
+subface faces have a position
+describe height skipping
+describe return values for the function
+describe when to stop rendering
+describe cell-func
+
+
+
+Then inside the init block, the pane is set to the function:
+
+	pane: :iterated
+
+You can read more about iterated faces in the REBOL/View View Graphic System Reference <a href="http://www.rebol.com/docs/view-system.html#section-10">here</a>.
+
++++Formatters
+
+Using formatters is restricted to text only styles, but they can be used anywhere you like in the style code. If you noticed earlier, the <tt>set-face</tt> source code had a single line:
+
+	ctx-format/format face none 'on-set
+
+This simply runs the formatter, whenever the keyword <tt>on-set</tt> is used in the layout block for a style.
+
+<i>But at this time, any <tt>on-*</tt> keyword is required to be stored in <tt>words</tt>. Hence you need an implementation for every single style. Currently this has only been done in <tt>FIELD</tt> and its derivatives. A redesign may be required to take fully advantage of formatters in all faces in a later build of the VID Extension Kit.</i>
+
++++Image Stock
+
+REBOL has a built in image stock, which you are free to use. It works by loading images from the stock using the <tt>load-stock</tt> and <tt>load-stock-block</tt> functions. The VID Extension Kit provides a few new bitmaps, but the basic functionality of how to use stock images has not changed.
+
+All images are stored in <tt>system/view/vid/image-stock</tt>, and it's necessary to <tt>load</tt> them, in order to use them for a face. For speed and memory considerations, it's a good idea to <tt>load</tt> them once during definition of the style instead of during <tt>init</tt>.
+
+Example:
+
+	image: load-stock 'help
+
+If you don't want to use an image from the image stock, then what do we do? Consider the writing here.
+
++++Impossibilities
+
+Some things are not possible, simply due to the sequence in which, things are done:
+
+As <tt>init</tt> is performed during layout, you can't ask it to perform operations on adjacent faces, since they are not in place yet.
+
+Also <tt>parent-face</tt> cannot be guaranteed to be set for the face until the entire layout is done.
+
+---Deriving from Existing Styles
+
+The process is very much the same as for creating new styles. What can be important, is to reduce the amount of baggage that comes with the definition of a new style, based on an existing complex style.
+

@@ -1,0 +1,71 @@
+VID Extension Kit - Design Decisions
+
+=options no-toc
+
+You may ask why certain things are designed in a certain way in the VID Extension Kit. This document attempts to address that.
+
+After years of lacking features and steep learning curves, VID has become frustrating to work with. While the basic idea of VID is sound, it's simply not finished.
+
+The VID Extension Kit was designed right on top of VID, using some of the original sources and then extending them with new styles and functions, while also fixing a few bugs.
+
+...VID with Meaning
+
+While this was happening, I realized that it's possible to add new concepts to VID, to move it to a higher level of user interface descriptions. These concepts come from the early design of VID3 for REBOL 3, created by Gabriele Santilli, where a style is designed through purpose rather than appearance. Thus a button is not designed to be a polished red gradient with white text, but as an "important button", and important buttons may have the aforementioned appearance. Or they may not, but <b>VID shouldn't care about the appearance of the style, only the purpose of it</b>.
+
+This gives meaning to the user interface in that you can programmatically find and focus the default button or that VID now knows how to close a window by performing a simulated mouse click on the <tt>OK-BUTTON</tt> style that it automatically can find in the window. In the layout process, it may mean that a <tt>SCROLLER</tt> can automatically find a list to scroll without needing to set up all the scroll mechanics, as you need to in VID.
+
+Opposite of VID3, however, the feel or the behavior of the style is not separated from the drawn part of the style. One style is still one description in the source code. The best we can do is to design low level styles that focus on behavior, and high level styles that focus mostly on what to draw.
+
+...VID with Skins
+
+This brings in the concept of skinning. While this is not fully implemented, we already are gathering <b>colors</b>, <b>edges</b> and <b>fonts</b> and actively using those resources in all styles from a central location.
+
+However, due to the design of many styles, many decisions and data that should be made as a part of a skin, unfortunately is hardwired into the initialization and redraw code for many styles. For example a button creates its gradient definition in the <tt>init</tt> section of the style and constantly manipulates it in <tt>feel/redraw</tt>. To change this will require some work.
+
+Anyhow, to describe this project further, it's easier to bullet point the changes from VID.
+
+...The VID Extension Kit is:
+
+* A collection of new styles for VID to make it more complete.
+
+* Heavy modifications to existing styles to make them more flexible.
+
+* A small set of rules defined to restrict, but also lift the capability of the user interface to a new level. This helps to:
+
+** Simplify the creation, validation and data gathering of forms.
+
+** Provide tabbed keyboard navigation.
+
+** Provide a consistent skin across the entire UI using a single skin file.
+
+** Provide full window resizing and face alignment extensions in the dialect.
+
+** Give a user interface meaning and structure as opposed to being a bunch of faces, you have to address absolutely.
+
+** Cleaner usage of accessors.
+
+* A collection of functions for managing faces, such as:
+
+** Very easy face traversal, moving back and forth, up and down in the face tree. Faces become a bit more aware of their surroundings, although not fully.
+
+** Face traversal based on criteria, useful for finding a specific face by style, flag or any other method.
+
+** Individual keyboard navigation per style, through the <tt>key-face*</tt> accessor.
+
+** Disabling and enabling faces and panels, also with customizable <tt>disable-face*</tt> and <tt>enable-face*</tt> accessors per style.
+
+** Validating INPUT faces and panels.
+
+* A few new styles that are data-only, i.e. invisible styles that provide new operations to the dialect at parse time and connect faces. This is generally used for field validation for now.
+
+* A collection of more sensible requesters that take full advantage of the new window layout, resizing and styles.
+
+...What the VID Extension Kit tries <strong>not</strong> to do:
+
+* It does not try to fix "unfixable" low-level bugs with hundreds of lines of complicated hacks. If something is really hard to fix, it will not be fixed. The philosophy is "generally good design" over "capability at all costs".
+
+* It does not use anti-aliased fonts.
+
+* It does not provide overly flexible face/graphics layout. No transparent windows or other extensions to the layout engine on a lower level.
+
+* It is not an exercise in superior GUI artwork. The VID Extension Kit goes for a Tcl/Tk like UI appearance, but only because it's easy to do and easy to make consistent.

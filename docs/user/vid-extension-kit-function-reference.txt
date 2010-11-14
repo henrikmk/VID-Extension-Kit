@@ -1,0 +1,1069 @@
+VID Extension Kit - Function Reference - Build 003
+
+This document is under construction. Note that this document only fits build 003.
+
+===Window Handling
+
+Windows functions are meant to help in the creation and maintenance of windows.
+
+---<tt>activate-window</tt>
+
+...Description:
+
+Activates the given window.
+
+...Arguments:
+
+:face - The window face [object!]
+
+---<tt>display-window</tt>
+
+...Description:
+
+This displays a face as a window and manages the face in the window list.
+
+...Arguments:
+
+:face - The window face [object!]
+
+---<tt>do-window</tt>
+
+...Description:
+
+Performs a method on the given window, such as activate, maximize, etc. It's used as the base function for a range of window action functions, like <tt>maximize-window</tt>.
+
+...Arguments:
+
+:face - The window face [object!]
+
+:word - The action to perform, which can be <tt>activate</tt>, <tt>maximize</tt> [word!]
+
+...Example:
+
+This maximizes the window:
+
+	do-window win 'maximize
+
+---<tt>focus-default-input</tt>
+
+...Description:
+
+This focuses the first <tt>input</tt> face with a <tt>default</tt> flag set. This is used during the execution of <tt>init-window</tt>. This also sets the focus ring.
+
+...Arguments:
+
+:face - The window face [object!]
+
+---<tt>focus-first-input</tt>
+
+...Description:
+
+This focuses the first <tt>input</tt> face. This is used during the execution of <tt>init-window</tt>, usually after a failed <tt>focus-default-input</tt>. This also sets the focus ring.
+
+...Arguments:
+
+:face - The window face [object!]
+
+---<tt>focus-first-false</tt>
+
+...Description:
+
+This focuses the first face, which identifies as a false face, such as <tt>FALSE-BUTTON</tt>. This also sets the focus ring. This is used in cases without an input face, such as simple dialogs, where quick key access to a cancel button is the correct method.
+
+...Arguments:
+
+:face - The window face [object!]
+
+---<tt>init-enablers</tt>
+
+...Description:
+
+This initializes all <tt>ENABLER</tt> styles inside the window. This is used in the <tt>init-window</tt> function.
+
+...Arguments:
+
+:face - The window face [object!]
+
+---<tt>init-window</tt>
+
+...Description:
+
+This performs window initialization during <tt>view</tt>. The ENABLER faces are set, forms are initialized, and it's decided which face to focus first. All operations are done in that order prior to display.
+
+...Arguments:
+
+:face - The window face [object!]
+
+...Refinements:
+
+:/focus - Determines which face to specifically focus on window open.
+
+---<tt>layout</tt>
+
+...Description:
+
+This creates a face object tree using the Visual Interface Dialect (VID). This is used to create nearly all subface panes in styles that require them and windows in the VID Extension Kit. It returns a face for viewing with <tt>view</tt>.
+
+...Arguments:
+
+:block - The visual interface dialect block [block!]
+
+...Refinements:
+
+:/size - Size (width and height) of pane face [pair!]
+
+:/offset - Offset of pane face [pair!]
+
+:/parent - Face style for pane [object! word! block!]
+
+:/origin - Set layout origin [pair!]
+
+:/styles - Block of styles to use [block!]
+
+:/keep - Keep style related data
+
+:/tight - Zero offset and origin
+
+...Example:
+
+	view layout [button "Hello World!"]
+
+---<tt>make-window</tt>
+
+...Description:
+
+This creates a resizable window with tab navigation capabilities, focus ring from the given dialect block and stores the <tt>tab-face</tt> for the face. It returns a face for viewing with <tt>view</tt>.
+
+Note that all windows created with this function are centered on the screen.
+
+...Arguments:
+
+:block - The visual interface dialect block [block!]
+
+...Refinements:
+
+:options - Block of words to use for the resizable window: <tt>no-border</tt>, <tt>no-title</tt>
+
+...Example:
+
+	view make-window [button "Hello World!"]
+
+---<tt>maximize-window</tt>
+
+...Description:
+
+Maximizes the given window.
+
+...Arguments:
+
+:face - Window face to maximize [object!]
+
+---<tt>popup?</tt>
+
+...Description:
+
+Returns whether the window is a popup, shown by <tt>inform</tt>. This is used when closing the window programmatically, to make sure the correct method for window closing (<tt>hide-popup</tt> vs. <tt>hide</tt>) is used.
+
+...Arguments:
+
+:face - Window face to investigate [object!]
+
+---<tt>vid-window?</tt>
+
+...Description:
+
+Determines if the given face is a VID Extension Kit window, i.e. investigates whether the focus ring exists and the style is <tt>window</tt>. Such windows are made using the <tt>make-window</tt> function. They are not created with the <tt>layout</tt> function.
+
+...Arguments:
+
+:face - Window face to investigate [object!]
+
+---<tt>view</tt>
+
+...Description:
+
+This displays a pre-existing face object tree created with <tt>make-window</tt>, <tt>layout</tt> or manually.
+
+...Refinements:
+
+:/new - Creates a new window and returns immediately.
+
+:/offset - Offset of window on screen (Type: pair)
+
+:/options - Window options [no-title no-border resize] (Type: block word)
+
+:/title - Window bar title (Type: string)
+
+---<tt>window-open?</tt>
+
+Determines if the given window is visible.
+
+===Pane Handling
+
+---<tt>align</tt>
+
+...Description:
+
+Aligns a face and its content according to the resizing and aligning rules in the VID Extension Kit.
+
+...Arguments:
+
+:face - Face to align [object!]
+
+...Refinements:
+
+:/no-show - Do not show changes yet
+
+---<tt>back-face</tt>
+
+...Description:
+
+Returns the previous face in relation to the input face. It moves along the same path, but opposite direction of <tt>next-face</tt>.
+
+When used with the <tt>/deep</tt> refinement, it travels recursively inward through faces that have panes as blocks, functions (iterated faces) or face objects.
+
+One basic condition for this function to work, is that all faces must have a parent face. If this is fulfilled, such as by making a window using <tt>make-window</tt>, <tt>back-face</tt> will, when used multiple times, traverse every single face in the face object tree.
+
+=image images/vid-ext-kit-back-face-loop.png
+
+...Arguments:
+
+:face - Face to move one step backwards from [object!]
+
+...Refinements:
+
+:/deep - Traverses recursively inward. If the face contains a pane, the first face in that pane is visited. If a face is part of a pane, and is the last face, <tt>next-face</tt> proceeds with the next face relative to the parent face of the input face.
+
+...Example:
+
+	back-face face
+
+---<tt>center-face</tt>
+
+...Description:
+
+Centers a given face in relation to a parent face. This is a remnant from VID, not used in the VID Extension Kit, as windows automatically center themselves with make-window and there are other facilities for centering faces inside windows.
+
+...Arguments:
+
+:face - Face or window to center [object!]
+
+...Refinements:
+
+:/with - Centers relative to a sibling face [object!]
+
+---<tt>clean-face</tt>
+
+<b>Note: This is not in use in the VID Extension Kit yet.</b>
+
+Cleans a face and all its subfaces. A dirty face is one that has had an edit stored by a user, such as a text field in a form. Cleaning the field resets the <tt>dirty?</tt> flag of the face. It does not perform a <tt>clear-face</tt> or <tt>reset-face</tt> and provides no visible changes to the face.
+
+...Arguments:
+
+:face - face and subfaces to clean the <tt>dirty?</tt> flag in [object!]
+
+---<tt>dirty-face?</tt>
+
+<b>Note: This is not yet used in the VID Extension Kit.</b>
+
+...Description:
+
+Returns if a face or if any of its subfaces are dirty. This is used to detect if there are changes in a form. It does not perform a visible change to the face.
+
+...Arguments:
+
+:face - Face and subfaces to check the <tt>dirty?</tt> flag in [object!]
+
+---<tt>find-flag</tt>
+
+...Description:
+
+Finds a face with a particular flag relative to the given face. Searches deeply in the face hierarchy
+
+...Arguments:
+
+:face - Face to use as start position for search [object!]
+
+:flag - Flag to search for [word!]
+
+...Refinements:
+
+:/reverse - Searches in the opposite direction.
+
+---<tt>find-face</tt>
+
+...Description:
+
+Returns the pane for the face, for use when figuring out where the face is in the pane.
+
+Some conditions apply, depending on the location of the input face:
+
+* If the pane is a block, the pane is returned at that index. If the parent-face of the pane does not match the input face, an error is thrown.
+
+* If the input face is a window (style = <tt>'window</tt>), <tt>system/view/screen-face</tt> is searched.
+
+* If the pane is an object, i.e. the input face itself, the input face is returned.
+
+* If the pane is a function, i.e. an iterated face, the input face is returned
+
+* If the face does not have a parent-face, an error is thrown.
+
+...Arguments:
+
+:face - Face to search in [object!]
+
+...Refinements:
+
+:/panes - Search in a specific pane in a multi pane face [integer!]
+
+---<tt>find-key-face</tt>
+
+...Description:
+
+Search faces to determine if keycode applies in the given face object tree. This is used when a key is pressed in the global window feel <tt>detect</tt> function.
+
+...Arguments:
+
+:face - Face or window to begin search in [object!]
+
+:keycode - Keycode to search for [char! word!]
+
+---<tt>find-relative-face</tt>
+
+...Description:
+
+Finds a specific face relative to a given face, traversing deeply and using specific criteria.
+
+...Arguments:
+
+:face - Face to use as start position for search [object!]
+
+:criteria - Block of criteria to use. Bound to the face currently being examined [block!]
+
+...Refinements:
+
+/reverse - Move backwards in the layout
+
+Example:
+
+	make-window [
+		h3 "Window"
+		bar
+		my-field: field
+		my-button: button "Hello World!"
+	]
+	describe-face
+		find-relative-face
+			my-field
+			[all [face in face 'text find face/text "hello"]]
+	== {'button' named: 'Hello World!' at: 4x56 size: 100x24}
+
+---<tt>find-style</tt>
+
+...Description:
+
+Finds a face by style name, relative to the given face.
+
+...Arguments:
+
+:face - Face to use as start position for search [object!]
+
+:style - Style name [any-word! string!]
+
+...Refinements:
+
+/reverse - Move backwards in the layout
+
+Example:
+
+	win: make-window [
+		h3 "Window"
+		bar
+		my-field: field
+		my-button: button "Hello World!"
+	]
+	describe-face find-style win 'button
+	== {'button' named: 'Hello World!' at: 4x56 size: 100x24}
+
+---<tt>freeze-face</tt>
+
+...Description:
+
+Freezes a face or a panel of faces. This removes the feel of the face, except <tt>redraw</tt>. This basically locks the face from user inputs via keyboard or mouse without visibly changing it, but it can still be set with <tt>set-face</tt>. Also using tab navigation will skip the face.
+
+...Arguments:
+
+:face - Face to freeze [object!]
+
+...Refinements:
+
+:/no-show - Do not display change yet.
+
+---<tt>get-default-face</tt>
+
+<b>Note: This is not used anywhere. This may be deprecated.</b>
+
+...Description:
+
+Gets the default face (the one which has the <tt>default</tt> flag set).
+
+...Arguments:
+
+:face - Face or window to find the default face in [object!]
+
+---<tt>make-face</tt>
+
+...Description:
+
+Creates a face from a given style name or example face. This is used internally by <tt>layout</tt> to construct the face object tree, but can also be used in styles, where special panes are created in ways that would be impractical with <tt>layout</tt>.
+
+...Arguments:
+
+:style - Name or example face of style to use [word! object!]
+
+...Refinements:
+
+:/styles - Stylesheet
+
+:/clone - Copy all primary facets
+
+:/size - Size of face [pair!]
+
+:/spec - Specification block [block!]
+
+:/offset - Offset of face [pair!]
+
+:/keep - Keep style related data
+
+---<tt>move-face</tt>
+
+<b>Note: This function may be rewritten.</b>
+
+...Description:
+
+This moves the upper left corner of the face, optionally without disturbing the lower right corner of the face. Thus the face can both be moved and resized.
+
+When resized, all subfaces are resized according to VID Extension Kit resize rules.
+
+...Arguments:
+
+:face - Face to move and resize [object!]
+
+:offset - Offset from current position of upper left corner [number! pair!]
+
+:size - New size of the face [number! pair!]
+
+...Refinements:
+
+:/scale - Keeps the lower right corner at the original position. The face and all subfaces are resized.
+
+:/no-show - Do not show changes yet.
+
+---<tt>next-face</tt>
+
+...Description:
+
+Returns the next face in relation to the input face. It moves along the same path, but opposite direction of <tt>back-face</tt>.
+
+When used with the <tt>/deep</tt> refinement, it travels recursively inward through faces that have panes as blocks, functions (iterated faces) or face objects.
+
+One basic condition for this function to work, is that all faces must have a parent face. If this is fulfilled, such as by making a window using <tt>make-window</tt>, <tt>back-face</tt> will, when used multiple times, traverse every single face in the face object tree.
+
+=image images/vid-ext-kit-next-face-loop.png
+
+...Arguments:
+
+:face - Face to move one step forward from [object!]
+
+...Refinements:
+
+:/deep - Traverses recursively inward. If the face contains a pane, the first face in that pane is visited. If a face is part of a pane, and is the last face, <tt>next-face</tt> proceeds with the next face relative to the parent face of the input face.
+
+:/panes - Traverses all panes in a panel instead of the currently visible pane. The input number is to know which pane to start from. [integer!].
+
+...Example:
+
+	next-face face
+
+---<tt>over-face</tt>
+
+...Description:
+
+Returns the face that that exists under a particular offset inside a face.
+
+...Arguments:
+
+:face - The face to find the face the offset is at
+
+:offset - The offset in relation to the face in the first argument [pair!]
+
+...Example:
+
+Return the face that is at a particular offset inside a window:
+
+	win: make-window [
+		b1: box "1" b2: box "2" return ; standard box is 100x100
+		b3: box "3" b4: box "4"
+	]
+	describe-face over-face win 150x150
+	== "'box' named: '4' at: 106x106 size: 100x100"
+
+This can be used to find a face at a particular location when hovering over it with the mouse.
+
+---<tt>resize</tt>
+
+...Description:
+
+Resizes a face and its contents according to the rules provided in the VID Extension Kit. This is not to be confused to the <tt>resize-face</tt> accessor function, as this function accepts both a size and an offset, where <tt>resize-face</tt> only cares for the size.
+
+...Arguments:
+
+:face - The face to resize [object!]
+
+:size - The new size for the face [pair!]
+
+:offset - The new offset for the face [pair!]
+
+...Refinements:
+
+:/no-show - Do not show change yet
+
+---<tt>root-face</tt>
+
+...Description:
+
+Returns the window in which the given face resides.
+
+...Arguments:
+
+:face - The face to return the root face for [object!]
+
+---<tt>set-default-face</tt>
+
+<b>Note: This is not used anywhere. This may be deprecated.</b>
+
+...Description:
+
+Sets the default flag for a given face. Clears existing default face within the given parent.
+
+...Arguments:
+
+:face - Face to set default flag for [object!]
+
+:parent - Parent face limit, the face which is used to remove the original default face from [object!]
+
+---<tt>set-parent-faces</tt>
+
+...Description:
+
+This function sets the parent face correctly for all subfaces for the given face.
+
+This function is very important, as VID normally only sets the parent face for some faces in layouts, as the layout is being viewed the first time using <tt>view</tt>. For the VID Extension Kit, this is not enough, so this function has been provided.
+
+As a main rule, in the VID Extension Kit, all faces must have a valid parent face. This function helps that to happen in the creation of windows and panes for panels. It's used in styles that creates subfaces, such as PANEL or FACE-CONSTRUCT.
+
+...Arguments:
+
+:face - Face to set parent faces in [object!]
+
+...Refinements:
+
+:/parent - Use a specific parent face to set parent-face against. Only used internally in the <tt>set-parent-faces</tt> function.
+
+---<tt>thaw-face</tt>
+
+...Description:
+
+Thaws a face or a panel of faces. This restores the feel of the face and lets the user interact with the face again via keyboard and mouse.
+
+...Arguments:
+
+:face - Face to thaw [object!]
+
+...Refinements:
+
+:/no-show - Do not display change yet.
+
+---<tt>traverse-face</tt>
+
+...Description:
+
+Traverses all subfaces in a given face and lets you perform an action on each face. This is for example used to determine whether the tab face is located inside a tab pane, that becomes invisible, when the user switches to a new tab.
+
+Note that the given face will not be included in the traversal. That means the action block will not be run for that face.
+
+...Arguments:
+
+:face - Face to traverse [object!]
+
+:action - Action block to run on each encountered face [block!]
+
+...Example:
+
+Traverse <tt>my-panel-face</tt> to find a field face.
+
+	result: none
+	traverse-face my-panel-face [
+		all [
+			not result
+			face in face 'style face/style = 'field result: face
+		]
+	]
+
+Note that it's not possible to break from the traversal process.
+
+---<tt>validate-face</tt>
+
+...Description:
+
+This validates a single face or a whole window. It's used internally to perform initial condition validation on window open, when a <tt>TRUE-BUTTON</tt> validates the window and when a single face is validated when pressing <b>Tab</b>.
+
+...Arguments:
+
+:face - Face to validate [object!]
+
+===Face Handling
+
+These are functions that work on the single face without touching subfaces.
+
+---<tt>click-face</tt>
+
+...Description
+
+This simulates a mouse click on a face, i.e. mouse down followed by a mouse up. This is used during tab navigation, when you press <b>Space</b> to click a button.
+
+...Arguments:
+
+:face - Face to click [object!]
+
+...Refinements:
+
+:alt - Right click instead of left click
+
+...Example:
+
+	click-face face
+
+Right click the face:
+
+	click-face/alt face
+
+---<tt>deflag-face</tt>
+
+...Description:
+
+Removes the flag of a face.
+
+...Arguments:
+
+:face - Face to remove flag from [object!]
+
+:flag - Flag to remove [word!]
+
+---<tt>describe-face</tt>
+
+...Description:
+
+This is a quick way to dump important, yet compressed information from a face, and is used when a fatal error occurs.
+
+...Arguments:
+
+:face - Face to describe [object!]
+
+...Example:
+
+	make-window [my-button: button "Hello World"]
+	describe-face my-button
+	== "'button' named: 'Hello World' at: 4x4 size: 100x24"
+
+---<tt>dirty-face</tt>
+
+<b>Note: This is not yet implemented</b>
+
+...Description:
+
+Sets a face <tt>dirty?</tt> flag. This is usually done, after a user has altered the value of the face. It does not set subfaces and does not perform a visible change to the face.
+
+...Arguments:
+
+:face - Face to set the <tt>dirty?</tt> flag in [object!]
+
+---<tt>do-face</tt>
+
+...Description:
+
+Performs the <tt>action</tt> function of the face.
+
+...Arguments:
+
+:face - Face to perform the <tt>action</tt> function on [object!]
+
+:value - The value passed to the <tt>action</tt> function [object!]
+
+---<tt>do-face-alt</tt>
+
+...Description:
+
+Performs the <tt>alt-action</tt> function of the face.
+
+...Arguments:
+
+:face - Face to perform the <tt>alt-action</tt> function on [object!]
+
+:value - The value passed to the <tt>alt-action</tt> function [object!]
+
+---<tt>flag-face</tt>
+
+...Description:
+
+This sets a flag for a VID face. This function is used throughout the VID Extension Kit in many functions.
+
+...Arguments:
+
+:face - The face to set the flag for [object!]
+
+:flag - The flag to set [word!]
+
+...Example:
+
+	flag-face face disabled
+
+Note that the input is not a <tt>lit-word!</tt>, but a <tt>word!</tt>.
+
+---<tt>flag-face?</tt>
+
+...Description:
+
+This checks for the presence of a specific flag in a VID face. This function is used throughout the VID Extension Kit in many functions.
+
+...Example:
+
+	flag-face? face disabled
+
+Note that the input is not a <tt>lit-word!</tt>, but a <tt>word!</tt>.
+
+---<tt>focus</tt>
+
+...Description:
+
+This focuses a specific face <i>without setting the focus ring</i>. It runs the <tt>on-focus</tt> key formatter.
+
+...Arguments:
+
+:face - Face to focus [object!]
+
+...Refinements:
+
+:/no-show - Do not display the focus change immediately.
+
+:/no-save - Do not save the state of the previous face focused.
+
+---<tt>get-tab-face</tt>
+
+...Description:
+
+Returns the tab face for the window in which the given face resides.
+
+...Arguments:
+
+:face - Face that exists in the window (or the window face itself), in which to get the tab face from [object!]
+
+---<tt>set-tab-face</tt>
+
+...Description:
+
+Sets the tab face to the given face. Only touches the tab face in the window in which the face resides. Does not provide visible change.
+
+...Arguments:
+
+:face - Face that should become tab face [object!]
+
+---<tt>get-tip-face</tt>
+
+...Description:
+
+Used internally to find the last face in the last pane inside a pane. This is used to determine for <tt>traverse-face</tt>, when the pane of its input face has been traversed.
+
+...Arguments:
+
+:face - Face to find the tip face in [object!]
+
+---<tt>inside-face?</tt>
+
+...Description:
+
+Returns whether a given face exists inside the pane of another face. This is used when switching pane in a panel, and you want to make sure that any face that was tab focused there, is properly unfocused.
+
+...Arguments:
+
+:child - face to investigate [object!]
+
+:parent - parent that child is supposed to reside in [object!]
+
+---<tt>iterated-face?</tt>
+
+...Description:
+
+This determines if the given face is correctly set for iteration. If it returns <tt>true</tt>, then the face has a proper iteration function.
+
+...Arguments:
+
+:face - face to investigate [object!]
+
+---<tt>iterated-pane</tt>
+
+...Description:
+
+This is a uniform way to evaluate the first entry in an iterated face. It is used to determine subfaces inside an iterated face.
+
+...Arguments:
+
+:face - Face to return first iteration entry from [object!]
+
+---<tt>restore-flags</tt>
+
+...Description:
+
+This restores the flag setup for the given face from <tt>face/saved-flags</tt>, saved by <tt>save-flags</tt>. This is used for functions that manipulate the feel of the face, such as <tt>disable-face</tt>.
+
+...Arguments:
+
+:face - Face to restore flags for [object!]
+
+---<tt>save-face</tt>
+
+...Description:
+
+Saves the content of the current <tt>focal-face</tt> being edited.
+
+...Arguments:
+
+:face - Face to save [object!]
+
+---<tt>save-flags</tt>
+
+...Description:
+
+Saves the flag setup for the given face in <tt>face/saved-flags</tt>. This is used for functions that manipulate the feel of the face, such as <tt>disable-face</tt>.
+
+...Arguments:
+
+:face - Face to save flags for [object!]
+
+---<tt>unfocus</tt>
+
+...Description:
+
+This removes key event focus from a face and runs the <tt>on-unfocus</tt> key formatter. Note that <i>it does not alter the focus ring</i>.
+
+...Arguments:
+
+:face - Face to unfocus [object!]
+
+===Accessor Functions
+
+Although you can create your own accessor functions to access <tt>face/access</tt>, a range of standard functions are included.
+
+---<tt>disable-face</tt>
+
+...Description:
+
+This disables a previously enabled face. The face will appear "dulled" and is no longer accepting user input or tabbing. It can, however, still be managed with <tt>setup-face</tt>, <tt>set-face</tt> and <tt>get-face</tt>.
+
+...Arguments:
+
+:face - Face to disable [object!]
+
+---<tt>enable-face</tt>
+
+...Description:
+
+This enables a previously disabled face.
+
+...Arguments:
+
+:face - Face to enable [object!]
+
+---<tt>get-face</tt>
+
+...Description:
+
+This returns the face value.
+
+...Arguments:
+
+:face - Face to return the value for [object!]
+
+---<tt>key-face</tt>
+
+<b>Note: This function is not yet included, as there has not been any use of it yet.</b>
+
+...Description:
+
+This sends a key event to the face, so it can be processed internally. For example, you can process the cursor keys in a list view separately from the global key handlers in <tt>window/feel/detect</tt>. For key-face to work, the face must be tab-focused, but it is not required that the cursor is present for editing.
+
+...Arguments:
+
+:face - face to send the event to [object!]
+
+:event - event to send to the face [event!]
+
+---<tt>reset-face</tt>
+
+...Description:
+
+This resets the face value to its default.
+
+...Arguments:
+
+:face - Face to reset [object!]
+
+---<tt>resize-face</tt>
+
+...Description:
+
+Resizes a face and its subfaces according to the rules provided in the VID Extension Kit.
+
+...Arguments:
+
+:face - Face to resize [object!]
+
+:size - The new size of the face [number! pair!]
+
+---<tt>save-face</tt>
+
+...Description:
+
+This saves the content of the face and thus makes it possible to do a <tt>get-face</tt>. This is useful if you are writing in a field and then click a button without unfocusing the field by hand.
+
+...Arguments:
+
+:face - Face to save [object!]
+
+---<tt>scroll-face</tt>
+
+...Description:
+
+This scrolls the face vertically or horizontally. The style can use separate functions for each direction.
+
+...Arguments:
+
+:face - Face to scroll [object!]
+
+:x-value - Value between 0 and 1 or none [integer! decimal! none!]
+
+:y-value - Value between 0 and 1 or none [integer! decimal! none!]
+
+...Refinements:
+
+:/step - x and y values are multiples of face step size instead of absolutes
+
+:/no-show - Do not show changes yet.
+
+---<tt>set-face</tt>
+
+...Description:
+
+This sets the face value.
+
+...Arguments:
+
+:face - Face to set the value for [object!]
+
+:value - Value to set [any-type!]
+
+...Refinements:
+
+:/no-show - Do not show changes yet.
+
+---<tt>setup-face</tt>
+
+...Description:
+
+This sets the face up, if the face supports setup. This counts for faces that may have sophisticated panes or elements that are allowed to dynamically change during its lifetime.
+
+...Arguments:
+
+:face - Face to set up [object!]
+
+:setup - Block of values or dialect specific to the style to set up the face [block!]
+
+;---<tt>get-face-path</tt> - This returns the PATH value of the face.
+
+;---<tt>set-face-path</tt> - This sets the PATH value of the face.
+
+===Debugging
+
+---<tt>debug-align</tt>
+
+...Description:
+
+Outputs an alignment action in the console. Used internally to debug alignment.
+
+...Arguments:
+
+:face - Face to dump alignment information from [object!]
+
+---<tt>debug-face</tt>
+
+...Description:
+
+Function used internally in the resizing system to output debugging information about resizing and alignment.
+
+...Arguments:
+
+:doing - String to print to tell what action is happening now [string!]
+
+:data - Data corresponding to the action, such as the output from <tt>describe-face</tt> [string!]
+
+---<tt>debug-resize</tt>
+
+...Description:
+
+Outputs a resize action in the console. Used internally to debug resizing.
+
+...Arguments:
+
+:face - Face to dump resize information from [object!]
+
+:diff - Size difference to output [pair!]
+
+---<tt>dump-face</tt>
+
+...Description:
+
+Prints face info for the entire pane, for debugging purposes.
+
+...Arguments:
+
+:face - Face and subfaces to output for [object!]
+
+---<tt>dump-pane</tt>
+
+...Description:
+
+Same function as <tt>dump-face</tt>, except it does at this time not support iterated faces. Please use <tt>dump-face</tt> instead.
+
+...Arguments:
+
+:face - Face and subfaces to output for [object!]
+
+===Helper Objects
+
+---<tt>err-face</tt>
+
+The <tt>err-face</tt> is set with the face that fails for some reason during processing of faces using one of the following functions:
+
+* <tt>find-face</tt>
+
+* <tt>back-face</tt>
+
+* <tt>next-face</tt>
+
+* <tt>find-relative-face</tt>
+
+* <tt>init-window</tt> resets it.
+
+---<tt>mouse-over-face</tt>
+
+This is set to the face every time a mouse move event occurs over a window face. The event is sent in the window <tt>detect</tt> function.
