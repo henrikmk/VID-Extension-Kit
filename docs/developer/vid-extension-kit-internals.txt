@@ -8,6 +8,8 @@ VID Extension Kit - Internals - Build 003
 
 ===Introduction
 
+<b>This document needs to be updated for build 005 and upwards.</b>
+
 If you are a style developer or want to learn more about the internals of the VID Extension Kit, this document is for you. It also applies, if you are a student of the standard VID, and want to know the internals of that, without resorting to the rather large VID Extension Kit.
 
 The VID Extension Kit is basically divided in multiple parts:
