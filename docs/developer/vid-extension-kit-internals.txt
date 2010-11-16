@@ -1,4 +1,4 @@
-VID Extension Kit - Internals Build 003
+VID Extension Kit - Internals - Build 003
 
 	Author: Henrik Mikael Kristensen
 	Version: 0.0.3
