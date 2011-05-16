@@ -21,7 +21,7 @@ REBOL [
 	Keywords: []
 ]
 
-do %../vid-include.r
+do %../../build/include.r
 
 ctx-vid-debug/debug: false
 
