@@ -23,7 +23,7 @@ REBOL [
 
 do %../../build/include.r
 
-ctx-vid-debug/debug: false
+clear ctx-vid-debug/debug
 
 view make-window [
 	at 0x0

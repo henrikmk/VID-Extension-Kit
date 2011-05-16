@@ -24,7 +24,7 @@ REBOL [
 
 do %../../build/include.r
 
-ctx-vid-debug/debug: [align]
+append ctx-vid-debug/debug 'align
 
 vid-styles: system/view/vid/vid-styles
 
