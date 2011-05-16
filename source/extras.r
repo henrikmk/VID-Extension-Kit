@@ -89,15 +89,13 @@ face-size-from-text: func [face dir /local sz] [
 ]
 
 ; put this somewhere as a VID draw function
-button-skin: func [face image color /local pos] [
+; sets an image via DRAW instead of FACE/IMAGE. Assumes an IMAGE-DRAW-BLOCK. Takes text adjustment into account.
+set-image: func [face image] [
+	unless block? face/effect [face/effect: copy/deep [draw [image 0x0 none]]]
 	pos: 0x0
-	if face/font/align <> 'right [
+	if all [face/size face/text image face/font/align <> 'right] [
 		pos: face/size - image/size - any [all [face/edge face/edge/size * 2] 0x0]
 	]
-	make object! [
-		effect: reduce [
-		;	'gradient 0x1 color + 16 color - 16
-			'draw reduce ['image pos image]
-		]
-	]
+	face/effect/draw/2: pos ; set position
+	face/effect/draw/3: face/draw-image: image ; set image
 ]

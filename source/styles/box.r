@@ -42,7 +42,8 @@ stylize/master [
 	ASPECT-BOX: BOX with [fixed-aspect: true]
 
 	; Dummy box for replacing fields or other user manipulated elements.
-	DUMMY: BOX load-stock 'blocked 200x24 spring [bottom] effect [tile] with [
+	; need tile effect here, possibly through DRAW
+	DUMMY: BOX load-stock 'blocked 200x24 spring [bottom] with [
 		access: make access [
 			set-face*: func [face value] [value]
 			get-face*: func [face] [none]

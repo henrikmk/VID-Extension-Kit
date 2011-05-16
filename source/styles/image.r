@@ -27,7 +27,7 @@ stylize/master [
 		size: color: image: none
 		feel: svvf/sensor
 		access: ctx-access/image
-		effect: [fit]
+;		effect: [fit]
 		edge: [size: 0x0 color: black]
 		font: [size: 16 align: 'center valign: 'middle style: 'bold shadow: 2x2]
 		doc: [
@@ -95,7 +95,7 @@ stylize/master [
 			engage: func [face action event][
 				if action = 'time [
 					if empty? face/frames [exit]
-					face/image: first face/frames
+					set-image face first face/frames
 					if tail? face/frames: next face/frames [
 						face/frames: head face/frames
 					]
@@ -103,13 +103,13 @@ stylize/master [
 				]
 			]
 		]
-		words: [	    
+		words: [
 			frames [append new/frames second args next args]
 			rate   [new/rate: second args next args]
 		]
 		init: [
 			if image? image [
-				if none? size [size: image/size] 
+				if none? size [size: image/size]
 				if size/y < 0 [size/y: size/x * image/size/y / image/size/x effect: insert copy effect 'fit]
 				if color [effect: join effect ['colorize color]]
 			]
@@ -127,20 +127,19 @@ stylize/master [
 			set-face*: func [face image] [
 				if none? image [
 					face/data: none
-					face/image: false
+					set-image face false
 				]
 				if any [
 					logic? image
 					integer? image
 				] [
 					face/data: image
-					face/image: pick face/images image
-					if face/image [face/image: get face/image]
+					set-image face pick face/images image
 				]
 				if word? image [
 					all [
 						face/data: image
-						face/image: select face/images image
+						set-image face select face/images image
 					]
 				]
 				show face

@@ -282,7 +282,7 @@ stylize/master [
 		]
 		choice-face: none ; cache of choice layout
 		init: [
-			effect: get in button-skin self load-stock 'arrow-pop color 'effect
+			set-image self load-stock 'arrow-pop
 			; the choice face should appear in a separate layout
 			choice-face: layout/tight [
 				space 0 origin 0 caret-list 100x100 fill 1x1

@@ -56,6 +56,12 @@ stylize/master [
 			]
 		]
 	]
+	; Multi-state button
+	STATE-BUTTON: BUTTON with [
+		virgin: false
+		states: [state1 state2 state3]
+		feel: svvf/state
+	]
 	; Action button
 	ACT-BUTTON: BUTTON with [
 		on-click: none
@@ -97,11 +103,11 @@ stylize/master [
 				]
 			]
 		]
-		glow: func [face] [
-			face/color: face/original-color * ((sine ((to-decimal now/time/precise) // 1 * 360)) * 0.05 + 1)
-			face/effects/1/3: face/color + 32
-			face/effects/1/4: face/color - 32
-		]
+		;glow: func [face] [
+		;	face/color: face/original-color * ((sine ((to-decimal now/time/precise) // 1 * 360)) * 0.05 + 1)
+		;	face/effects/1/3: face/color + 32
+		;	face/effects/1/4: face/color - 32
+		;]
 		feel: make feel [
 			engage: func [face action event] bind [
 				switch action [

@@ -133,7 +133,7 @@ stylize/master [
 	NO-BUTTON: NO-BUTTON svvc/false-color edge normal-edge
 	CLOSE-BUTTON: CLOSE-BUTTON svvc/false-color edge normal-edge
 	POP-BUTTON: POP-BUTTON 24x24 svvc/action-color edge normal-edge
-	SORT-BUTTON: SORT-BUTTON -1x20 svvc/manipulator-color font [color: black shadow: none]
+	SORT-BUTTON: SORT-BUTTON -1x24 svvc/manipulator-color font [color: black shadow: none] edge normal-edge
 	SORT-RESET-BUTTON: SORT-RESET-BUTTON svvc/action-color edge none
 	COLOR-BUTTON: COLOR-BUTTON edge normal-edge
 	PATH-CHOICE: PATH-CHOICE svvc/action-color edge normal-edge

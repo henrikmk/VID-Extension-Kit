@@ -85,7 +85,7 @@ svvf: system/view/vid/vid-feel: context [
 		over: none
 		redraw: func [face act pos][
 			act: pick face/images (to integer! face/data) + either face/hover [5] [1 + (2 * to integer! face/state)]
-			either face/pane [face/pane/image: act] [face/image: act]
+			set-image either face/pane [face/pane][face] act
 		]
 		engage: func [face action event][
 			if action = 'down [
@@ -102,7 +102,7 @@ svvf: system/view/vid/vid-feel: context [
 			act: pick face/images (to integer! face/data) + either face/hover [5][
 				1 + (2 * to integer! face/state)
 			]
-			either face/pane [face/pane/image: act][face/image: act]
+			set-image either face/pane [face/pane][face] act
 		]
 		over: func [face over offset][
 			face/hover: over
@@ -150,46 +150,55 @@ svvf: system/view/vid/vid-feel: context [
 			if all [face/texts face/texts/2] [
 				face/text: either face/state [face/texts/2][face/texts/1]
 			]
-			either face/images [
-				face/image: either face/state [face/images/2][face/images/1]
-				if all [face/colors face/effect find face/effect 'colorize][
-					change next find face/effect 'colorize pick face/colors not face/state
-				]
-			][
-				unless flag-face? face disabled [
-					if face/edge [face/edge/effect: pick [ibevel bevel] face/state]
-				]
-				state: either not face/state [face/blinker][true]
+			if face/images [
+				; this should be done with DRAW entirely, as IMAGE is not a good idea in general here
+				; the problem is that DRAW is not always available or may change between types
+				; we can't place an image with offset using VIEW, so this has to work with DRAW instead
+				; this means that any call to FACE/IMAGE must produce a DRAW block instead
+				set-image face
+					either all [in face 'states block? face/states] [
+						pick face/images index? face/states
+					][
+						either face/state [face/images/2][face/images/1]
+					]
+				;if all [face/colors face/effect find face/effect 'colorize][
+				;	change next find face/effect 'colorize pick face/colors not face/state
+				;]
+			]
+			unless flag-face? face disabled [
+				if face/edge [face/edge/effect: pick [ibevel bevel] face/state]
+			]
+			state: either not face/state [face/blinker][true]
 ;				if face/colors [face/color: pick face/colors not state]
 ;				if face/effects [face/effect: pick face/effects not state]
-			]
+;			]
 		]
 		cue: none
 	]
 
-	btn: make button [
-		over: func [face act evt][
-			remove/part find face/effect 'mix 2
-			if act [
-				evt: any [find face/effect 'extend tail face/effect]
-				insert evt reduce ['mix face/images/3]
-			]
-			all [face/show? show face]
-		]
-		engage: func [face action event][
-			remove/part find face/effect 'mix 2
-			switch action [
-				down		[face/state: on]
-				alt-down	[face/state: on]
-				up			[if face/state [do-face face face/text act-face face event 'on-click] face/state: off]
-				alt-up		[if face/state [do-face-alt face face/text act-face face event 'on-alt-click] face/state: off]
-				over		[face/state: on]
-				away		[face/state: off]
-			]
-			cue face action
-			all [face/show? show face]
-		]
-	]
+	;btn: make button [
+	;	over: func [face act evt][
+	;		remove/part find face/effect 'mix 2
+	;		if act [
+	;			evt: any [find face/effect 'extend tail face/effect]
+	;			insert evt reduce ['mix face/images/3]
+	;		]
+	;		all [face/show? show face]
+	;	]
+	;	engage: func [face action event][
+	;		remove/part find face/effect 'mix 2
+	;		switch action [
+	;			down		[face/state: on]
+	;			alt-down	[face/state: on]
+	;			up			[if face/state [do-face face face/text act-face face event 'on-click] face/state: off]
+	;			alt-up		[if face/state [do-face-alt face face/text act-face face event 'on-alt-click] face/state: off]
+	;			over		[face/state: on]
+	;			away		[face/state: off]
+	;		]
+	;		cue face action
+	;		all [face/show? show face]
+	;	]
+	;]
 
 	icon: make hot [
 		redraw: func [face act pos /local state] [
@@ -234,9 +243,32 @@ svvf: system/view/vid/vid-feel: context [
 		]
 	]
 
-	tog: make btn [
-		engage: get in toggle 'engage
+	state: make button [
+		engage: func [face action event][
+			if find [down alt-down] action [
+				face/state: on
+				face/states: head face/states
+				face/data: select face/states face/data
+				if none? face/data [face/data: pick face/states not to-logic face/virgin]
+				face/states: find face/states face/data
+				either action = 'down [
+					do-face face face/data
+					act-face face event 'on-click
+				][
+					do-face-alt face face/data
+					act-face face event 'on-alt-click
+				]
+				show face
+			]
+			if find [up alt-up] action [
+				face/state: off
+			]
+		]
 	]
+
+	;tog: make btn [
+	;	engage: get in toggle 'engage
+	;]
 
 	rotary: make hot [
 		redraw: func [face act pos] [
@@ -1179,11 +1211,11 @@ ctx-access: context [
 	image: context [
 		set-face*: func [face value][
 			if any [image? value none? value][
-				face/image: value
+				set-image face value
 			]
 		]
-		get-face*: func [face][face/image]
-		clear-face*: func [face][face/image: none]
+		get-face*: func [face][face/draw-image]
+		clear-face*: func [face][set-image face none]
 		reset-face*: func [face][set-face* face face/default]
 	]
 

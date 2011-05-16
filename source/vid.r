@@ -166,6 +166,7 @@ vid-face: make face [ ; root definition
 	colors:					; alternate face colors
 	texts:					; alternate text
 	images:					; alternate images
+	draw-image:				; standard image used in DRAW block
 	file:					; media file
 	var:					; variable used to hold face
 	keycode:				; shortcut key
@@ -311,9 +312,9 @@ vid-face/multi: context [ ; default multifacet handlers
 	]
 	file: func [face blk] [
 		if pick blk 1 [
-			face/image: load-image face/file: first blk
+			set-image face load-image face/file: first blk
 			if pick blk 2 [
-				face/colors: reduce [face/image]
+				face/colors: reduce [face/draw-image]
 				foreach i next blk [
 					append face/colors load-image i
 				]
@@ -322,7 +323,7 @@ vid-face/multi: context [ ; default multifacet handlers
 	]
 	image: func [face blk] [
 		if pick blk 1 [
-			face/image: first blk
+			set-image face first blk
 			if pick blk 2 [face/images: copy blk]
 		]
 	]

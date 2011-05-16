@@ -139,7 +139,7 @@ stylize/master [
 			window/spring: [bottom right]
 			window/original-size: none
 			window/original-offset: none
-			window/maximize-face/effect: probe effect-window-maximize
+			window/maximize-face/effect: effect-window-maximize
 			any [no-show show face]
 		]
 		;-- toggles window between maximized and normal size

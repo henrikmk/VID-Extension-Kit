@@ -608,11 +608,12 @@ stylize/master [
 		]
 
 		init: [
-			;-- Build Pane
 			pane: copy [across space 0]
+			;-- Build Header
 			if header-face [
 				append pane compose/only [panel fill 1x0 spring [bottom] (header-face) return]
 			]
+			;-- Build Pane
 			append pane [
 				scroller 20x100 fill 0x1 align [right] [
 					scroll-face face/parent-face/list 0 get-face face
@@ -637,6 +638,7 @@ stylize/master [
 			set-parent-faces self
 			any [size size: pane/size + any [all [object? edge 2 * edge/size] 0]]
 			panes: reduce ['default pane: pane/pane]
+			;-- Name faces
 			set either header-face [
 				[header-face v-scroller list]
 			][
@@ -655,17 +657,39 @@ stylize/master [
 		]
 	]
 
-	SORT-BUTTON: BUTTON with [
+	SORT-BUTTON: STATE-BUTTON with [
 		column: none ; the name or index position of the column that is to be sorted. this is set from the DATA-LIST. no it's not.
 		list: none ; list face to sort
+		direction: none ; direction to sort in
 		; function to perform the sorting. perhaps this reaches into the context.
 		; based on the column
 		; when sorted, go by first
 		; attach to list face
-	] [
-		face/column
+		; [ ] - add up/down arrow for sort in redraw
+		; [ ] - allow setting the sort using the data-list itself, so the sort button needs to abstract only basic information
+		; [ ] - when clicked, perform sort action on parent list
+		; [ ] - sensibly find the parent using init
+		images: reduce [none load-stock 'arrow-up load-stock 'arrow-down]
+		states: [no-sort ascending descending]
+		virgin: true ; do not repeat the first state
+		font: make face/font [align: 'left]
+		action: func [face value] [
+			; [ ] - sort parent face by calling the parent action
+			; [ ] - redraw parent face header
+;			probe face/data
+		]
+		append init [
+			;-- Find column position, if not given
+			column
+			;-- Find list face
+			list
+			;-- Find direction
+		]
 	]
-	SORT-RESET-BUTTON: SORT-BUTTON
+	; [ ] perform reset sort action on parent list
+	SORT-RESET-BUTTON: BUTTON with [
+		
+	]
 	TABLE: LIST
 	TEXT-LIST: LIST
 	PARAMETER-LIST: DATA-LIST with [
