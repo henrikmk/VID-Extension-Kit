@@ -22,13 +22,17 @@ REBOL [
 	Keywords: []
 ]
 
-do %../vid-include.r
+do %../../build/include.r
 
-ctx-vid-debug/debug: false
+ctx-vid-debug/debug: [align]
 
 vid-styles: system/view/vid/vid-styles
 
 style-list: extract vid-styles 2
+
+alpha-style-list: sort copy style-list
+
+tree-style-list: sort copy style-list
 
 tag-list: make block! 1000
 
@@ -44,7 +48,7 @@ style-tags-window: make-window [
 	panel [
 		across
 		data-list 200x200 with [
-			subface: [list-text-cell spring [bottom] fill 1x0] ; this should work
+			sub-face: [list-text-cell spring [bottom] fill 1x0] ; this should work
 			data: :tag-list
 		]
 	]
@@ -82,18 +86,71 @@ stylize/master [
 ; the currently displayed face
 p-face: does [first get-pane first get-pane p-preview]
 
+list-types: [
+	alphabetic [list-text-cell fill 1x0 spring [bottom]]
+	creation [list-text-cell fill 1x0 spring [bottom]]
+	tree [list-tree-cell fill 1x0 spring [bottom]]
+]
+
+; it's time to visit a simple tree face style
+; the style would indent based on level
+; the tree is evident only by a single column being the tree. the rest are still normal non-indented columns
+; the rendering would change from a list based renderer to a tree-based renderer
+; the number of items may vary in the list as items are folded or unfolded
+; the cell would allow double-clicking to open or close a branch
+; cells can act as branches or data
+; LIST-TREE-CELL
+; the indent level is determined by the PARA/MARGIN/X item
+; level starts at 1
+; level is posted like POS in the tree renderer
+; the input for the list is a plain object, not blocks of blocks.
+; need LIST/PANE-FUNC that works with a tree
+; know where to render from
+; create level block to render with, rather than re-rendering the list every time
+; then we can use the PANE-FUNC without changing it
+; data would be input as an object
+; tree processing function would output to data
+; there would be a hidden level column somewhere
+; if DATA is an object, then render as a tree
+
+; DATA > tree-func > TREE-DATA > pane-func
+
+; problem with data not related to this item should be specially formatted in data
+
 view main: make-window [
 	across
 	a1: left-panel fill 0x1 [
-		choice fill 1x0
-			spring [bottom]
-			setup [creation "Styles by creation" alphabetic "Styles by alphabetic" tree "Styles by tree"]
-		bar
 		across
-		l-styles: data-list 150x0 fill 0x1 with [
+		l-styles: data-list 250x0 fill 0x1 with [
 			select-mode: 'mutex
-			subface: [list-text-cell spring [bottom] 126]
-			data: :style-list
+			header-face: [
+				choice fill 1x0
+					spring [bottom]
+					setup [alphabetic "Styles by alphabetic" creation "Styles by creation" tree "Styles by tree"]
+					[
+						use [current-list old idx] [
+							old: get-face l-styles
+
+							l-styles/list/make-sub-face l-styles/list select list-types get-face face
+
+							set-face/no-show l-styles current-list: get select [
+								alphabetic alpha-style-list
+								creation style-list
+								tree tree-style-list
+							] get-face face
+
+							; set up the sub-face for each type
+
+							if old [
+								l-styles/list/select-row l-styles/list index? find current-list old
+								l-styles/follow l-styles first l-styles/list/selected
+							]
+							show l-styles
+						]
+					]
+			]
+			sub-face: list-types/alphabetic ; initialize using the choice selector in header-face instead
+			data: :alpha-style-list ; initialize using the choice selector in header-face instead
 		] [
 			style-word: to-word get-face face
 			style: select vid-styles style-word
@@ -182,5 +239,5 @@ view main: make-window [
 		p-preview: frame 300x300 fill 1x1 with [setup: bind :style-previews 'self]
 	]
 	at 0x0
-	button "About..." align [top right] [about-program]
+	button "About..." align [top right] spring [left bottom] [about-program]
 ]

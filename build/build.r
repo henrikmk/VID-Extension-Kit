@@ -104,10 +104,10 @@ foreach file [
 	indicator			; validation indicator styles
 	pop-face			; various window and list popup styles
 	form				; form related styles
-	<list>				; old list style (deprecated)
-	list-new			; list styles
+	list				; list styles
 	<menu>				; menu style (non-functioning)
 	search				; list search style
+	file				; file management styles
 	super-styles		; style combinations for dialogs
 	windows				; styles for window manager and multi-document windows
 	styles				; style skin
