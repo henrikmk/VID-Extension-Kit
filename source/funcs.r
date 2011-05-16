@@ -553,8 +553,6 @@ focus-first-input: func [
 		]
 	]
 	if input-face [
-		; screws up here in trying to focus the button
-		describe-face input-face
 		set-tab-face focus input-face
 	]
 	input-face

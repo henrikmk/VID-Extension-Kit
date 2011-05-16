@@ -101,7 +101,7 @@ stylize/master [
 	; ---------- Buttons
 	CHECK: CHECK 24x24
 	RADIO: RADIO 24x24
-	CHOICE: CHOICE svvc/action-color edge normal-edge
+	CHOICE: CHOICE svvc/action-color edge normal-edge with [font: make font [align: 'left color: black]]
 	ROTARY: ROTARY svvc/action-color edge [color: 160.160.160 effect: 'bevel]
 	TOGGLE: TOGGLE svvc/action-color edge normal-edge
 	STATE: STATE svvc/action-color edge normal-edge

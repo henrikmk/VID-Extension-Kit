@@ -180,12 +180,11 @@ stylize/master [
 		pad: 5 ; space between text and image
 		access: make access [
 			disable-face*: func [face] [
-				; [ ] - font color does not work properly on init due to redraw and common font object
 				face/font/color: 80.80.80
-				face/pane/effect: [brightness 1 contrast -1]
+				append face/pane/effect [brightness 1 contrast -1]
 			]
 			enable-face*: func [face] [
-				face/pane/effect: none
+				clear find/reverse tail face/pane/effect 'brightness
 			]
 		]
 		access: make access ctx-access/selector-nav

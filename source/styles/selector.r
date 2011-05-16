@@ -25,7 +25,6 @@ stylize/master [
 	]
 	MULTI-SELECTOR-TOGGLE: SELECTOR-TOGGLE ; different flags
 
-
 	; list of toggles that can't be multi-selected
 	SELECTOR: FACE-CONSTRUCT with [
 		size: 200x24 ; one line for all toggles
@@ -58,6 +57,7 @@ stylize/master [
 			foreach [key value] input-value [
 				i: i + 1
 				face/emit compose/deep [
+					; uses toggle flags for some reason rather than selector-toggle flags
 					selector-toggle (face/color) (as-pair face/widths/:i face/size/y) (value) of 'selection [
 						face/parent-face/dirty?: true
 						set-face face/parent-face face/var
@@ -66,8 +66,10 @@ stylize/master [
 					] with [
 						var: (to-lit-word key)
 						;edge: (make face/edge []) ; can't eliminate the outer edge here
-						font: (make face/font [])
-						para: (make face/para [])
+						append init [
+							font: make font []
+							para: make para []
+						]
 					]
 				]
 			]
@@ -194,8 +196,12 @@ stylize/master [
 					; [ ] - allow disabling of single checkmarks in this panel
 					check-line (text) (value) with [
 						var: (to-lit-word key)
-						font: (make face/font [])
-						para: (make face/para [])
+						;font: (make face/font []) ; this is necessary for disable-face
+						;para: (make face/para [])
+						append init [
+							font: make font []
+							para: make para []
+						]
 					] [
 						face/parent-face/dirty?: true
 						alter face/parent-face/data face/var
@@ -208,7 +214,7 @@ stylize/master [
 	]
 
 	; Normal choice
-	CHOICE: BUTTON font [color: black align: 'left] 150 with [
+	CHOICE: BUTTON 150 with [
 		setup: [choice1 "Choice 1" choice2 "Choice 2" choice3 "Choice 3"]
 		feel: svvf/choice
 		; opens and positions the menu list
