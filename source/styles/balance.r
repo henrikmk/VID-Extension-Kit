@@ -3,7 +3,7 @@ REBOL [
 	Short: "Balancers and Resizers"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-balance.r
+	Filename: %balance.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

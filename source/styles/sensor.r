@@ -3,7 +3,7 @@ REBOL [
 	Short: "Sensor specific styles for VID"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-sensor.r
+	Filename: %sensor.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

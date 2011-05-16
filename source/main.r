@@ -60,7 +60,7 @@ REBOL [
 #include %styles/indicator			; validation indicator styles
 #include %styles/pop-face			; various window and list popup styles
 #include %styles/form				; form related styles
-#include %styles/list-new			; list styles
+#include %styles/list				; list styles
 #include %styles/search				; list search style
 #include %styles/super-styles		; style combinations for dialogs
 #include %styles/windows			; styles for window manager and multi-document windows

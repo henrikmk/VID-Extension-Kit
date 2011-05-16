@@ -788,7 +788,7 @@ REBOL [
 	Short: "VID Requesters"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-request.r
+	Filename: %request.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

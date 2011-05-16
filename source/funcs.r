@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Functions"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-funcs.r
+	Filename: %funcs.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -22,7 +22,7 @@ REBOL [
 ]
 
 set-parent-faces: func [
-	{Sets parent-face correctly for all subfaces in a face.}
+	{Sets parent-face correctly for all sub-faces in a face.}
 	face
 	/parent pf
 ] [
@@ -438,7 +438,7 @@ find-relative-face: func [
 		any [
 			face = f ; if loop hits the face itself, stop looping
 			either error? set/any 'result try [do bind criteria 'f] [
-				probe disarm result
+				;probe disarm result
 				throw make error! "FIND-RELATIVE-FACE error"
 			][
 				result
@@ -927,7 +927,7 @@ set-default-face: func [
 ; ---------- Face Change Detection
 
 dirty-face?: func [
-	"Detects if a face or any of its subfaces are dirty."
+	"Detects if a face or any of its sub-faces are dirty."
 	face
 	/local result
 ] [
@@ -943,7 +943,7 @@ dirty-face?: func [
 ]
 
 clean-face: func [
-	"Cleans dirty face and all its subfaces."
+	"Cleans dirty face and all its sub-faces."
 	face
 ] [
 	traverse-face face [

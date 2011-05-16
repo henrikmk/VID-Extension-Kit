@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Window Functions"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-window.r
+	Filename: %window.r
 	Version: 0.0.2
 	Type: 'script
 	Maturity: 'unstable
@@ -24,7 +24,7 @@ REBOL [
 ; creates a layout face
 make-window: func [pane /options opts] [
 	if object? pane [
-		if ctx-vid-debug/debug [dump-face pane]
+		if find ctx-vid-debug/debug 'face [dump-face pane]
 		return pane
 	]
 	; somehow the pane-size is wrong

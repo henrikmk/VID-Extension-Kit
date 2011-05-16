@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Menu Face"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2010 - HMK Design"
-	Filename: %vid-menu-face.r
+	Filename: %menu-face.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -73,6 +73,9 @@ get-menu-face: func [face] [
 	get in root-face face 'menu-face
 ]
 
+; for some cases, the menu face needs to be a separate window
+; this would be instated on a case-by-case basis
+
 ; creates and displays the menu face. this function is run from the style that needs it. FC is parent-face
 set 'set-menu-face func [fc content size offset] [
 	;-- Locate appropriate menu face
@@ -93,6 +96,9 @@ set 'set-menu-face func [fc content size offset] [
 	menu-face/pane: menu-face/pane/pane
 	ctx-resize/align-contents menu-face
 	; [ ] - tab order should mean that the next face after pop-face is menu-face
+	; [ ] - tab order could also temporarily be constrained to inside the menu face here, as it does this in OSX
+	; [ ] - need a tab base constraint, as this will also work for subwindows
+;	menu-face/flags
 	focus menu-face
 	show menu-face
 ]

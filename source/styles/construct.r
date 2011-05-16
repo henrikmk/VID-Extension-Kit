@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Construct"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2008 - HMK Design"
-	Filename: %vid-construct.r
+	Filename: %construct.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

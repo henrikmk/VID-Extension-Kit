@@ -297,7 +297,7 @@ svvf: system/view/vid/vid-feel: context [
 		;	]
 		;	show face
 		;]
-		engage: func [face action event /local idx y-size] [
+		engage: func [face action event] [
 			if action = 'down [
 				; [x] - generate the poplist during init.
 				; [x] - or re-show it, if it already exists. doing that during init.
@@ -318,22 +318,11 @@ svvf: system/view/vid/vid-feel: context [
 				; [ ] - visible arrow for out of bounds parts
 				; [x] - keyface control for menu-face to control the list internally, but this is specific to list
 				; [ ] - keyface control allows moving the list
+				; [ ] - keyface control to open the list
+				; [ ] - move function to standardized setup
 				; [x] - start selection on the opened selection rather than the first selection, but this is specific to list
 				; [ ] - size is 4x4 too far out, when the height is set to 100x20
-				if all [block? face/setup not empty? face/setup] [
-					set-face face/choice-face/pane/1 extract/index face/setup 2 2
-					idx: divide 1 + index? face/data 2
-					face/choice-face/pane/1/selected: to-block idx
-					face/choice-face/pane/1/over: as-pair 1 idx
-					ctx-resize/align-contents face/choice-face none
-					y-size: face/size/y - (second 2 * edge-size face)
-					set-menu-face
-						face
-						face/choice-face
-						as-pair face/size/x (2 * second edge-size face) + divide y-size * length? head face/data 2
-						;-- Using WIN-OFFSET? here, because the parent face may be scrolled
-						add win-offset? face as-pair 0 y-size - (y-size * idx)
-				]
+				face/open-choice-face face
 			]
 		]
 	]
@@ -550,7 +539,7 @@ svvf: system/view/vid/vid-feel: context [
 					; [ ] - click to make active
 					; [ ] - when active, others go inactive, possibly through disable
 					; [ ] - activate drag
-					old-offset: event/offset
+					old-offset: event/offset ; [!] - seems not local?
 					face/action face get-face face
 					;-- if tab face is inside this face, move it along
 					face/tab-face: get-tab-face face
@@ -983,7 +972,7 @@ act-face: func [[catch] face event actor] [
 	unless find first face/actors actor [
 		throw make error! reform ["Actor" actor "not found"]
 	]
-	if ctx-vid-debug/debug [
+	if find ctx-vid-debug/debug 'actor [
 		print ["Face:" describe-face face]
 		print ["Actor:" actor]
 	]

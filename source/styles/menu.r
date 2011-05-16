@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Menus"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-menu.r
+	Filename: %menu.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -249,7 +249,7 @@ stylize/master [
 			row: pick face/source id
 			either row [
 				either row/name [
-					fs: face/subface
+					fs: face/sub-face
 					fs/pos: id
 					set-face/no-show fs/pane/1 if in row 'state [row/state]
 					set-face/no-show fs/pane/2 row/name
@@ -301,7 +301,7 @@ stylize/master [
 		init: [
 			if none? row [row: make object! [data: none]]
 			if none? self/source [self/source: make block! []]
-			make-subface self make-subface-layout row
+			make-sub-face self make-sub-face-layout row
 			separatorface: make get-style 'bar [size: 2x2]
 			separatorface/parent-face: self
 			pane: :panefunc
@@ -309,7 +309,7 @@ stylize/master [
 			append offsets 0
 			use [name-face old-x x id] [
 				id: x: 0
-				name-face: subface/pane/2
+				name-face: sub-face/pane/2
 				old-x: name-face/size/x
 				name-face/size/x: 500
 				foreach item self/source [
@@ -318,7 +318,7 @@ stylize/master [
 					x: max x 50 + name-face/para/origin/x + first size-text name-face
 					append offsets
 						either item/name [
-							subface/size/y
+							sub-face/size/y
 						][
 							separatorface/size/y
 					]
@@ -336,16 +336,16 @@ stylize/master [
 					change back tail offsets
 						add last offsets pick tail offsets -2
 				]
-				resize/no-show subface subface/size + as-pair x - old-x 0 0x0
+				resize/no-show sub-face sub-face/size + as-pair x - old-x 0 0x0
 			]
 			either none? size [
 				size: 0x0
-				size/x: subface/size/x
+				size/x: sub-face/size/x
 				size/y: 100
 			][
 				if pair? size [
 					if size/x = -1 [
-						size/x: subface/size/x
+						size/x: sub-face/size/x
 					]
 					if size/y = -1 [
 						size/y: last offsets

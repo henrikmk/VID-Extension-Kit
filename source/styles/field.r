@@ -3,7 +3,7 @@ REBOL [
 	Short: "Improved VID Field"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2007 - HMK Design"
-	Filename: %vid-field.r
+	Filename: %field.r
 	Version: 0.0.6
 	Created: 23-Mar-2007
 	Date: 31-Mar-2008
@@ -19,6 +19,11 @@ REBOL [
 ; Combine with view-edit.r for undo history and other enhanced editing abilities.
 
 stylize/master [
+	HIDDEN: FACE 0x0 with [
+		access: ctx-access/data
+		init: [access/set-face* self none]
+	] spring [bottom right]
+	
 	FIELD: FACE 200x24 spring [bottom] with [
 		numeric-keys: key-action: false
 		key-range: range: none

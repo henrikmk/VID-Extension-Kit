@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Image"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2008 - HMK Design"
-	Filename: %vid-image.r
+	Filename: %image.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

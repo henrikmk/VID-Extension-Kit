@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Styles"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-styles.r
+	Filename: %styles.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -116,7 +116,7 @@ stylize/master [
 	TOOL-BUTTON: BUTTON edge [size: 1x1 color: 100.100.100] 50x20
 	ICON-BUTTON: BUTTON 24x24 edge none with [init: []] ; problematic as we want an icon-button with edge as well
 	GLYPH-BUTTON: BUTTON 24x24 edge normal-edge
-	BOTTOM-BUTTON: BUTTON with [spring: [top]]
+	BOTTOM-BUTTON: BUTTON with [spring: [top right]]
 	CENTER-BUTTON: BUTTON with [align: [left right]]
 	SAVE-BUTTON: SAVE-BUTTON svvc/true-color edge normal-edge
 	VALIDATE-BUTTON: VALIDATE-BUTTON svvc/true-color edge normal-edge
@@ -136,6 +136,7 @@ stylize/master [
 	SORT-BUTTON: SORT-BUTTON -1x20 svvc/manipulator-color font [color: black shadow: none]
 	SORT-RESET-BUTTON: SORT-RESET-BUTTON svvc/action-color edge none
 	COLOR-BUTTON: COLOR-BUTTON edge normal-edge
+	PATH-CHOICE: PATH-CHOICE svvc/action-color edge normal-edge
 
 	; ---------- Cells
 	DATE-WEEKDAY-CELL: DATE-WEEKDAY-CELL
@@ -167,7 +168,6 @@ stylize/master [
 	GRADIENT-SLIDER: GRADIENT-SLIDER edge field-edge
 	BALANCER: BALANCER svvc/frame-background-color edge field-edge
 	RESIZER: RESIZER svvc/frame-background-color edge field-edge
-	LIST-HEADER: LIST-HEADER edge normal-edge
 
 	; ---------- Windows
 	REBOL-WINDOW: REBOL-WINDOW edge window-edge

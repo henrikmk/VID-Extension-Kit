@@ -24,18 +24,18 @@ REBOL [
 ; [ ] - this falls out with iterated faces. it won't update an iterated face.
 
 ctx-vid-debug: context [
-	debug: false
+	debug: []
 	fc: none
 	level: copy ""
-	set 'in-level does [if debug [append level "-"]]
-	set 'out-level does [if debug [remove level]]
+	set 'in-level does [if find debug 'face [append level "-"]]
+	set 'out-level does [if find debug 'face [remove level]]
 	set 'debug-face func [doing data] [
-		if debug [print trim/lines to-string reduce [doing ": +" level data]]
+		if find debug 'face [print trim/lines to-string reduce [doing ": +" level data]]
 	]
 	face-name: does [any [all [function? fc "iterated"] fc/var fc/style fc/type "unknown"]]
 	face-text: does [mold any [all [function? fc "iterated"] fc/text ""]]
 	set 'debug-align func [face] [
-		unless debug [exit]
+		unless find debug 'align [exit]
 		fc: :face
 		debug-face "Aligning" reduce [
 			face-name
@@ -47,15 +47,15 @@ ctx-vid-debug: context [
 		]
 	]
 	set 'debug-resize func [face diff] [
-		unless debug [exit]
+		unless find debug 'resize [exit]
 		fc: :face
 		debug-face "Resizing" reduce [face-name face-text "by" diff]
 	]
 	set 'debug-vid func [str] [
-		unless debug [exit]
+		unless find debug 'vid [exit]
 		print "Debug: " str
 	]
-	set 'remind func [value] [if debug [probe value]]
+	set 'remind func [value] [if find debug 'remind [probe value]]
 ]
 
 dump-face: func [

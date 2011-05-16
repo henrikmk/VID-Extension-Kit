@@ -119,7 +119,7 @@ set 'request func [title [string!] type [word! block!] content [any-type!] butto
 
 ;-- requesters
 
-set 'request-dir		func [where /title ttl]					[request any [ttl "Get Directory"] 'layout-dir where 'use-cancel]
+set 'request-dir		func [/file where /title ttl]			[request any [ttl "Get Directory"] 'layout-dir where 'use-cancel]
 set 'request-color		func [value /title ttl]					[request any [ttl "Get Color"] 'layout-color value 'use-cancel]
 set 'request-user		func [user pass /title ttl]				[request any [ttl "Enter User & Pass"] 'layout-user reduce [user pass] 'use-cancel]
 set 'request-pass		func [value /title ttl]					[request any [ttl "Enter Password"] 'layout-pass value 'use-cancel]

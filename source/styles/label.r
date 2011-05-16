@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Labels"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-label.r
+	Filename: %label.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

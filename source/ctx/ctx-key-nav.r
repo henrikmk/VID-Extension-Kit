@@ -56,6 +56,7 @@ set 'set-tab-face func [face [object!] /local rf] [
 		rf/tab-face: face
 		set-focus-ring face
 	]
+	dump-face face
 	face
 ]
 

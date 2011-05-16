@@ -3,7 +3,7 @@ REBOL [
 	Short: "Super Styles"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2010 - HMK Design"
-	Filename: %vid-super-styles.r
+	Filename: %super-styles.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -150,10 +150,83 @@ LAYOUT-LIST: LAYOUT-LISTS [
 ]
 
 LAYOUT-DIR: COMPOUND [
-	; navigation crumb
-	; list for directory
-	; should be a full file list
-	data-list 200x200
+	space 0
+	across
+	arrow 24x24 left [face/parent-face/back-history face/parent-face]
+	space 2x2
+	arrow 24x24 right [face/parent-face/next-history face/parent-face]
+	path-choice fill 1x0 spring [bottom] [
+		set-face face/parent-face value
+		face/parent-face/set-history face/parent-face
+	] return
+	data-list 304x204 [
+		set-face face/parent-face first value
+		face/parent-face/set-history face/parent-face
+	] return
+	bottom-button "New Directory" [
+		use [val] [
+			if val: request-value/title none "New Directory Name" [
+				either attempt [val: dirize to-file val] [
+					either exists? val [
+						alert "Directory already exists."
+					][
+						either attempt [make-dir/deep join face/parent-face/data val] [
+							set-face face/parent-face val
+							face/parent-face/set-history face/parent-face
+						][
+							alert "Cannot make directory."
+						]
+					]
+				][
+					alert "Invalid directory name."
+				]
+			]
+		]
+	]
+] with [
+	crumb: file-list: history: none
+	;-- Move to the next history path
+	back-history: func [face] [
+		face/history: back face/history
+		set-face face first face/history
+	]
+	;-- Move to the previous history path
+	next-history: func [face] [
+		unless tail? next face/history [
+			face/history: next face/history
+			set-face face first face/history
+		]
+	]
+	;-- Updates history path
+	set-history: func [face] [
+		; history clears anything after it, once it's set
+		face/history: back insert clear next face/history face/data
+	]
+	access: make access [
+		set-face*: func [face value] [
+			value: attempt [to-file value]
+			if value [
+				face/data: dirize clean-path
+					either #"/" = first value [
+						value ; absolute new path
+					][
+						join face/data value ; change to current path
+					]
+				set-face/no-show face/crumb face/data
+				set-face/no-show face/file-list remove-each file read face/data [#"/" <> last file]
+			]
+		]
+		get-face*: func [face] [
+			face/data
+		]
+	]
+	append init [
+		set [last-dir next-dir crumb file-list] pane
+		data: any [data %./]
+		history: make block! 1000
+		access/set-face* self data
+		set-history self
+	]
 ]
 
 LAYOUT-DOWNLOAD: COMPOUND [

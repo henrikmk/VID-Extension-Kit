@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Drop Down Sheet"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2010 - HMK Design"
-	Filename: %vid-sheet.r
+	Filename: %sheet.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

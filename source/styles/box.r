@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Box"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-box.r
+	Filename: %box.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

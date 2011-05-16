@@ -3,7 +3,7 @@ REBOL [
 	Short: "Scroller Management for VID"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-ctx-scroll.r
+	Filename: %ctx-scroll.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -82,7 +82,7 @@ set-face-scroll: func [face x y] [
 ; standard horizontal scroll value function
 h-scroll-val-func: func [face] [
 	either iterated-face? face [
-		face/subface/offset/x / face/subface/size/x - face/size/x
+		face/sub-face/offset/x / face/sub-face/size/x - face/size/x
 	][
 		face/pane/offset/x / face/pane/size/x - face/size/x
 	]
@@ -91,7 +91,7 @@ h-scroll-val-func: func [face] [
 ; standard vertical scroll value function
 v-scroll-val-func: func [face] [
 	either iterated-face? face [
-		face/subface/offset/y / face/subface/size/y - face/size/y
+		face/sub-face/offset/y / face/sub-face/size/y - face/size/y
 	][
 		face/pane/offset/y / face/pane/size/y - face/size/y
 	]
@@ -100,7 +100,7 @@ v-scroll-val-func: func [face] [
 ; standard horizontal scrolling function
 h-scroll-face-func: func [face x /local edge fp] [
 	edge: 2 * any [attempt [face/edge/size] 0]
-	fp: either iterated-face? face [face/subface][face/pane]
+	fp: either iterated-face? face [face/sub-face][face/pane]
 	if all [x fp/size/x > face/size/x] [
 		fp/offset/x: face/size/x - edge/x - fp/size/x * x
 	]
@@ -117,7 +117,7 @@ v-scroll-face-func: func [face y /local edge] [
 ; standard horizontal redrag value function
 h-redrag-val-func: func [face] [
 	either iterated-face? face [
-		face/size/x / face/subface/size/x
+		face/size/x / face/sub-face/size/x
 	][
 		face/size/x / face/pane/size/x
 	]
@@ -126,7 +126,7 @@ h-redrag-val-func: func [face] [
 ; standard vertical redrag value function
 v-redrag-val-func: func [face] [
 	either iterated-face? face [
-		face/size/y / face/subface/size/y
+		face/size/y / face/sub-face/size/y
 	][
 		face/size/y / face/pane/size/y
 	]

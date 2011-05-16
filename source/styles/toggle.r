@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Toggle"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2008 - HMK Design"
-	Filename: %vid-toggle.r
+	Filename: %toggle.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

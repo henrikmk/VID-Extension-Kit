@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Date Field"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2008 - HMK Design"
-	Filename: %vid-date.r
+	Filename: %date.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

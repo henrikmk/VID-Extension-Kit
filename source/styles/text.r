@@ -3,7 +3,7 @@ REBOL [
 	Short: "Text faces for VID"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-text.r
+	Filename: %text.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

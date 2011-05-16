@@ -22,17 +22,19 @@ stylize/master [
 				face/parent-face/parent-face/over: all [act face/pos]
 				show face
 			]
-			engage: func [face act event /local lst] [
+			engage: func [face act event /local lst pos] [
 				lst: face/parent-face/parent-face
 				if act = 'down [
 					if all [
 						in lst 'select-func
 						any-function? get in lst 'select-func
+						face/pos/y <= length? lst/data-filtered ; do not run for cells that are outside the list filter
 					] [
+						pos: face/pos
+						act-face lst event 'on-click
+						face/pos: pos ; maintain position even after list is closed
 						lst/select-func face event
 					]
-					do-face lst face/pos ; run the action for the list on click
-					act-face lst event 'on-click ; run on-click actor for list on click
 				]
 			]
 		]
@@ -43,7 +45,10 @@ stylize/master [
 
 	; cell text for LIST with offset and icon for tree fold/unfold
 	LIST-TREE-CELL: LIST-CELL with [
-		; [ ] - specify level
+		level: 1
+		node-type: 'data
+		; [o] - specify level
+		; [ ] - specify folder/data
 		; [ ] - specify fold action
 		; [ ] - specify unfold action
 		; [ ] - specify fold icon
@@ -53,11 +58,11 @@ stylize/master [
 	; cell image for LIST
 	LIST-IMAGE-CELL: LIST-CELL
 
-	; iterated list with user defined subface. internal use only.
+	; iterated list with user defined sub-face. internal use only.
 	LIST: IMAGE with [
 		;-- Faces
-		subface:					; face that is used to iterate through the list view
-		pane:						; iterated subface here
+		sub-face:					; face that is used to iterate through the list view
+		pane:						; iterated sub-face here
 		v-scroller:					; vertical scroller attached to list face
 		h-scroller:					; horizontal scroller attached to list face
 		selected:					; block of integers with selected indexes
@@ -79,18 +84,17 @@ stylize/master [
 		spacing: 0					; spacing between rows in pixels
 		over:						; face position currently hovering over
 		spring: none
-		;-- Subface creation function
-		make-subface: func [face lo /local fs] [
-			fs: face/subface: layout/parent/origin/styles lo iterated-face 0x0 copy face/styles
+		;-- Sub-face creation function
+		make-sub-face: func [face lo /init /local fs] [
+			fs: face/sub-face: layout/parent/origin lo iterated-face 0x0; copy face/styles ; this only works during init
 			fs/parent-face: face
 			fs/size/y: fs/size/y - face/spacing
 			if face/size [fs/size/x: face/size/x]
 			set-parent-faces/parent fs face
-			align fs
+			unless init [ctx-resize/align fs]
 		]
 		list-size: func [face] [
-			to-integer
-				face/size/y - (any [attempt [2 * face/edge/size/y] 0]) / face/subface/size/y
+			to integer! face/size/y - (any [attempt [2 * face/edge/size/y] 0]) / face/sub-face/size/y
 		]
 		; moves to the given position in the list and makes it visible, if not visible
 		follow: func [face pos /local idx range size] [
@@ -113,31 +117,88 @@ stylize/master [
 		calc-pos: func [face] [
 			divide subtract index? face/output 1 max 1 (length? head face/output) - face/list-size face
 		]
-		; maps the face type to the subfaces through setup types
+		; maps the face type to the sub-faces through setup types
 		map-type: func [type] [
 			any [
 				select [
 					number! list-text-cell
 					string! list-text-cell
 					image! list-image-cell
-				] to-word type
+				] to word! type
 				'list-text-cell ; default
 			]
 		]
 		;-- Row selection
 		select-row: func [face indexes] [
 			; select rows
+			; unfinished function
 			;face/select-func face
-			insert clear head face/selected indexes
-;			length? 
-			; need the selection to occur on unfiltered data, so there is a general problem here
-			; selection should be mapped to an internal index
-			remove-each idx face/selected
+			insert clear head face/selected indexes ; indexes should be from the total list, not just visible items
+;			length?
+
+			; [?] - need the selection to occur on unfiltered data, so there is a general problem here
+
+			; [?] - the selection is also necessary to perform on filtered data, so there are two sides to this problem
+
+			; [!] - selection should be mapped to an internal index
+
+			; [!] - also selection should adhere to sorted data
+
+			; finish this function next. it makes sense to have this done prior to any other function
+
+			; [!] - check that highlighting will follow filtered highlighting
+
+			;face/update face ; is this needed?
+		]
+		;-- Row manipulation
+		; CRUD functions?
+		; insert, delete, update
+		; actors for each function
+		; on-edit
+		; on-insert
+		; on-delete
+		edit-cell: func [x y data] [
+			; the problem to fix is that this will essentially edit the data that we promised to separate out
+			; list-view handles the data as well as the editing
+			; we want to allow editing the data and then performing a simple update
+			; perhaps this should be done in here
+			; when editing this cell, we are updating the single value in the block/element/object
+			; this causes many testing scenarios
+			; this may be possible to use with in-line editing, but not sure
+			; [!] - inline editing would use inline versions of the cell styles, so this should be done by the cell styles themselves
+			; and then you do a get-face on the data in the sub-face
+			; [!] - and the cells close up again
+			; [!] - this is only useful for editing a single item very quickly
+			act-face face event 'on-edit
+			; update the face or the single row
+			face/update face
+		]
+		edit-row: func [idx data] [
+			; as used by inline editing
+			change at face/data idx data
+			act-face face event 'on-change
+			; put the row selection here
+			face/update face
+		]
+		insert-row: func [idx data] [
+			; when inserting the row, use the proper location
+			; what good is on-insert for?
+			insert at face/data idx data
+			act-face face event 'on-change
+			; put the row selection here
+			face/update face
+		]
+		append-row: func [data] [
+			insert-row length? face/data data
+		]
+		delete-row: func [idx] [
+			act-face face event 'on-change
+			; update selection
 			face/update face
 		]
 		;-- Pane rendering function
 		pane-func: func [face [object!] id [integer! pair!] /local count fs spane sz] [
-			fs: face/subface id
+			fs: face/sub-face id
 			if pair? id [return 1 + second id / fs/size]
 			fs/offset: fs/old-offset: id - 1 * fs/size * 0x1
 			sz: size/y - any [attempt [2 * face/edge/size/y] 0]
@@ -173,7 +234,7 @@ stylize/master [
 		]
 		;-- Cell render function
 		render-func: func [face cell] [
-			either find face/selected cell/pos/y [
+			either find face/selected cell/pos/y [ ; [!] - this is bound on visible selection?
 				cell/color:
 					either flag-face? face disabled [
 						svvc/select-disabled-color
@@ -206,12 +267,13 @@ stylize/master [
 		;-- Cell selection function for mouse. FACE is cell that is clicked on.
 		select-mode: 'multi
 		start: end: none
-		select-func: func [face event /local s step] [
-			if tail? at data face/pos/y [exit]
+		select-func: func [face event /local old s step] [
+;			if tail? at data face/pos/y [exit] ; [!] - convert this to use the unfiltered position
+			old: copy selected
 			switch select-mode [
 				mutex [
 					;-- Single selection
-					append clear selected start: end: face/pos/y
+					append clear selected start: end: face/pos/y ; [!] - convert this to use the unfiltered position
 				]
 				multi [
 					;-- Select multiple rows
@@ -243,11 +305,17 @@ stylize/master [
 			]
 			sel: copy selected
 			selected: head insert head clear selected unique sel
-			show self
+			if sel <> old [
+				old: face/pos
+				do-face self face/pos
+				show self
+				face/pos: old ; otherwise it changes due to SHOW
+			]
 		]
 		;-- Cell selection function for keyboard. FACE is cell that is selected.
-		key-select-func: func [face event /local out s step] [
+		key-select-func: func [face event /local old out s step] [
 			if find [up down] event/key [
+				old: copy selected
 				out: head output
 				dir: pick [1 -1] event/key = 'down
 				if event/control [dir: dir * list-size face]
@@ -274,6 +342,9 @@ stylize/master [
 			]
 			sel: copy selected
 			selected: head insert head clear selected unique sel
+			if sel <> old [
+				do-face self face/pos
+			]
 		]
 		;-- Accessor functions
 		access: make access [
@@ -286,14 +357,10 @@ stylize/master [
 					face/output: skip tail face/output negate sz
 				]
 			]
-			; performs face navigation using LIST-* styles in the subface
+			; performs face navigation using LIST-* styles in the sub-face
 			key-face*: func [face event /local old] [
-				old: copy face/selected
 				face/key-select-func face event
-				if old <> face/selected [
-					do-face face none
-					act-face face event 'on-key
-				]
+				act-face face event 'on-key
 			]
 			; scrolls the list face
 			scroll-face*: func [face x y /local old size] [
@@ -308,6 +375,7 @@ stylize/master [
 						at head face/output add y * subtract length? face/data size 1
 					]
 				clamp-list face
+				act-face face event 'on-scroll
 				not-equal? index? old index? face/output ; update only for show when the index shows a difference
 			]
 			; returns selected rows from the list face
@@ -327,15 +395,15 @@ stylize/master [
 					]
 				]
 			]
-			; resizes the subface of the list
+			; resizes the sub-face of the list
 			resize-face*: func [face size x y] [
-				;-- Resize main list face and subface
+				;-- Resize main list face and sub-face
 				resize;/no-show
-					face/subface
+					face/sub-face
 					as-pair
 						face/size/x
-						face/subface/size/y
-					face/subface/offset
+						face/sub-face/size/y
+					face/sub-face/offset
 				;-- Clamp list if it's beyond end
 				clamp-list face
 			]
@@ -353,73 +421,74 @@ stylize/master [
 			]
 		]
 		init: [
-			;-- Build subface from columns
+			;-- Build sub-face from columns
 			case [
-				;-- Use subface directly and supply sorting and type information from columns
-				all [subface columns] [
+				;-- Use sub-face directly and supply sorting and type information from columns
+				all [sub-face columns] [
 					; use columns for sorting and types and nothing else
 					; this is applied to the ctx-list attached here
 				]
-				;-- Create new subface
-				all [not subface columns] [
-					subface: make block! 100
+				;-- Create new sub-face
+				all [not sub-face columns] [
+					sub-face: make block! 100
 					foreach column columns [
-						append subface map-type column/type
+						append sub-face map-type column/type
 					]
 				]
-				;-- Create subface from data
-				all [not subface not columns] [
+				;-- Create sub-face from data
+				all [not sub-face not columns] [
 					either block? data [
 						unless empty? data [
-							subface: make block! 100
+							sub-face: make block! 100
 							switch/default type?/word data/1 [
 								object! [
 									foreach item first data/1 [
-										append subface map-type type? item
+										append sub-face map-type type? item
 									]
 								]
 								block! [
 									foreach item data/1 [
-										append subface map-type type? item
+										append sub-face map-type type? item
 									]
 								]
 							] [
 								; assuming that all data are of the same type
-								append subface map-type type? data/1
+								append sub-face map-type type? data/1
 							]
 						]
 					][
 						;-- Create empty single column list
-						subface: [list-text-cell 100x20 spring [bottom] fill 1x0]
+						sub-face: [list-text-cell 100x20 spring [bottom] fill 1x0]
 					]
 				]
 			]
 			;if none? size [
 			;	size: 300x200
-			;	size/x: subface/size/x + first edge-size? self
+			;	size/x: sub-face/size/x + first edge-size? self
 			;] ; size is really set to 100x100
-			; if size is set here, the subface will adhere to the size
-			; if size is not set here, the subface will determine the size
+			; if size is set here, the sub-face will adhere to the size
+			; if size is not set here, the sub-face will determine the size
 			; still a problem, because we don't really determine the size from fill until the outer part has been aligned
-			make-subface self any [subface attempt [second :action] [list-text-cell]] ; empty subface = infinite loop
+			; this should also work, even if we are not running this through init
+			make-sub-face/init self any [sub-face attempt [second :action] [list-text-cell]] ; empty sub-face = infinite loop
 			if none? size [
 				size: 300x200
-				size/x: subface/size/x + first edge-size? self
+				size/x: sub-face/size/x + first edge-size? self
 			]
 			;-- Build column order
 			unless block? column-order [
 				column-order: make block! []
-				repeat i length? subface/pane [
-					append column-order to-word join 'column- i
+				repeat i length? sub-face/pane [
+					append column-order to word! join 'column- i
 				]
 			]
-			;-- Build columns from subface
+			;-- Build columns from sub-face
 			case [
-				;-- Create column list from subface
-				all [subface not columns] [
+				;-- Create column list from sub-face
+				all [sub-face not columns] [
 					columns: make block! []
-					repeat i length? subface/pane [
-						append columns to-word join 'column- i
+					repeat i length? sub-face/pane [
+						append columns to word! join 'column- i
 						append columns none
 					]
 				]
@@ -444,7 +513,7 @@ stylize/master [
 				if event/control [dir: dir * list-size face]
 				if empty? out [face/over: none clear face/selected return false]
 				face/over: either face/over [0x1 * dir + face/over][1x1]
-				face/over: min max 1x1 face/over to-pair length? out
+				face/over: min max 1x1 face/over to pair! length? out
 				follow face face/over/y
 			]
 			if find [#" " #"^M"] event/key [
@@ -453,7 +522,7 @@ stylize/master [
 		]
 	]
 
-	; iterated bottom-up list with user defined subface. internal use only.
+	; iterated bottom-up list with user defined sub-face. internal use only.
 	REVERSE-LIST: LIST with [
 		; determine which changes are needed here:
 		; output is reversed, so we need to output this somehow reversed, possibly pane-func ID
@@ -465,12 +534,12 @@ stylize/master [
 	NAV-LIST: PANEL with [
 		;-- Faces
 		list:					; list face
-		pane:					; list and navigation faces here
+		pane:					; layed out list and navigation faces
 		;-- List information
 		data:					; data block to use as source, passed to LIST
 		columns:				; column description, passed to LIST
 		column-order:			; column order, passed to LIST
-		subface:				; subface block or layout, passed to LIST
+		sub-face:				; sub-face block or layout, passed to LIST
 		text:					; does not contain focusable text
 			none
 		;-- Basic accessors
@@ -481,17 +550,20 @@ stylize/master [
 		]
 	]
 
-	; standard data list with list, header and user defined subface or column definition
+	; standard data list with list, user defined header and user defined sub-face or column definition
 	DATA-LIST: NAV-LIST with [ ; [!] - compound later
 		;-- Faces
-		header:					; header face
+		header-face:			; header face
 		v-scroller:				; vertical scroller face
 		h-scroller:				; horizontal scroller face
 			none
-; [?] - do not allow focusing of individual items in list subface
-; [ ] - inline field system
-; [ ] - figure out why list subface content does not resize properly to the width of the outer faces immediately
+; [?] - do not allow focusing of individual items in list sub-face
+; [ ] - inline field system, realized by having text styles that do inline editing
+; [ ] - figure out why list sub-face content does not resize properly to the width of the outer faces immediately
 ; [ ] - align
+; [ ] - does not respond to ON-CLICK actor, due to incorrect mapping
+; [ ] - optional header layout, which will be freely defined
+; [ ] - header button style, which loosely connects to the list by its index in the parent header face
 		select-mode: 'multi
 		access: make access [
 			; adjusts the scroller ratio and drag (internal)
@@ -526,15 +598,22 @@ stylize/master [
 				set-scroller face
 			]
 		]
+		;-- List functions
 		update: func [face] [
 			face/list/update face/list
 		]
+		follow: func [face pos] [
+			face/list/follow face/list pos
+			set-face/no-show face/v-scroller face/list/calc-pos face/list
+		]
 
 		init: [
-			;-- Build pane
-			pane: layout/tight compose/deep/only [
-				across space 0
-;				header 200x20 return
+			;-- Build Pane
+			pane: copy [across space 0]
+			if header-face [
+				append pane compose/only [panel fill 1x0 spring [bottom] (header-face) return]
+			]
+			append pane [
 				scroller 20x100 fill 0x1 align [right] [
 					scroll-face face/parent-face/list 0 get-face face
 					face/parent-face/access/set-scroller/only face/parent-face
@@ -547,32 +626,46 @@ stylize/master [
 				]
 				list fill 1x1 align [left]
 					[do-face face/parent-face none]
-;					on-click [act-face face/parent-face event 'on-click]
-;					on-key [act-face face/parent-face event 'on-key]
 					with [ ; size is ignored, because it's made inside list size
-						subface: (subface)
+						sub-face: (sub-face)
 						data: (data) ; make sure it's same
 						columns: (columns) ; make sure it's same
 						column-order: (column-order) ; make sure it's same
 					]
 			]
-			reverse pane/pane
+			pane: layout/tight compose/deep/only pane
 			set-parent-faces self
 			any [size size: pane/size + any [all [object? edge 2 * edge/size] 0]]
 			panes: reduce ['default pane: pane/pane]
-			set [list v-scroller] pane
+			set either header-face [
+				[header-face v-scroller list]
+			][
+				[v-scroller list]
+			] pane
 			selected: list/selected ; shared selection list
 			list/select-mode: select-mode
+			;-- Map actors from DATA-LIST to internal components
+			foreach actor first actors [
+				if find [on-click on-key] actor [
+					list/actors/:actor: get in actors actor
+				]
+			]
 			;-- Scroller setup
 			access/set-scroller self
-			;-- Build Header
-			; not yet
 		]
 	]
 
-	SORT-BUTTON: BUTTON
+	SORT-BUTTON: BUTTON with [
+		column: none ; the name or index position of the column that is to be sorted. this is set from the DATA-LIST. no it's not.
+		list: none ; list face to sort
+		; function to perform the sorting. perhaps this reaches into the context.
+		; based on the column
+		; when sorted, go by first
+		; attach to list face
+	] [
+		face/column
+	]
 	SORT-RESET-BUTTON: SORT-BUTTON
-	LIST-HEADER: LIST
 	TABLE: LIST
 	TEXT-LIST: LIST
 	PARAMETER-LIST: DATA-LIST with [
@@ -601,7 +694,7 @@ stylize/master [
 				set-scroller face
 			]
 		]
-		subface: [
+		sub-face: [
 			across space 1x1
 			list-text-cell bold spring [bottom right] right 100 200.200.200
 			list-text-cell 180 spring [bottom]

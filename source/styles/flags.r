@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Style Flags"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-flags.r
+	Filename: %flags.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -140,6 +140,7 @@ ROTARY					[tabbed action input changes]
 CHOICE					[tabbed action input changes]
 ;DROP-DOWN				[tabbed action flags text font changes]
 ICON					[tabbed action input]
+HIDDEN					[input fixed]
 FIELD					[tabbed action text-edit field return input cancel changes on-unfocus] ; no longer return or on-unfocus
 DUMMY					[input]
 INFO					[text-edit field input]
@@ -187,6 +188,7 @@ LIST-IMAGE-CELL			[action input]
 LIST					[iterated action]
 CARET-LIST				[iterated action]
 REVERSE-LIST			[iterated action]
+NAV-LIST				[tabbed action compound]
 DATA-LIST				[tabbed action compound scrollable]
 PARAMETER-LIST			[tabbed action compound scrollable]
 ;SCROLL-DATA-LIST		[tabbed compound action] ; compound, is not iterated in itself

@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Face Object"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-face.r
+	Filename: %face.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -54,7 +54,7 @@ stylize/master [
 			ctx-resize/add-resize-face* self					; Set the runtime resize-face* (changes access)
 			ctx-resize/align/no-show self none					; Autoalign the window based on the above hints
 			ctx-resize/resize/no-show self size offset			; Autosize the window based on the above hints
-			if ctx-vid-debug/debug [dump-face self]				; Dump window face on init if debugging is enabled
+			if find ctx-vid-debug/debug 'face [dump-face self]	; Dump window face on init if debugging is enabled
 		]
 	]
 ]

@@ -406,6 +406,10 @@ facet-words: [ ; Order of these is important to the code
 	on-disable			[set-actor new 'on-disable second args next args]
 	on-freeze			[set-actor new 'on-freeze second args next args]
 	on-thaw				[set-actor new 'on-thaw second args next args]
+	; Lists
+	on-insert			[set-actor new 'on-insert second args next args]
+	on-delete			[set-actor new 'on-delete second args next args]
+	on-edit				[set-actor new 'on-edit second args next args]
 ]
 
 fw-with: find facet-words 'with

@@ -3,7 +3,7 @@ REBOL [
 	Short: "List Context"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-ctx-list.r
+	Filename: %ctx-list.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -22,7 +22,7 @@ REBOL [
 	Keywords: []
 ]
 
-; bound to places in the data-list and list-header
+; bound to places in the data-list
 
 ctx-list: context [
 	data*: fspec*: soc*: sod*: dfilt*: didx*: dsort*: dadis*: out*: none
@@ -91,7 +91,7 @@ ctx-list: context [
 		; so the sorting needs to occur in a way where the index is brought along
 		if all [sod* soc*] [
 			op: get select [asc lesser? desc greater?] sod*
-			switch to-word get-list-type [
+			switch to word! get-list-type [
 				object! [
 					sort/compare dsort* func [a b] [op get in a soc* get in b soc*]
 				]

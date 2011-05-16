@@ -39,10 +39,10 @@ ctx-resize: context [
 	; max-size: ; Same as above
 
 	; Default values - can be changed by external code
-	screen-origin: 50x50 ; Screen origin value if not set (pair! or [pair! pair!])
-	window-origin: 20x20 ; Window face origin value if not set (pair! or [pair! pair!])
-	face-origin:   0x0   ; Face origin value if not set (pair! or [pair! pair!])
-	win-pos:       0x0   ; Internal variable to keep track of the current global offset
+	screen-origin:	50x50 ; Screen origin value if not set (pair! or [pair! pair!])
+	window-origin:	20x20 ; Window face origin value if not set (pair! or [pair! pair!])
+	face-origin:	0x0   ; Face origin value if not set (pair! or [pair! pair!])
+	win-pos:		0x0   ; Internal variable to keep track of the current global offset
 	
 	; Resize helpers
 	;tab-face?:	false    ; This turns true when the tab face was encountered during resize
@@ -136,7 +136,7 @@ ctx-resize: context [
 				right [*fo/x: *fps/x - *mbr/x - *fs/x]       ; Move to right
 			]
 		]
-		; [ ] - win-pos should be set to parent win-pos if we are aligning a subface
+		; [ ] - win-pos should be set to parent win-pos if we are aligning a sub-face
 		if parent [win-pos: win-pos + (fo: *fo) + edge-size parent]
 		debug-align :face
 		set-faces face

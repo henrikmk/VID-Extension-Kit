@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Console Style"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2010 - HMK Design"
-	Filename: %vid-console.r
+	Filename: %console.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

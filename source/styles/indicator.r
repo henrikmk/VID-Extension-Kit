@@ -3,7 +3,7 @@ REBOL [
 	Short: "Indicators for VID"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-indicator.r
+	Filename: %indicator.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Text Editing Context"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-ctx-text.r
+	Filename: %ctx-text.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

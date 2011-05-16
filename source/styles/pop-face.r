@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Pop Face"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-pop-face.r
+	Filename: %pop-face.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

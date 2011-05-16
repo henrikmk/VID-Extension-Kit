@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Buttons"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-button.r
+	Filename: %button.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -268,7 +268,7 @@ stylize/master [
 	COLOR-BUTTON: BUTTON 30x30 with [
 		font: none
 		text: none
-		spring: none
+		spring: [bottom right]
 		append init [
 			access/set-face* self any [color black]
 			color: svvc/action-color

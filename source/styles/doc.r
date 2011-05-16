@@ -3,7 +3,7 @@ REBOL [
 	Short: "DOC style"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2010 - HMK Design"
-	Filename: %vid-doc.r
+	Filename: %doc.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

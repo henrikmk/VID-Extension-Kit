@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Dialog Button Groups"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-dialog-buttons.r
+	Filename: %dialog-buttons.r
 	Version: 0.0.2
 	Type: 'script
 	Maturity: 'unstable

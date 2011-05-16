@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Panel"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2008 - HMK Design"
-	Filename: %vid-panel.r
+	Filename: %panel.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -72,7 +72,7 @@ stylize/master [
 				out/style:			'pane
 				set-parent-faces/parent out face
 			] [
-				probe disarm err
+;				probe disarm err
 				throw make error! reform ["Layout error in pane" word]
 			]
 			repend face/panes [word out]
@@ -178,17 +178,17 @@ stylize/master [
 		]
 		; adds a pane to the panel
 		add-pane: func [face word pane] [
-			face/panel-face/add-pane face word pane
+			face/panel-face/add-pane face/panel-face word pane
 			face/adjust-scrollers face
 		]
 		; remove a pane from the panel
 		remove-pane: func [face word] [
-			face/panel-face/remove-pane face word
+			face/panel-face/remove-pane face/panel-face word
 			face/adjust-scrollers face
 		]
 		; moves a pane in the panel
 		move-pane: func [face word offset] [
-			face/panel-face/move-pane face word offset
+			face/panel-face/move-pane face/panel-face word offset
 			face/adjust-scrollers face
 		]
 		; resizes the pane in the panel according to its own content

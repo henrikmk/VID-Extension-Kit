@@ -3,7 +3,7 @@ REBOL [
 	Short: "VID Selector"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2008 - HMK Design"
-	Filename: %vid-selector.r
+	Filename: %selector.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -211,6 +211,24 @@ stylize/master [
 	CHOICE: BUTTON font [color: black align: 'left] 150 with [
 		setup: [choice1 "Choice 1" choice2 "Choice 2" choice3 "Choice 3"]
 		feel: svvf/choice
+		; opens and positions the menu list
+		open-choice-face: func [face /local idx y-size] [
+			if all [not face/choice-face? block? face/setup not empty? face/setup] [
+				set-face face/choice-face/pane/1 extract/index face/setup 2 2
+				idx: divide 1 + index? face/data 2
+				face/choice-face/pane/1/selected: to-block idx
+				face/choice-face/pane/1/over: as-pair 1 idx
+				ctx-resize/align-contents face/choice-face none
+				y-size: face/size/y - (second 2 * edge-size face)
+				set-menu-face
+					face
+					face/choice-face
+					as-pair face/size/x (2 * second edge-size face) + divide y-size * length? head face/data 2
+					;-- Using WIN-OFFSET? here, because the parent face may be scrolled
+					add win-offset? face as-pair 0 y-size - (y-size * idx)
+				; [!] - set base tab face to menu-face, but this happens inside set-menu-face
+			]
+		]
 		; need a common resize face here
 		; balancer and resizer
 		access: make access [
@@ -245,16 +263,34 @@ stylize/master [
 					; resize choice-face as well
 				]
 			]
+			key-face*: func [face event] [
+				switch event/key [
+					#" " [  ; space
+						; open and focus list
+						open-choice-face face
+					]
+					#"^M" [ ; enter
+						; open and focus list
+						open-choice-face face
+					]
+					#"^[" [ ; escape
+						
+					]
+				]
+				event
+			]
 		]
 		choice-face: none ; cache of choice layout
 		init: [
 			effect: get in button-skin self load-stock 'arrow-pop color 'effect
+			; the choice face should appear in a separate layout
 			choice-face: layout/tight [
 				space 0 origin 0 caret-list 100x100 fill 1x1
 					on-key [ ; key-face is done before this
 						use [fp pop-face] [
 							fp: face/parent-face ; is this choice-face?
 							pop-face: fp/pop-face
+							probe event/key
 							case [
 								find [up down] event/key [
 									; [ ] - adjustment needs to adhere to current selection rather than it's own up/down scheme
@@ -268,8 +304,9 @@ stylize/master [
 									]
 								]
 								find [#"^M" #" "] event/key [ ; enter, space
-									face/close-choice-face face pop-face
+									set-face pop-face pick pop-face/setup 2 * face/selected/1 - 1
 									do-face pop-face none
+									unset-menu-face pop-face
 								]
 								#"^[" = event/key [ ; escape
 									unset-menu-face pop-face
@@ -278,7 +315,13 @@ stylize/master [
 						]
 					]
 					on-click [
-						face/close-choice-face face face/parent-face/pop-face
+						; perform this action every time the mouse is clicked
+						unset-menu-face face/parent-face/pop-face
+						face/parent-face/choice-face?: false
+					] [
+						; perform this action only when the click happens on a different entry than the current one
+						; happens before ON-CLICK
+						set-face face/parent-face/pop-face pick face/parent-face/pop-face/setup 2 * face/selected/1 - 1
 						do-face face/parent-face/pop-face none
 					]
 					with [
@@ -303,21 +346,20 @@ stylize/master [
 							y-size: pop-face/size/y - (2 * second edge-size pop-face)
 							second pop-face/offset + as-pair 0 y-size - (y-size * face/selected/1)
 						]
-						close-choice-face: func [face pop-face] [
-							set-face pop-face pick pop-face/setup 2 * face/selected/1 - 1
-							unset-menu-face pop-face
-						]
 						select-mode: 'mutex
-						subface: [list-text-cell bold 100 fill 1x0 spring [bottom]]
+						sub-face: [list-text-cell bold 100 fill 1x0 spring [bottom]]
 					]
 			]
-			;dump-face choice-face
+			flag-face choice-face tabbed
+			;dump-face self; choice-face
 			; [ ] - tab-panel causes the offset to be incorrect. perhaps it's really a problem with win-offset and the edge
-			subface: choice-face/pane/1/subface
-			subface/pane/1/real-size: subface/real-size: none
-			subface/pane/1/size: subface/size: size - (2 * edge-size face)
-			subface/pane/1/font: make self/font []
-			access/setup-face* self setup
+			sub-face: choice-face/pane/1/sub-face
+			sub-face/pane/1/real-size: sub-face/real-size: none
+			sub-face/pane/1/size: sub-face/size: size - (2 * edge-size face)
+			sub-face/pane/1/font: make self/font []
+			if setup [
+				access/setup-face* self setup
+			]
 			;ctx-resize/do-align choice-face self none
 		]
 	]

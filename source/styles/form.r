@@ -3,7 +3,7 @@ REBOL [
 	Short: "Form Related Styles"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-form.r
+	Filename: %form.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
