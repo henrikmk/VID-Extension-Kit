@@ -94,7 +94,7 @@ foreach file [
 ][
 	;-- Include all files
 	unless tag? file [
-		do to-file join %../source/styles/ join file '.r
+		do to-file join %../source/styles/ join probe file '.r
 	]
 ]
 
