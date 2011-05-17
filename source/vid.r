@@ -157,6 +157,10 @@ draw-body: context [
 	state:				none	; Which DRAW block to currently use (word)
 	template:			none	; DRAW block which contains the template of the face
 
+	; fonts
+	font:				none	; Font object
+	para:				none	; Paragraph object
+
 	; colors
 	material:			none	; material gradient
 	background:			none	; background color
@@ -172,6 +176,7 @@ draw-body: context [
 	outer:				none	; the four outer corners in clock wise direction of the drawing (block)
 	inner:				none	; the four inner corners in clock wise direction of the drawing (block)
 	center:				0x0		; the center of the drawing (pair)
+	size:				0x0		; the full size of the face (pair)
 	image-outer:		none	; the four outer positions in clock wise direction of the upper left position of the image (block)
 	image-inner:		none	;
 	image-center:		0x0		; the position that is the upper left corner of the draw image, if centered (pair)

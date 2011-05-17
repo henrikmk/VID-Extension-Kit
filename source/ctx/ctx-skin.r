@@ -51,17 +51,11 @@ set 'make-skin func [skin [object!]] [
 			set parent-name opt word!
 			set content opt block!
 			(
-				content: make object! either content [content][[]]
-				if parent-name [
-					parent: select ctx-surface/surfaces parent-name
-					either parent [
-						parent: make parent []
-						content: make parent content
-					][
-						make error! reform ["Unknown skin parent:" parent-name]
-					]
+				either parent-name [
+					make-surface/parent name content parent-name
+				][
+					make-surface name content
 				]
-				make-surface name content
 			)
 		]
 	]

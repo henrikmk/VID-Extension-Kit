@@ -38,8 +38,16 @@ surface: make object! [
 ]
 
 ; creates a new surface or updates an existing one
-set 'make-surface func [name data] [
+set 'make-surface func [name data /parent parent-name] [
 	name: to-word name
+	case [
+		block? data [data: make object! data]
+		none? data [data: make object! []]
+	]
+	if parent [
+		parent: select surfaces parent-name
+		data: make parent data
+	]
 	either current: find surfaces name [
 		change next current make second current data
 	][
