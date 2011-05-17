@@ -151,6 +151,33 @@ text-body: context [
 	highlight-end:		none	; highlight end index in text, from system/view (none or string)
 ]
 
+draw-body: context [
+	; draw blocks
+	draw:				none	; DRAW block or a block of words paired with DRAW blocks (none or block)
+	state:				none	; Which DRAW block to currently use (word)
+	template:			none	; DRAW block which contains the template of the face
+
+	; colors
+	material:			none	; material gradient
+	background:			none	; background color
+	foreground:			none	; foreground color
+
+	; images
+	draw-image:			none	; image used in DRAW block
+
+	; sizes
+	margin:				0x0		; size of the margin, i.e. distance between outer and inner limits (pair)
+
+	; positions
+	outer:				none	; the four outer corners in clock wise direction of the drawing (block)
+	inner:				none	; the four inner corners in clock wise direction of the drawing (block)
+	center:				0x0		; the center of the drawing (pair)
+	image-outer:		none	; the four outer positions in clock wise direction of the upper left position of the image (block)
+	image-inner:		none	;
+	image-center:		0x0		; the position that is the upper left corner of the draw image, if centered (pair)
+	vertices:			none	; other DRAW coordinates with spring information (block of pairs)
+]
+
 set 'svvc vid-colors
 
 vid-face: make face [ ; root definition
@@ -183,7 +210,9 @@ vid-face: make face [ ; root definition
 	help:					; optional help string
 	user-data: none			; unused user data storage
 	size: none				; size must be none to allow autosizing
+	surface: none			; the name of the surface to use for the draw body
 	text-body: none			; object with info about positions of the text
+	draw-body: none			; object with info about draw blocks in the face
 	flags: []				; option flags
 	edge: make edge [size: 0x0]		; face edge
 	font: make font [style: none color: white align: 'left valign: 'top shadow: 1x1 colors: vid-colors/font-color]
@@ -762,6 +791,7 @@ set 'layout func [
 			new/styles: styles
 			new/flags: exclude new/flags state-flags
 			new/text-body: make text-body []
+			new/draw-body: make draw-body [image-inner: copy image-outer: copy inner: copy outer: array/initial 4 0x0]
 			new/actors: make new/actors []
 			unless flag-face? new fixed [new/offset: where]
 			grow-facets new facets
@@ -774,6 +804,7 @@ set 'layout func [
 				new/parent-face: none ; used to flag that child needs to be parent
 				if :var [new/var: bind to-word :var :var] ; New 1.2.30
 				do bind new/init in new 'init
+				if get in new 'surface [set-surface new new/surface]
 				if new/parent-face [new: new/parent-face]
 				if :var [set :var new var: none] ; New 1.2.30
 				append pane new

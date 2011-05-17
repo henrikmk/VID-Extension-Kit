@@ -21,6 +21,7 @@ REBOL [
 	Keywords: []
 ]
 
+; [ ] - should be part of the skins
 foreach file read %../resources/images/ [
 	set to-word to-string file load join %../resources/images/ file
 ]
@@ -31,6 +32,9 @@ foreach file [
 	ctx/ctx-vid-debug	; debugging
 	feel				; feel and access contexts for various styles
 	ctx/ctx-text		; text editing core
+	ctx/ctx-draw		; Face DRAW core
+	ctx/ctx-surface		; SURFACE core
+	ctx/ctx-skin		; SKIN core
 	funcs				; face navigation functions
 	<layout>			; (unused)
 	image-stock			; all image bitmaps
@@ -93,3 +97,10 @@ foreach file [
 		do to-file join %../source/styles/ join file '.r
 	]
 ]
+
+;-- Skins
+foreach file read %../resources/skins/ [
+	if #"/" = last file [read-skin join %../resources/skins/ file]
+]
+
+load-skin 'standard

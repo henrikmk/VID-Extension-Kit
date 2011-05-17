@@ -50,6 +50,6 @@ view make-window [
 	rotary
 	disable ; rotary does not respond to disable
 	return
-	;label "Tab Selector"
-	;tab-selector return ; draw-image fail
+	label "Tab Selector"
+	tab-selector return ; draw-image fail
 ]

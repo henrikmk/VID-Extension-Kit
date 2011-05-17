@@ -59,6 +59,9 @@ foreach file [
 	ctx/ctx-vid-debug	; debugging
 	feel				; feel and access contexts for various styles
 	ctx/ctx-text		; text editing core
+	ctx/ctx-draw		; Face DRAW core
+	ctx/ctx-surface		; SURFACE core
+	ctx/ctx-skin		; SKIN core
 	funcs				; face navigation functions
 	<layout>			; (unused)
 	image-stock			; all image bitmaps
@@ -121,6 +124,11 @@ foreach file [
 		add-file to-file join %../source/styles/ join file '.r
 	]
 ]
+
+;-- Skins
+; need to load all skins as static files. They don't take up much memory.
+; we have a SKINS block for this
+
 
 make-dir/deep %../release/
 

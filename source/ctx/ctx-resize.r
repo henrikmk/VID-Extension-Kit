@@ -283,6 +283,8 @@ ctx-resize: context [
 		resize-contents face n-diff
 		; Perform text adjustments to face due to new size
 		ctx-text/set-text-body face face/text
+		; Perform draw adjustments to face due to new size
+		ctx-draw/resize-draw-body face
 		act-face face none 'on-resize
 		if face/parent-face [win-pos: win-pos - fo - edge-size face/parent-face]
 	]
@@ -342,6 +344,8 @@ ctx-resize: context [
 						face/size: last-size + size
 						; Recalculate text body if present
 						ctx-text/set-text-body face face/text
+						; Recaclulate draw body if present
+						ctx-draw/resize-draw-body face
 						; Resize the contents, copied here to prevent looping
 						if object? face/pane [do-resize face/pane size]
 						if block? face/pane [foreach fc face/pane [do-resize fc size]]

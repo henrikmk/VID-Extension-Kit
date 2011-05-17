@@ -50,4 +50,19 @@ stylize/master [
 			clear-face*: func [face] []
 		]
 	]
+
+	DRAWING: IMAGE with [
+		spring: none
+		access: make access [
+			set-face*: func [face value] [
+				face/draw-body/draw: value
+				ctx-draw/set-draw-body face
+				ctx-draw/bind-draw-body face
+			]
+		]
+		append init [
+			access/set-face* self second :action
+			action: none
+		]
+	]
 ]
