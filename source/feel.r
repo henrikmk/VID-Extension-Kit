@@ -27,6 +27,7 @@ svvf: system/view/vid/vid-feel: context [
 	sensor: make face/feel [
 		cue: blink: none
 		engage: func [face action event][
+			face/event: action
 			switch action [
 				time [unless face/state [face/blinker: not face/blinker act-face face event 'on-time]]
 				down [face/state: on]
@@ -36,6 +37,7 @@ svvf: system/view/vid/vid-feel: context [
 				over [face/state: on]
 				away [face/state: off]
 			]
+			; state and event is used here to manage state of button, but we do not set draw-body here
 			cue face action
 			show face
 		]
@@ -43,11 +45,13 @@ svvf: system/view/vid/vid-feel: context [
 
 	hot: make sensor [
 		over: func [face action event][
-			if all [face/font face/font/colors][
-				face/font/color: pick face/font/colors not action
-				show face
-				face/font/color: first face/font/colors
-			]
+			face/event: pick [over away] action
+			show face
+			;if all [face/font face/font/colors][
+			;	face/font/color: pick face/font/colors not action
+			;	show face
+			;	face/font/color: first face/font/colors
+			;]
 		]
 ;		cue: func [face action][
 ;			if all [face/font face/font/colors][face/font/color: pick face/font/colors not face/state]
@@ -146,32 +150,10 @@ svvf: system/view/vid/vid-feel: context [
 	]
 
 	button: make hot [
-		redraw: func [face act pos /local state] [
-			if all [face/texts face/texts/2] [
-				face/text: either face/state [face/texts/2][face/texts/1]
+		redraw: func [face act pos] [
+			if act = 'draw [
+				ctx-draw/set-draw-body face
 			]
-			if face/images [
-				; this should be done with DRAW entirely, as IMAGE is not a good idea in general here
-				; the problem is that DRAW is not always available or may change between types
-				; we can't place an image with offset using VIEW, so this has to work with DRAW instead
-				; this means that any call to FACE/IMAGE must produce a DRAW block instead
-				set-image face
-					either all [in face 'states block? face/states] [
-						pick face/images index? face/states
-					][
-						either face/state [face/images/2][face/images/1]
-					]
-				;if all [face/colors face/effect find face/effect 'colorize][
-				;	change next find face/effect 'colorize pick face/colors not face/state
-				;]
-			]
-			unless flag-face? face disabled [
-				if face/edge [face/edge/effect: pick [ibevel bevel] face/state]
-			]
-			state: either not face/state [face/blinker][true]
-;				if face/colors [face/color: pick face/colors not state]
-;				if face/effects [face/effect: pick face/effects not state]
-;			]
 		]
 		cue: none
 	]
@@ -215,6 +197,7 @@ svvf: system/view/vid/vid-feel: context [
 
 	toggle: make button [
 		engage: func [face action event][
+			face/event: action
 			if find [down alt-down] action [
 				if face/related [
 					foreach item face/parent-face/pane [

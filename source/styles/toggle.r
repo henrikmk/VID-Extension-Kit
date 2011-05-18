@@ -28,6 +28,7 @@ stylize/master [
 		feel: svvf/toggle
 		keep: true
 		access: ctx-access/toggle
+		surface: 'toggle
 	]
 
 	; TOGGLE that uses images

@@ -57,7 +57,6 @@ stylize/master [
 			set-face*: func [face value] [
 				face/draw-body/draw: value
 				ctx-draw/set-draw-body face
-				ctx-draw/bind-draw-body face
 			]
 		]
 		append init [

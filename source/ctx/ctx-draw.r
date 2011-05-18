@@ -29,72 +29,91 @@ ctx-draw: context [
 ; [x] - method to change state, possibly from face/state or face/data
 ; [!] - method to bind DRAW blocks on layout, possibly after init, and do this only once
 ; [x] - never restate the DRAW blocks
-; [!] - test with some face to do this
+; [x] - test with some face to do this
 ; [ ] - figure out when to use SET-DRAW-BODY, possibly through FEEL
-; [ ] - apply template to a DRAW block
+; [x] - apply template to a DRAW block
 ; [x] - need way to set margin easily. possibly the same as setting color and skin information
 ;       we need to do this currently by appending to init
 ; [ ] - use color information in draw body as well
 ; [x] - use draw body as a skin
 ; [x] - allow loading of skin at include time
 ; [?] - allow loading of skin at build time
-; [ ] - find a way to use states to switch between images instead of draw blocks
+; [x] - find a way to use states to switch between images instead of draw blocks
 ; [x] - use set-draw-body during or after init automatically
 ; [ ] - bind FACE/EFFECT block to DRAW-BODY for current draw block
-; [ ] - allow flexing 
+; [ ] - allow flexing draw between lines and no lines as the corners won't be usable for both at the same time
+; [x] - create FEEL object that uses DRAW-BODY states for mouse over, up, down
+; [ ] - allow over, up, down states for DRAW and substates or frames for each state. the frames are determined using the states as now.
+; [ ] - determine states using set-draw-body with the FEEL object and frames using SET-DRAW-BODY
+; [ ] - alter BUTTON to use this new scheme
+; [ ] - figure out how to pass event to SET-DRAW-BODY, as FACE/STATE, FACE/STATES and FACE/DATA are normally used
+; [ ] - keep states inside events mapping
+; [ ] - bind during SET-SURFACE instead of inside SET-DRAW-BODY, as it is less intense
+; [x] - support multiple words per block. a problem is that it may be possible to confuse DRAW blocks with state blocks
 
-; determines the draw body from the state of the face
-set-draw-body: func [face /local new-draw-blk state] [
-	; Find the correct state
-	state: case [
-		in face 'states [face/states/1]
-		in face 'state [face/state]
-		true [face/data]
-	]
-	; Find new draw block
-	new-draw-blk:
-		case [
-			none? face/draw-body/draw [
-				none
-			]
-			parse face/draw-body/draw [any [word! block!]] [
-				select face/draw-body/draw state
-			]
-			block? face/draw-body/draw [
-				face/draw-body/draw
-			]
-		]
-	; Establish effect block
-	unless block? face/effect [
-		face/effect: reduce ['draw none 'draw none]
-	]
-	parse face/effect [thru 'draw template-blk: [none! | block!] thru 'draw draw-blk: [none! | block!]]
-	; Apply template
-	if face/draw-body/template [
-		change/only template-blk face/draw-body/template
-	]
-	; Apply draw block
-	if new-draw-blk [
-		change/only draw-blk new-draw-blk
-	]
-	; Apply font and para changes
-	foreach type [font para] [
-		if get in face/draw-body type [
-			foreach [word value] get in face/draw-body type [
-				set in get in face type word value
-			]
-		]
+; returns the required value from a surface facet or the draw-body itself by the action for use in the draw-body
+get-surface-facet: func [face facet /local surface value word] [
+	surface: any [face/draw-body/surface face/draw-body]
+	facet: all [in surface facet get in surface facet]
+	; return none, value or action selected value
+	either all [
+		block? facet
+		parse facet [any [some word! [block! | object!]]]
+	] [
+		parse any [find facet face/event facet] [any word! set value any-type!]
+		value
+	][
+		facet
 	]
 ]
 
-; binds draw body vertices to drawing. do this every time the FACE/DRAW-BODY/DRAW block changes
-bind-draw-body: func [face] [
-	if face/draw-body/template [
-		bind face/draw-body/template face/draw-body
+; determines the draw body from the action for the face and the state of the face
+set-draw-body: func [face /local value] [
+	foreach facet [font para margin colors draw-image template draw] [
+		value: get-surface-facet face facet
+		; Apply facet values to draw-body from surface
+		set in face/draw-body facet value
+		; Apply facet value to face from surface
+		switch facet [
+			font [
+				if object? value [
+					foreach word words-of value [
+						set in face/font word value/:word
+					]
+				]
+			]
+			para [
+				if object? value [
+					foreach word words-of value [
+						set in face/para word value/:word
+					]
+				]
+			]
+			template [
+				; Establish effect block
+				unless block? face/effect [
+					face/effect: reduce ['draw none 'draw none]
+				]
+				parse face/effect [
+					thru 'draw template-blk: [none! | block!]
+					thru 'draw draw-blk: [none! | block!]
+				]
+				; Apply template
+				if value [
+					change/only template-blk value
+					bind template-blk face/draw-body
+				]
+			]
+			draw [
+				; Apply draw block
+				if value [
+					change/only draw-blk value
+					bind draw-blk face/draw-body
+				]
+			]
+		]
 	]
-	if face/draw-body/draw [
-		bind face/draw-body/draw face/draw-body
-	]
+	face/event: none
 ]
 
 ; resizes all vertices in the DRAW body

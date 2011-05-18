@@ -29,8 +29,8 @@ stylize/master [
 		feel: svvf/button
 		effects: none
 		depth: 128
-		colors: svvc/action-colors
 		disabled-colors: none
+		surface: 'frame
 		access: ctx-access/button
 		doc: [
 			info: "Rectangular, rendered buttons"
@@ -42,17 +42,9 @@ stylize/master [
 			image: ["button background" "background when button down"]
 		]
 		init: [
-			edge: make edge []
 			if font [
-				font/color: first font/colors
 				;-- Adjust size/x, if size/x = -1
 				size: face-size-from-text self 'x
-			]
-			if color [colors: reduce [color color]]
-			;-- Average colors for disabled colors
-			disabled-colors: reduce [
-				to-tuple array/initial 3 round ((colors/1/1 + colors/1/2 + colors/1/3) / 3)
-				to-tuple array/initial 3 round ((colors/2/1 + colors/2/2 + colors/2/3) / 3)
 			]
 		]
 	]

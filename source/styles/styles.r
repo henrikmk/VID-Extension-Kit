@@ -103,12 +103,12 @@ stylize/master [
 	RADIO: RADIO 24x24
 	CHOICE: CHOICE svvc/action-color edge normal-edge with [font: make font [align: 'left color: black]]
 	ROTARY: ROTARY svvc/action-color edge [color: 160.160.160 effect: 'bevel]
-	TOGGLE: TOGGLE svvc/action-color edge normal-edge
+;	TOGGLE: TOGGLE svvc/action-color edge normal-edge
 	STATE: STATE svvc/action-color edge normal-edge
 	SELECTOR-TOGGLE: SELECTOR-TOGGLE svvc/action-color edge normal-edge
 	MULTI-SELECTOR-TOGGLE: MULTI-SELECTOR-TOGGLE svvc/action-color edge narrow-edge
 	ARROW: ARROW svvc/manipulator-color edge normal-edge
-	BUTTON: BUTTON svvc/action-color edge normal-edge
+;	BUTTON: BUTTON svvc/action-color edge normal-edge
 	ACT-BUTTON: BUTTON svvc/action-color edge normal-edge
 	FOLD-BUTTON: FOLD-BUTTON svvc/action-color edge normal-edge
 	HIGHLIGHT-BUTTON: BUTTON svvc/important-color with [font: make font [colors: svvc/important-font-color shadow: 1x1]]

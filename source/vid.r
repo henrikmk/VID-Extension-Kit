@@ -152,19 +152,20 @@ text-body: context [
 ]
 
 draw-body: context [
+	; skin
+	surface:			none	; Which surface is used to generate the draw-body
+	
 	; draw blocks
-	draw:				none	; DRAW block or a block of words paired with DRAW blocks (none or block)
+	draw:				none	; DRAW block (none or block)
 	state:				none	; Which DRAW block to currently use (word)
 	template:			none	; DRAW block which contains the template of the face
 
 	; fonts
-	font:				none	; Font object
-	para:				none	; Paragraph object
+	font:				none	; Font object (object)
+	para:				none	; Paragraph object (object)
 
 	; colors
-	material:			none	; material gradient
-	background:			none	; background color
-	foreground:			none	; foreground color
+	colors:				none	; object with colors from surface (object)
 
 	; images
 	draw-image:			none	; image used in DRAW block
@@ -216,11 +217,12 @@ vid-face: make face [ ; root definition
 	user-data: none			; unused user data storage
 	size: none				; size must be none to allow autosizing
 	surface: none			; the name of the surface to use for the draw body
+	event: none				; the word of the event used to set draw body
 	text-body: none			; object with info about positions of the text
 	draw-body: none			; object with info about draw blocks in the face
 	flags: []				; option flags
 	edge: make edge [size: 0x0]		; face edge
-	font: make font [style: none color: white align: 'left valign: 'top shadow: 1x1 colors: vid-colors/font-color]
+	font: make font [];style: none color: white align: 'left valign: 'top shadow: 1x1 colors: vid-colors/font-color]
 	doc: none				; auto-doc
 	options:				; face options for popup
 	saved-feel:				; temporary storage for face feel
