@@ -50,29 +50,51 @@ ctx-draw: context [
 ; [ ] - keep states inside events mapping
 ; [ ] - bind during SET-SURFACE instead of inside SET-DRAW-BODY, as it is less intense
 ; [x] - support multiple words per block. a problem is that it may be possible to confuse DRAW blocks with state blocks
+; [x] - extend objects in draw body if they are already defined instead of replacing them
+; [ ] - return value in GET-SURFACE-FACET both on event and on face state
 
-; returns the required value from a surface facet or the draw-body itself by the action for use in the draw-body
-get-surface-facet: func [face facet /local surface value word] [
-	surface: any [face/draw-body/surface face/draw-body]
+
+; returns the required value from a surface facet by the state and event for use in the draw-body
+get-surface-facet: func [face facet [word!] /local event state surface value word] [
+	surface: face/draw-body/surface
 	facet: all [in surface facet get in surface facet]
-	; return none, value or action selected value
-	either all [
-		block? facet
-		parse facet [any [some word! [block! | object!]]]
-	] [
-		parse any [find facet face/event facet] [any word! set value any-type!]
-		value
-	][
-		facet
+	unless paren? facet [return facet]
+	state: all [in face 'state word? face/state face/state]
+	event: all [in face 'event word? face/event face/event]
+	b: v: none
+	out: make object! [] ; object for assembly of completed value
+	word-rule: reduce [
+		if event [to-lit-word event]
+		if all [event state] ['|]
+		if state [to-lit-word state]
 	]
+	remove-each val word-rule [none? val]
+	object-rule: [v: object! (out: make out v/1)]
+	first-value-rule: [(any [v parse b [some word! object-rule]] v: none)]
+	assemble-rule: [
+		b: any [
+			some [
+				word-rule any word! [object-rule | into assemble-rule first-value-rule]
+				| word!
+			]
+			[object! | paren!]
+		] first-value-rule
+	]
+	parse facet assemble-rule
+	out
 ]
 
 ; determines the draw body from the action for the face and the state of the face
 set-draw-body: func [face /local value] [
 	foreach facet [font para margin colors draw-image template draw] [
 		value: get-surface-facet face facet
-		; Apply facet values to draw-body from surface
-		set in face/draw-body facet value
+		; Apply facet values to draw-body from surface.
+		set in face/draw-body facet
+			either all [object? value object? get in face/draw-body facet] [
+				make get in face/draw-body facet value
+			][
+				value
+			]
 		; Apply facet value to face from surface
 		switch facet [
 			font [

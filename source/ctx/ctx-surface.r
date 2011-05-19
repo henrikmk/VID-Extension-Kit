@@ -43,14 +43,25 @@ surface: make object! [
 ; creates a new surface or updates an existing one
 set 'make-surface func [name data /parent parent-name /local new-surface] [
 	name: to-word name
+	; Shape data
 	case [
-		block? data [data: make object! data]
+		block? data [data: construct data]
 		none? data [data: make object! []]
 	]
+	; Find parent and extend current with parent
 	if parent [
 		parent: select surfaces parent-name
-		data: make parent data
+		; Add missing parent words to data
+		data: construct/with body-of data parent
+		foreach facet words-of parent [
+			parent-facet: get in parent facet
+			data-facet: get in data facet
+			if paren? parent-facet [
+				insert data-facet parent-facet
+			]
+		]
 	]
+	; Determine whether to update a surface or append a new one
 	new-surface:
 		either current: find surfaces name [
 			first back change next current make second current data
@@ -58,12 +69,15 @@ set 'make-surface func [name data /parent parent-name /local new-surface] [
 			repend surfaces [name make surface data]
 			last surfaces
 		]
-	foreach word words-of new-surface [
-		if find [font para colors] word [
+	; Convert word/block pairs to word/object pairs
+	change-blocks: [any [some word! [into change-blocks | change-rule]]]
+	change-rule: [value: block! (change value make object! value/1) | object!]
+	foreach facet words-of new-surface [
+		if find [font para colors] facet [
 			any [
-				not block? get in new-surface word
-				parse get in new-surface word [any [some word! [val: block! (change val make object! first val) | object!]]]
-				set in new-surface word make object! get in new-surface word
+				not paren? get in new-surface facet
+				parse get in new-surface facet change-blocks
+				set in new-surface facet make object! get in new-surface facet
 			]
 		]
 	]

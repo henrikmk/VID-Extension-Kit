@@ -213,7 +213,8 @@ svvf: system/view/vid/vid-feel: context [
 						]
 					]
 				]
-				face/data: face/state: not face/state
+				face/data: not face/data
+				face/state: pick [on off] face/data
 				either action = 'down [
 					do-face face face/data
 					act-face face event 'on-click
@@ -248,10 +249,6 @@ svvf: system/view/vid/vid-feel: context [
 			]
 		]
 	]
-
-	;tog: make btn [
-	;	engage: get in toggle 'engage
-	;]
 
 	rotary: make hot [
 		redraw: func [face act pos] [

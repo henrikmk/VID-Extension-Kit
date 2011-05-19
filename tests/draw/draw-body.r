@@ -28,6 +28,6 @@ do %../../build/include.r
 clear ctx-vid-debug/debug
 
 view make-window [
-	b: button "Test" spring [bottom]
-	t: toggle "Test" spring [right] ; fix shared draw block problem
+	b: button "Button Test" spring [bottom]
+	t: toggle "Toggle Test" spring [right]
 ]

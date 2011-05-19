@@ -1,8 +1,8 @@
 base: [
-	margin:		2x2
+	margin: 2x2
 ]
 frame: base [
-	colors: [
+	colors: (
 		up alt-up [
 			shine: 240.240.240
 			background: 200.200.200
@@ -14,8 +14,7 @@ frame: base [
 			shadow: 240.240.240
 		]
 		; need some kind of drag event
-		; allow overlapping colors here, as this is required for toggle to get an action color
-	]
+	)
 	template: [
 		anti-alias off
 		pen none
@@ -26,13 +25,17 @@ frame: base [
 		fill-pen colors/background
 		box inner/1 inner/5 1
 	]
-	font: [
+	font: (
 		up alt-up away [color: black]
 		over [color: blue]
 		down alt-down [color: white]
-	]
+	)
 ]
 toggle: frame [
+	colors: (
+		on [action: green]
+		off [action: black]
+	)
 	draw: [
 		anti-alias off
 		pen none
@@ -40,7 +43,7 @@ toggle: frame [
 		triangle 12x2 2x12 2x2
 		fill-pen colors/shadow
 		triangle 11x2 2x11 2x2
-		fill-pen green
+		fill-pen colors/action
 		triangle 10x2 2x10 2x2
 	]
 ]
@@ -53,12 +56,12 @@ choice: right-icon [
 	draw-image:	load-stock 'arrow-pop
 ]
 tab: base [
-	draw: [
+	draw: (
 		inactive [
 			
 		]
 		active [
 			
 		]
-	]
+	)
 ]
