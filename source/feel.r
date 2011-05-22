@@ -30,14 +30,13 @@ svvf: system/view/vid/vid-feel: context [
 			face/event: action
 			switch action [
 				time [unless face/state [face/blinker: not face/blinker act-face face event 'on-time]]
-				down [face/state: on]
-				alt-down [face/state: on]
-				up   [if face/state [do-face face face/text act-face face event 'on-click] face/state: off]
-				alt-up [if face/state [do-face-alt face face/text act-face face event 'on-alt-click] face/state: off]
-				over [face/state: on]
-				away [face/state: off]
+				down [face/state: 'on]
+				alt-down [face/state: 'on]
+				up   [if face/state = 'on [do-face face face/text act-face face event 'on-click] face/state: 'off]
+				alt-up [if face/state = 'on [do-face-alt face face/text act-face face event 'on-alt-click] face/state: 'off]
+				over [face/state: 'on]
+				away [face/state: 'off]
 			]
-			; state and event is used here to manage state of button, but we do not set draw-body here
 			cue face action
 			show face
 		]
@@ -47,15 +46,7 @@ svvf: system/view/vid/vid-feel: context [
 		over: func [face action event][
 			face/event: pick [over away] action
 			show face
-			;if all [face/font face/font/colors][
-			;	face/font/color: pick face/font/colors not action
-			;	show face
-			;	face/font/color: first face/font/colors
-			;]
 		]
-;		cue: func [face action][
-;			if all [face/font face/font/colors][face/font/color: pick face/font/colors not face/state]
-;		]
 	]
 
 	hot-area: make hot [
@@ -88,6 +79,8 @@ svvf: system/view/vid/vid-feel: context [
 	check: make sensor [
 		over: none
 		redraw: func [face act pos][
+			; move this to surface
+			ctx-draw/set-draw-body face
 			act: pick face/images (to integer! face/data) + either face/hover [5] [1 + (2 * to integer! face/state)]
 			set-image either face/pane [face/pane][face] act
 		]
@@ -115,25 +108,25 @@ svvf: system/view/vid/vid-feel: context [
 		]
 		engage: func [face action event][
 			switch action [
-				down [face/state: on]
-				alt-down [face/state: on]
+				down [face/state: 'on]
+				alt-down [face/state: 'on]
 				up [
-					if face/state [
-						face/state: off
+					if face/state = 'on [
+						face/state: 'off
 						reset-related-faces face
 						do-face face face/data: not face/data
 						act-face face event 'on-click
 					]
 				]
 				alt-up [
-					if face/state [
+					if face/state = 'on [
 						do-face-alt face face/text
 						act-face face event 'on-alt-click
 					]
-					face/state: off
+					face/state: 'off
 				]
-				over [face/state: on]
-				away [face/state: off]
+				over [face/state: 'on]
+				away [face/state: 'off]
 			]
 			;cue face action
 			show face
@@ -151,7 +144,7 @@ svvf: system/view/vid/vid-feel: context [
 
 	button: make hot [
 		redraw: func [face act pos] [
-			if act = 'draw [
+			if all [not svv/resizing? act = 'draw] [
 				ctx-draw/set-draw-body face
 			]
 		]
@@ -184,7 +177,7 @@ svvf: system/view/vid/vid-feel: context [
 
 	icon: make hot [
 		redraw: func [face act pos /local state] [
-			if face/pane/edge [face/pane/edge/effect: pick [ibevel bevel] face/state]
+			if face/pane/edge [face/pane/edge/effect: pick [ibevel bevel] 'on = face/state]
 		]
 		cue: none
 	]
@@ -224,13 +217,17 @@ svvf: system/view/vid/vid-feel: context [
 				]
 				show face
 			]
+			if find [up alt-up] action [
+				show face
+			]
 		]
 	]
 
+	; perhaps suitable as a replacement for standard button, so we don't have to deal with on/off being a word
 	state: make button [
 		engage: func [face action event][
 			if find [down alt-down] action [
-				face/state: on
+				face/state: 'on
 				face/states: head face/states
 				face/data: select face/states face/data
 				if none? face/data [face/data: pick face/states not to-logic face/virgin]
@@ -245,7 +242,7 @@ svvf: system/view/vid/vid-feel: context [
 				show face
 			]
 			if find [up alt-up] action [
-				face/state: off
+				face/state: 'off
 			]
 		]
 	]

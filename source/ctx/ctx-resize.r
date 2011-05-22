@@ -345,7 +345,7 @@ ctx-resize: context [
 						; Recalculate text body if present
 						ctx-text/set-text-body face face/text
 						; Recaclulate draw body if present
-						ctx-draw/resize-draw-body face
+						;ctx-draw/resize-draw-body face
 						; Resize the contents, copied here to prevent looping
 						if object? face/pane [do-resize face/pane size]
 						if block? face/pane [foreach fc face/pane [do-resize fc size]]
@@ -362,7 +362,9 @@ ctx-resize: context [
 	handler: insert-event-func [
 		if all [not event/face/parent-face 'resize = event/type] [
 			; used during user window resize
+			svv/resizing?: true ; use this to prevent a face redraw from occurring here
 			resize-face event/face event/face/size
+			svv/resizing?: false
 			set-focus-ring event/face
 		]
 		event

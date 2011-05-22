@@ -51,44 +51,68 @@ ctx-draw: context [
 ; [ ] - bind during SET-SURFACE instead of inside SET-DRAW-BODY, as it is less intense
 ; [x] - support multiple words per block. a problem is that it may be possible to confuse DRAW blocks with state blocks
 ; [x] - extend objects in draw body if they are already defined instead of replacing them
-; [ ] - return value in GET-SURFACE-FACET both on event and on face state
+; [x] - return value in GET-SURFACE-FACET both on event and on face state
+; [ ] - more solid indication of initial state
+; [x] - debug output of event and state
+b: v: none
 
+; Surface parse rules
+word-rule: none
 
-; returns the required value from a surface facet by the state and event for use in the draw-body
-get-surface-facet: func [face facet [word!] /local event state surface value word] [
-	surface: face/draw-body/surface
-	facet: all [in surface facet get in surface facet]
-	unless paren? facet [return facet]
-	state: all [in face 'state word? face/state face/state]
-	event: all [in face 'event word? face/event face/event]
-	b: v: none
-	out: make object! [] ; object for assembly of completed value
-	word-rule: reduce [
-		if event [to-lit-word event]
-		if all [event state] ['|]
-		if state [to-lit-word state]
+; returns a facet value object by state or FALSE if not found
+get-facet-state: func [facet state] [
+	either state [
+		either in facet state [
+			; Return value
+			get in facet state
+		][
+			; When state is not found
+			false
+		]
+	][
+		; Return first facet value
+		second body-of facet
 	]
-	remove-each val word-rule [none? val]
-	object-rule: [v: object! (out: make out v/1)]
-	first-value-rule: [(any [v parse b [some word! object-rule]] v: none)]
-	assemble-rule: [
-		b: any [
-			some [
-				word-rule any word! [object-rule | into assemble-rule first-value-rule]
-				| word!
-			]
-			[object! | paren!]
-		] first-value-rule
+]
+
+; sets the facet to a specific value or assembles an object
+set-facet-value: func [facet value 'output] [
+	switch/default facet [
+		font para colors [
+			set output make any [get output object!] value
+		]
+	][
+		; replace value
+		set output value
 	]
-	parse facet assemble-rule
+	get output
+]
+
+; returns a value from a surface facet by state and event
+get-surface-facet: func [face facet state event /local event-word state-word out] [
+	facet: to-lit-word facet						; always a word
+	event-word: if word? event [to-lit-word event]	; NONE or word
+	state-word: to-lit-word state					; always a word
+	out: none										; output value
+	first-state-rule: [first-state: (event-word: to-lit-word either word? event [event][first-state/1])]
+	value-rule: [set value any-type! (set-facet-value facet value out)]
+	word-rule: [[thru state-word | thru event-word] any [state-rule | word! | value-rule to end]]
+	state-rule: ['state into [first-state-rule any [word-rule | state-rule | skip]]]
+	facet-rule: [thru facet [state-rule | value-rule]]
+	parse face/surface [any facet-rule]
 	out
 ]
 
-; determines the draw body from the action for the face and the state of the face
-set-draw-body: func [face /local value] [
+; determines the draw body from face surface and the state
+set-draw-body: func [face /local state event value] [
+	; Gather state information
+	state: all [in face 'state word? face/state face/state]
+	event: all [in face 'event word? face/event face/event]
+	if find ctx-vid-debug/debug 'draw-body [print ["State:" state "Event:" event]]
 	foreach facet [font para margin colors draw-image template draw] [
-		value: get-surface-facet face facet
-		; Apply facet values to draw-body from surface.
+		; Obtain value from surface facet
+		value: get-surface-facet face facet state event
+		; Apply surface facet to draw-body facet
 		set in face/draw-body facet
 			either all [object? value object? get in face/draw-body facet] [
 				make get in face/draw-body facet value
@@ -97,17 +121,10 @@ set-draw-body: func [face /local value] [
 			]
 		; Apply facet value to face from surface
 		switch facet [
-			font [
+			font para [
 				if object? value [
 					foreach word words-of value [
-						set in face/font word value/:word
-					]
-				]
-			]
-			para [
-				if object? value [
-					foreach word words-of value [
-						set in face/para word value/:word
+						set in face/:facet word value/:word
 					]
 				]
 			]
@@ -139,7 +156,7 @@ set-draw-body: func [face /local value] [
 ]
 
 ; resizes all vertices in the DRAW body
-resize-draw-body: func [face /local fd fdo fdi] [
+resize-draw-body: func [face /local fd fdo fdi fdd fdds] [
 	any [fd: face/draw-body return none]
 	fdo: fd/outer
 	fdi: fd/inner
@@ -191,7 +208,7 @@ resize-draw-body: func [face /local fd fdo fdi] [
 	]
 	fd/image-center: either image? fdd [face/size - 1 - fdd/size / 2][fd/center]
 	; go through all vertices for spring information
-	face/draw-body/vertices
+	fd/vertices
 ]
 
 ]

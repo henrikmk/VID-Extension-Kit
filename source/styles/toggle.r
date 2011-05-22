@@ -26,9 +26,9 @@ stylize/master [
 	TOGGLE: BUTTON with [
 		text: "Toggle"
 		feel: svvf/toggle
+		surface: 'toggle
 		keep: true
 		access: ctx-access/toggle
-		surface: 'toggle
 	]
 
 	; TOGGLE that uses images

@@ -77,6 +77,7 @@ svv: system/view/vid: context [
 
 verbose: off
 warn: off
+resizing?: false
 
 word-limits: none
 
@@ -811,7 +812,7 @@ set 'layout func [
 				new/parent-face: none ; used to flag that child needs to be parent
 				if :var [new/var: bind to-word :var :var] ; New 1.2.30
 				do bind new/init in new 'init
-				if get in new 'surface [set-surface new new/surface]
+				if get in new 'surface [set-surface new]
 				if new/parent-face [new: new/parent-face]
 				if :var [set :var new var: none] ; New 1.2.30
 				append pane new

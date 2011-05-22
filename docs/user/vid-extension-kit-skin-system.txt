@@ -1,0 +1,229 @@
+VID Extension Kit Skin System
+
+===Introduction
+
+The skin system in the VID Extension Kit works by applying skin information to faces, such as draw blocks, colors, images, etc. as they would appear in different states. This means for example that if a button is pressed, a separate DRAW block can be used to draw the face, for the period of time, where the left mouse button is pressed.
+
+The relation between skins and faces is not 1:1, which means that several faces can share the same skin and the skin information is not tied to the face, as skins are stored as separate resources.
+
+Between the skin and the face, a number of concepts are used to translate skin information to something that the face can use.
+
+In the sections below, each concept is described.
+
+===Concept
+
+---Skin
+
+A SKIN is a list of surfaces, images, colors, etc.
+
++++Functions
+
+:make-skin - Parse the skin and build images, colors and surfaces in that order.
+
+:load-skin - Loads a skin from the skin stock in memory into the surfaces list.
+
+:read-skin - Reads a skin from disk, using a specific file structure and appends it to the skin stock.
+
+---Surfaces
+
+SURFACES are a list of objects that contain information about how a face should appear in different states. The list of surfaces is updated every time a new skin is loaded.
+
+Surfaces are inherited, so if you create a base surface, a child may contain changed or additional facets.
+
+One surface may have several children. Surfaces may only have one direct parent, but can have any number of ancestors.
+
+Surfaces are described in the <tt>surfaces.r</tt> file by a dialect, starting with the base surface. The dialect is described in a separate chapter
+
++++Functions
+
+...make-surface
+
+This creates a surface object using the surface dialect. A surface description may either stand alone or refer to a parent. This function is used, when loading a skin from the skin stock.
+
+Each surface is an object that contains <strong>surface facets</strong>, and these facets are supported:
+
+:colors - The colors are a block of tuples with a set-word! name. The colors are bound to the TEMPLATE and DRAW blocks.
+
+:margin - This describes the vertical and horizontal distance in pixels between INNER and OUTER edges of the draw blocks.
+
+:template - This is the background DRAW block.
+
+:draw - This is the foreground DRAW block.
+
+:font - This contains FONT object changes.
+
+:para - This contains PARA object changes.
+
+Some maintenance facets:
+
+:parent - This is a word which describes the parent of this face and is used when combining surfaces for the draw body object.
+
+Example:
+
+	make-surface/parent
+		'frame
+		[
+			colors: (
+				up alt-up [
+					shine: 240.240.240
+					background: 200.200.200
+					shadow: 140.140.140
+				]
+				down alt-down [
+					shine: 140.140.140
+					background: 100.100.100
+					shadow: 240.240.240
+				]
+			)
+			template: [
+				anti-alias off
+				pen none
+				fill-pen colors/shine
+				polygon outer/1 outer/3 inner/3 inner/7 outer/7 outer/1
+				fill-pen colors/shadow
+				polygon outer/3 outer/5 outer/7 inner/7 inner/3 outer/3
+				fill-pen colors/background
+				box inner/1 inner/5 1
+			]
+			font: (
+				up alt-up away [color: black]
+				over [color: blue]
+				down alt-down [color: white]
+			)
+		]
+		'base
+
+...set-surface
+
+This builds a combined surface object from a surface and all of its ancestors. It uses the face to work on as an input argument. The face should contain a word, with the name of the surface to use in FACE/SURFACE. The function then converts that word into the combined surface object.
+
+If the function is called, when FACE/SURFACE is NONE or already is an object, nothing will occur.
+
+When done, it calls the SET-DRAW-BODY function to create draw body information from the state of the face and the new surface object in FACE/SURFACE, so it will have correct appearance, when displayed.
+
+The function is called during layout.
+
+Example:
+
+	face/surface: 'frame
+	set-surface face
+
+---draw-body
+
+The DRAW-BODY is an object that resides inside each face as FACE/DRAW-BODY and describes skin information to be applied to the face for one state. That information is taken from FACE/SURFACE, FACE/STATE and FACE/EVENT.
+
+A facet from the draw-body object is known as a <strong>draw-body facet</strong>. This is to differentiate from a <strong>surface facet</strong>.
+
+The draw-body object also contains coordinate information for resizing DRAW blocks.
+
++++Contents
+
+The content of the DRAW-BODY object is:
+
+:margin - The pixel distance vertically and horizontally between the INNER and OUTER edge of the face, used in the draw block.
+
+:colors - An object of color tuples used in the DRAW and TEMPLATE blocks.
+
+:draw - The DRAW, i.e. foreground draw block. Is visible on top of the TEMPLATE draw block. This block is meant to be bound to the draw body object.
+
+:template - The TEMPLATE, i.e. background draw block. Is visible behind the DRAW draw block. This block is meant to be bound to the draw body object.
+
+:draw-image - An image used in the DRAW or TEMPLATE draw block
+
+:inner - A block of 8 pairs, positioned around the edge of the face minus the distance set by MARGIN, starting from the upper left corner and moving clockwise around the face.
+
+:outer - A block of 8 pairs, positioned around the edge of the face, starting from the upper left corner and moving clockwise around the face.
+
+:center - The center of the face as a pair.
+
+:image-center - The center of the face as a pair, calculating in the size of the DRAW-IMAGE. Used for centering an image.
+
+:image-inner - A block of 8 pairs, positioned around the edge of the face minus the distance set by MARGIN, starting from the upper left corner and moving clockwise around the face. Takes the size of the DRAW-IMAGE into account, so the image can be placed on these points.
+
+:image-outer - A block of 8 pairs, positioned around the edge of the face, starting from the upper left corner and moving clockwise around the face. Takes the size of the DRAW-IMAGE into account, so the image can be placed on these points.
+
+:font - Changes to the font object as used in the face.
+
+:para - Changes to the para object as used in the face.
+
++++Functions
+
+...set-draw-body
+
+This applies surface information to the draw-body object, based on the input states and the combined surface object that exists in FACE/SURFACE.
+
+The input states are set in various places in FEEL objects and are set as FACE/EVENT and FACE/STATE.
+
+:FACE/EVENT - This describes a single word as used with user input, such as when clicking a button, you would have a 'down event. Note that this is <strong>not</strong> an event! object. It is allowed to have this value to be NONE.
+
+:FACE/STATE - This describes the current state of a face, which is described by a word. For example, a TOGGLE might use an 'on and 'off state. This is not to be confused with the built-in values ON and OFF, which map to logic!. The value cannot be NONE.
+
+Whenever FACE/EVENT is NONE, the first value in the facet is used to generate a default.
+
+If FACE/EVENT is NONE and FACE/STATE contains a value, the default is combined with the value that is found for FACE/EVENT.
+
+Whenever FACE/EVENT or FACE/STATE contain values that do not exist for a facet in the surface object, an unset! is returned. This also means that the draw body will not be updated for that particular facet. No error is generated from this action, but it may lead to one of the draw blocks causing a crash, if a color is missing.
+
+...resize-draw-body
+
+This changes coordinate information in the draw-body object and is called only during resize.
+
+---Draw Blocks
+
+DRAW blocks are bound to the draw-body object, so that you can define a draw block statically, and simply use the coordinate words stored in the draw-body. Whenever the coordinates change due to a resize, the draw block does not need to be changed. It simply redraws the draw block in the new dimensions.
+
+There are two draw blocks: TEMPLATE and DRAW. The idea is then that each face will be able to use both draw blocks to draw the background and the foreground of the face. The intent is then that you use the TEMPLATE draw block, to, say, draw the button frame of any kind of button, and then use the DRAW block to draw in details and icons.
+
+The face text is generated by View, so DRAW text is not used for face text.
+
+===Creating a Skin
+
+---Surface Dialect
+
+The surfaces.r file contains a list of surfaces, which is read with READ-SKIN. The content is a dialect.
+
+Example:
+
+	base: [
+		margin: 2x2
+	]
+	frame: base [
+		colors: (
+			up alt-up [
+				shine: 240.240.240
+				background: 200.200.200
+				shadow: 140.140.140
+			]
+			down alt-down [
+				shine: 140.140.140
+				background: 100.100.100
+				shadow: 240.240.240
+			]
+		)
+		template: [
+			anti-alias off
+			pen none
+			fill-pen colors/shine
+			polygon outer/1 outer/3 inner/3 inner/7 outer/7 outer/1
+			fill-pen colors/shadow
+			polygon outer/3 outer/5 outer/7 inner/7 inner/3 outer/3
+			fill-pen colors/background
+			box inner/1 inner/5 1
+		]
+		font: (
+			up alt-up away [color: black]
+			over [color: blue]
+			down alt-down [color: white]
+		)
+	]
+
+Each surface is a name, followed by a block. If a surface has a parent, the block is preceded by the name of that parent surface.
+
++++ Facet Contents
+
+Each facet (margin, font, template, draw) can contain a plain value or a paren!:
+
+:Plain value - This is used directly, and is returned, whenever the particular facet is requested. If the plain value is an object!, it will be combined with its own parent. If not, the child value will be used.
+
+:Paren! - This is recognized as a state block; A block which contains set-words! for states and any other types for values. As shown, several states, such as UP and ALT-UP in the COLORS facet, may share the same value. The paren!s are not evaluated, but are converted to objects at load time.
+

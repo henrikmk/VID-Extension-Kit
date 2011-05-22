@@ -30,7 +30,8 @@ stylize/master [
 		effects: none
 		depth: 128
 		disabled-colors: none
-		surface: 'frame
+		surface: 'button
+		state: 'off
 		access: ctx-access/button
 		doc: [
 			info: "Rectangular, rendered buttons"

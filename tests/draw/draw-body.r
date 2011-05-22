@@ -25,9 +25,16 @@ REBOL [
 
 do %../../build/include.r
 
-clear ctx-vid-debug/debug
+insert clear ctx-vid-debug/debug 'draw-body
 
-view make-window [
-	b: button "Button Test" spring [bottom]
-	t: toggle "Toggle Test" spring [right]
+m: make-window [
+	b1: button "Button Test 1"
+	b2: button "Button Test 2"
+	b3: button "Button Test 3"
+	t1: toggle "Toggle Test 1"
+	t2: toggle "Toggle Test 2"
+	t3: toggle "Toggle Test 3"
+	check
 ]
+
+view m

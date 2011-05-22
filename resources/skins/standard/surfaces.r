@@ -1,9 +1,9 @@
 base: [
-	margin: 2x2
+	margin 2x2
 ]
 frame: base [
-	colors: (
-		up alt-up [
+	colors state [
+		up alt-up away [
 			shine: 240.240.240
 			background: 200.200.200
 			shadow: 140.140.140
@@ -13,9 +13,13 @@ frame: base [
 			background: 100.100.100
 			shadow: 240.240.240
 		]
-		; need some kind of drag event
-	)
-	template: [
+		over [
+			shine: 250.250.250
+			background: 210.210.210
+			shadow: 150.150.150
+		]
+	]
+	template [
 		anti-alias off
 		pen none
 		fill-pen colors/shine
@@ -25,43 +29,57 @@ frame: base [
 		fill-pen colors/background
 		box inner/1 inner/5 1
 	]
-	font: (
+	font state [
 		up alt-up away [color: black]
 		over [color: blue]
 		down alt-down [color: white]
-	)
+	]
+]
+button: frame [
+	colors state [
+		up alt-up away [
+			shine: 240.240.240
+			background: 200.200.200
+			shadow: 140.140.140
+		]
+		down alt-down on [
+			shine: 140.140.140
+			background: 100.100.100
+			shadow: 240.240.240
+		]
+	]
+	font state [
+		up alt-up away [color: black]
+		over [color: blue]
+		down alt-down on [color: white]
+	]
 ]
 toggle: frame [
-	colors: (
-		on [action: green]
-		off [action: black]
-	)
-	draw: [
+	colors state [
+		on [value: green]
+		off [value: black]
+	]
+	draw [
 		anti-alias off
 		pen none
 		fill-pen colors/shine
 		triangle 12x2 2x12 2x2
 		fill-pen colors/shadow
 		triangle 11x2 2x11 2x2
-		fill-pen colors/action
+		fill-pen colors/value
 		triangle 10x2 2x10 2x2
 	]
 ]
 right-icon: frame [
-	draw:		[image image-inner/4 draw-image]
-	font:		[align: 'left]
-	para:		[origin: 4x2]
+	draw [image image-inner/4 draw-image]
+	font [align: 'left]
+	para [origin: 4x2]
 ]
-choice: right-icon [
-	draw-image:	load-stock 'arrow-pop
-]
-tab: base [
-	draw: (
-		inactive [
-			
-		]
-		active [
-			
-		]
-	)
+;choice: right-icon [
+;	draw-image (load-stock 'arrow-pop)
+;]
+check: base [
+	draw: [
+		
+	]
 ]

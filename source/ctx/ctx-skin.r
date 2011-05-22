@@ -44,21 +44,7 @@ set 'make-skin func [skin [object!]] [
 	;---------- Materials
 	; materials are appliable for draw blocks, which means they must be ready before surfaces
 	;---------- Surfaces
-	clear ctx-surface/surfaces
-	parse skin/surfaces [
-		any [
-			set name set-word!
-			set parent-name opt word!
-			set content opt block!
-			(
-				either parent-name [
-					make-surface/parent name content parent-name
-				][
-					make-surface name content
-				]
-			)
-		]
-	]
+	append clear ctx-surface/surfaces skin/surfaces
 ]
 
 ; clears the old skin and loads a new one from the skin stock
