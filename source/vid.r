@@ -153,12 +153,8 @@ text-body: context [
 ]
 
 draw-body: context [
-	; skin
-	surface:			none	; Which surface is used to generate the draw-body
-	
 	; draw blocks
 	draw:				none	; DRAW block (none or block)
-	state:				none	; Which DRAW block to currently use (word)
 	template:			none	; DRAW block which contains the template of the face
 
 	; fonts
@@ -188,7 +184,10 @@ draw-body: context [
 set 'svvc vid-colors
 
 vid-face: make face [ ; root definition
-	state: false			; state of button
+	state: 'off				; state of button
+	states:					; multiple states in order
+	virgin:					; whether the first state in the STATES block can only be invoked once by the user
+	touch:					; current state of UI feedback, such as LMB pressed, dragging, etc.
 	setup:					; face setup for constructs
 	access:					; face value access functions (object)
 	style:					; style used to define face
@@ -222,8 +221,10 @@ vid-face: make face [ ; root definition
 	text-body: none			; object with info about positions of the text
 	draw-body: none			; object with info about draw blocks in the face
 	flags: []				; option flags
-	edge: make edge [size: 0x0]		; face edge
+	;para: none
+	;font: none
 	font: make font [];style: none color: white align: 'left valign: 'top shadow: 1x1 colors: vid-colors/font-color]
+	edge: make edge [size: 0x0]		; face edge
 	doc: none				; auto-doc
 	options:				; face options for popup
 	saved-feel:				; temporary storage for face feel
@@ -310,8 +311,10 @@ set 'set-font func [aface 'word val] [ ; deals with none font and cloning the fo
 ]
 
 set 'set-para func [aface 'word val] [
+	; it appears that this is not used in vid in the same way as font
 	if none? aface/para [aface/para: vid-face/para]
-	unless flag-face? aface para [aface/para: make aface/para [] flag-face aface para]
+	probe describe-face aface
+	unless flag-face? aface para [probe 'para-issue aface/para: make aface/para [] flag-face aface para]
 	set in aface/para word val
 ]
 
@@ -400,10 +403,10 @@ facet-words: [ ; Order of these is important to the code
 	align fill spring setup default ; [!] - still be careful that this doesn't break anything
 	; possibly transfer on-* formatters in here
 	effect effects keycode rate colors texts help user-data ;-- ends at with
-	with			[args: next args]  ; only used for
+	with				[args: next args]  ; only used for
 	bold italic underline [set-font new style first args args]
-	left center right [set-font new align first args args]
-	top middle bottom [set-font new valign first args args]
+	left center right	[set-font new align first args args]
+	top middle bottom	[set-font new valign first args args]
 	plain				[set-font new style none args]
 	of					[new/related: second args next args]
 	font-size			[set-font new size second args next args]
@@ -548,7 +551,8 @@ grow-facets: func [new args /local pairs texts images colors files blocks val tm
 			url!    [append files val]
 			image!  [append images val]
 			char!   [new/keycode: val]
-			logic!  [new/data: new/state: val]
+			logic!  [new/data: val]
+			;logic!  [new/data: new/state: val] ; big change
 			decimal! [new/data val]
 			time!   [new/rate: val]
 			word!   [

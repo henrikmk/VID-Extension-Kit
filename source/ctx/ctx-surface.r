@@ -66,6 +66,8 @@ set 'set-surface func [face /local parent] [
 		none? parent
 	]
 	face/surface: copy/deep surface-block
+	bind bind face/surface face face/draw-body
+	svvf/set-face-state face none
 	ctx-draw/set-draw-body face
 ]
 

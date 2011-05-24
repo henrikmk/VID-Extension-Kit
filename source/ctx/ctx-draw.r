@@ -89,29 +89,35 @@ set-facet-value: func [facet value 'output] [
 ]
 
 ; returns a value from a surface facet by state and event
-get-surface-facet: func [face facet state event /local event-word state-word out] [
-	facet: to-lit-word facet						; always a word
-	event-word: if word? event [to-lit-word event]	; NONE or word
-	state-word: to-lit-word state					; always a word
-	out: none										; output value
-	first-state-rule: [first-state: (event-word: to-lit-word either word? event [event][first-state/1])]
-	value-rule: [set value any-type! (set-facet-value facet value out)]
-	word-rule: [[thru state-word | thru event-word] any [state-rule | word! | value-rule to end]]
-	state-rule: ['state into [first-state-rule any [word-rule | state-rule | skip]]]
-	facet-rule: [thru facet [state-rule | value-rule]]
+get-surface-facet: func [face facet state touch /local end-rule depth touch-word state-word out] [
+	facet: to-lit-word facet			; always a word
+	touch-word: to-lit-word touch		; always a word
+	state-word: to-lit-word state		; always a word
+	out: none							; output value
+	depth: 0
+	end-rule: []
+	; we may no longer need the default, as the default is now specified with set-face-state
+	first-state-rule:	[first-state: (touch-word: to-lit-word either word? touch [touch][first-state/1])]
+	value-rule:			[set value any-type! (set-facet-value facet value out)]
+	word-rule:			[[thru state-word | thru touch-word] any [state-rule | word! | value-rule break]]
+	depth-rule:			[(if 2 = depth: depth + 1 [end-rule: [to end]])]
+	state-rule:			['state into [first-state-rule depth-rule any [word-rule | state-rule | skip]] end-rule]
+	facet-rule:			[thru facet [state-rule (end-rule: [])| value-rule]]
 	parse face/surface [any facet-rule]
 	out
 ]
 
-; determines the draw body from face surface and the state
-set-draw-body: func [face /local state event value] [
+; determines the draw body from face surface, the data state and the touch state
+set-draw-body: func [face /local debug state touch value] [
 	; Gather state information
 	state: all [in face 'state word? face/state face/state]
-	event: all [in face 'event word? face/event face/event]
-	if find ctx-vid-debug/debug 'draw-body [print ["State:" state "Event:" event]]
+	touch: all [in face 'touch word? face/touch face/touch]
+	debug: find ctx-vid-debug/debug 'draw-body
+	if debug [print ["State:" state "Touch:" touch]]
 	foreach facet [font para margin colors draw-image template draw] [
 		; Obtain value from surface facet
-		value: get-surface-facet face facet state event
+		if debug [print ["Facet:" facet "for:" describe-face face]]
+		value: get-surface-facet face facet state touch
 		; Apply surface facet to draw-body facet
 		set in face/draw-body facet
 			either all [object? value object? get in face/draw-body facet] [
@@ -122,7 +128,12 @@ set-draw-body: func [face /local state event value] [
 		; Apply facet value to face from surface
 		switch facet [
 			font para [
-				if object? value [
+				if all [object? value object? get in face facet] [
+					; Clone font and para objects, if they are being modified
+					unless flag-face? face :facet [
+						face/:facet: make face/:facet []
+						flag-face face :facet
+					]
 					foreach word words-of value [
 						set in face/:facet word value/:word
 					]
@@ -140,19 +151,16 @@ set-draw-body: func [face /local state event value] [
 				; Apply template
 				if value [
 					change/only template-blk value
-					bind template-blk face/draw-body
 				]
 			]
 			draw [
 				; Apply draw block
 				if value [
 					change/only draw-blk value
-					bind draw-blk face/draw-body
 				]
 			]
 		]
 	]
-	face/event: none
 ]
 
 ; resizes all vertices in the DRAW body

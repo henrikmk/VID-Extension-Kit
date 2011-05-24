@@ -3,12 +3,12 @@ base: [
 ]
 frame: base [
 	colors state [
-		up alt-up away [
+		released away drag-away [
 			shine: 240.240.240
 			background: 200.200.200
 			shadow: 140.140.140
 		]
-		down alt-down [
+		pressed drag-over [
 			shine: 140.140.140
 			background: 100.100.100
 			shadow: 240.240.240
@@ -30,28 +30,9 @@ frame: base [
 		box inner/1 inner/5 1
 	]
 	font state [
-		up alt-up away [color: black]
+		released away drag-away [color: black]
 		over [color: blue]
-		down alt-down [color: white]
-	]
-]
-button: frame [
-	colors state [
-		up alt-up away [
-			shine: 240.240.240
-			background: 200.200.200
-			shadow: 140.140.140
-		]
-		down alt-down on [
-			shine: 140.140.140
-			background: 100.100.100
-			shadow: 240.240.240
-		]
-	]
-	font state [
-		up alt-up away [color: black]
-		over [color: blue]
-		down alt-down on [color: white]
+		pressed drag-over [color: white]
 	]
 ]
 toggle: frame [
@@ -78,8 +59,78 @@ right-icon: frame [
 ;choice: right-icon [
 ;	draw-image (load-stock 'arrow-pop)
 ;]
-check: base [
-	draw: [
-		
+image: base [
+	draw [
+		image image-center draw-image
+	]
+]
+check: image [
+	draw-image state [
+		off state [
+			released away drag-away (load-stock 'check-off-up)
+			over (load-stock 'check-off-over)
+			pressed drag-over (load-stock 'check-off-down)
+		]
+		on state [
+			released away drag-away (load-stock 'check-on-up)
+			over (load-stock 'check-on-over)
+			pressed drag-over (load-stock 'check-on-down)
+		]
+	]
+]
+; some problems here, but might be in the feel object for radio
+radio: image [
+	draw-image state [
+		off state [
+			released away drag-away (load-stock 'radio-off-up)
+			over (load-stock 'radio-off-over)
+			pressed drag-over (load-stock 'radio-off-down)
+		]
+		on state [
+			released away drag-away (load-stock 'radio-on-up)
+			over (load-stock 'radio-on-over)
+			pressed drag-over (load-stock 'radio-on-down)
+		]
+	]
+]
+glyph: button [
+	colors state [
+		released away [
+			value: 0.0.0
+		]
+		pressed drag-over [
+			value: white
+		]
+		over [
+			value: blue
+		]
+	]
+]
+arrow: glyph [
+	draw [
+		anti-alias on
+		pen none
+		fill-pen colors/value
+		translate 10x10
+		rotate direction
+		triangle 0x-5 5x5 -5x5
+	]
+]
+check-line: check [
+	draw [image image-outer/8 draw-image]
+	para [origin: 26x2] ; appears to be shared
+	font state [
+		released away drag-away [align: 'left style: none color: black]
+		over [color: blue]
+		pressed drag-over [color: white]
+	]
+]
+radio-line: radio [
+	draw [image image-outer/8 draw-image]
+	para [origin: 26x2]
+	font state [
+		released away drag-away [align: 'left style: none color: black]
+		over [color: blue]
+		pressed drag-over [color: white]
 	]
 ]

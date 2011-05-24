@@ -53,11 +53,20 @@ set 'load-skin func [name] [
 ]
 
 ; reads a skin from disk and appends it to the skin stock. Input is the skin directory.
-set 'read-skin func [file /local item skin] [
+set 'read-skin func [file /local item skin p paren-rule] [
 	skin: make skin-object []
 	foreach type [colors images materials surfaces] [
 		if exists? item: to-file rejoin [dirize file join type '.r] [
 			set in skin type load item
+		]
+		; Process parenthesis blocks
+		switch type [
+			surfaces [
+				; [!] - this executes code in the skin, which is not secure
+				; so the dialect should be extended with specific image loading
+				paren-rule: [any [p: paren! (change p do p/1) | into paren-rule | skip]]
+				parse skin/surfaces paren-rule
+			]
 		]
 	]
 	append skins to-word trim/with form last split-path file "/"

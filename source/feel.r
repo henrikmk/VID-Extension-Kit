@@ -20,6 +20,95 @@ REBOL [
 ]
 
 svvf: system/view/vid/vid-feel: context [
+	
+	;-- Feel Functions
+
+	; resets related faces in a mutex group
+	reset-related-faces: func [face][
+		if face/related [
+			foreach item face/parent-face/pane [
+				if all [
+					item <> face
+					item/related
+					item/related = face/related
+					item/data
+				][
+					clear-face item
+				]
+			]
+		]
+	]
+
+	; set face data state and UI feedback state
+	set-face-state: func [face event /local new-state] [
+		; Update touch/feedback information
+		face/touch:
+			switch/default event [
+				up [
+					; it appears to be possible to perform this over the wrong face, when moving over it
+					; it performs it over the right face
+					; when dragging anywhere, other faces respond, while the mouse is down
+					; this face does not respond here
+					if find [drag-over pressed] face/touch [
+						; Do face action on button release above face
+						do-face face face/text
+						act-face face event 'on-click
+						; this might be too much, as it might get into a fight with other places where the state is managed
+						; Update face state information
+						if all [block? face/states not empty? head face/states] [
+							face/states: next face/states
+							if tail? face/states [
+								face/states:
+									either face/virgin [
+										next head face/states
+									][
+										head face/states
+									]
+							]
+							face/state: face/states/1
+						]
+					]
+					'released
+				]
+				alt-up [
+					if find [drag-over pressed] face/touch [
+						do-face-alt face face/text
+						act-face face event 'on-alt-click
+					]
+					'released
+				]
+				down alt-down [
+					'pressed
+				]
+				over [
+					first select/skip [
+						pressed drag-over
+						drag-over drag-over
+						drag-away drag-over
+						released over
+						over over
+						away over
+					] face/touch 2
+				]
+				away [
+					first select/skip [
+						pressed drag-away
+						drag-over drag-away
+						drag-away drag-away
+						released released ; really?
+						over away
+						away away
+					] face/touch 2
+				]
+			][
+				'released
+			]
+	]
+
+	; determine, whether we are releasing over the face
+	releasing?: func [face act] [all [find [pressed drag-over] face/touch act = 'up]]
+
+	;-- Feel Objects
 
 	; state: for buttons that act on UP
 	; data: user state for button
@@ -27,28 +116,19 @@ svvf: system/view/vid/vid-feel: context [
 	sensor: make face/feel [
 		cue: blink: none
 		engage: func [face action event][
-			face/event: action
-			switch action [
-				time [unless face/state [face/blinker: not face/blinker act-face face event 'on-time]]
-				down [face/state: 'on]
-				alt-down [face/state: 'on]
-				up   [if face/state = 'on [do-face face face/text act-face face event 'on-click] face/state: 'off]
-				alt-up [if face/state = 'on [do-face-alt face face/text act-face face event 'on-alt-click] face/state: 'off]
-				over [face/state: 'on]
-				away [face/state: 'off]
-			]
-			cue face action
+			set-face-state face action
 			show face
 		]
 	]
 
 	hot: make sensor [
 		over: func [face action event][
-			face/event: pick [over away] action
+			set-face-state face pick [over away] to-logic action
 			show face
 		]
 	]
 
+	; unused
 	hot-area: make hot [
 		over: func [face action event][
 			if face/colors [
@@ -60,75 +140,20 @@ svvf: system/view/vid/vid-feel: context [
 		cue: none
 	]
 
-	reset-related-faces: func [face][
-		if face/related [
-			foreach item face/parent-face/pane [
-				if all [
-					item/related
-					item/related = face/related
-					item/data
-				][
-					;item/data: false
-					clear-face item
-					show item
-				]
+	; Used in radio groups
+	mutex: make hot [
+		redraw: func [face act pos][
+			if all [not svv/resizing? act = 'draw] [
+				ctx-draw/set-draw-body face
 			]
 		]
-	]
-
-	check: make sensor [
-		over: none
-		redraw: func [face act pos][
-			; move this to surface
-			ctx-draw/set-draw-body face
-			act: pick face/images (to integer! face/data) + either face/hover [5] [1 + (2 * to integer! face/state)]
-			set-image either face/pane [face/pane][face] act
-		]
+		; mutual exclusion
 		engage: func [face action event][
-			if action = 'down [
+			if releasing? face action [
+				face/data: true
 				reset-related-faces face
-				do-face face face/data: not face/data
-				act-face face event 'on-click
-				show face
 			]
-		]
-	]
-
-	check-radio: make face/feel [
-		redraw: func [face act pos][
-			act: pick face/images (to integer! face/data) + either face/hover [5][
-				1 + (2 * to integer! face/state)
-			]
-			set-image either face/pane [face/pane][face] act
-		]
-		over: func [face over offset][
-			face/hover: over
-			show face
-			face/hover: off
-		]
-		engage: func [face action event][
-			switch action [
-				down [face/state: 'on]
-				alt-down [face/state: 'on]
-				up [
-					if face/state = 'on [
-						face/state: 'off
-						reset-related-faces face
-						do-face face face/data: not face/data
-						act-face face event 'on-click
-					]
-				]
-				alt-up [
-					if face/state = 'on [
-						do-face-alt face face/text
-						act-face face event 'on-alt-click
-					]
-					face/state: 'off
-				]
-				over [face/state: 'on]
-				away [face/state: 'off]
-			]
-			;cue face action
+			set-face-state face action
 			show face
 		]
 	]
@@ -151,30 +176,6 @@ svvf: system/view/vid/vid-feel: context [
 		cue: none
 	]
 
-	;btn: make button [
-	;	over: func [face act evt][
-	;		remove/part find face/effect 'mix 2
-	;		if act [
-	;			evt: any [find face/effect 'extend tail face/effect]
-	;			insert evt reduce ['mix face/images/3]
-	;		]
-	;		all [face/show? show face]
-	;	]
-	;	engage: func [face action event][
-	;		remove/part find face/effect 'mix 2
-	;		switch action [
-	;			down		[face/state: on]
-	;			alt-down	[face/state: on]
-	;			up			[if face/state [do-face face face/text act-face face event 'on-click] face/state: off]
-	;			alt-up		[if face/state [do-face-alt face face/text act-face face event 'on-alt-click] face/state: off]
-	;			over		[face/state: on]
-	;			away		[face/state: off]
-	;		]
-	;		cue face action
-	;		all [face/show? show face]
-	;	]
-	;]
-
 	icon: make hot [
 		redraw: func [face act pos /local state] [
 			if face/pane/edge [face/pane/edge/effect: pick [ibevel bevel] 'on = face/state]
@@ -190,7 +191,7 @@ svvf: system/view/vid/vid-feel: context [
 
 	toggle: make button [
 		engage: func [face action event][
-			face/event: action
+			set-face-state face action
 			if find [down alt-down] action [
 				if face/related [
 					foreach item face/parent-face/pane [
@@ -201,25 +202,14 @@ svvf: system/view/vid/vid-feel: context [
 							item/related = face/related
 							item/data
 						][
-							item/data: item/state: false
+							clear-face item
 							show item
 						]
 					]
 				]
 				face/data: not face/data
-				face/state: pick [on off] face/data
-				either action = 'down [
-					do-face face face/data
-					act-face face event 'on-click
-				][
-					do-face-alt face face/data
-					act-face face event 'on-alt-click
-				]
-				show face
 			]
-			if find [up alt-up] action [
-				show face
-			]
+			show face
 		]
 	]
 
@@ -611,10 +601,10 @@ svvf: system/view/vid/vid-feel: context [
 		over: redraw: detect: none
 		engage: func [face action event][
 			switch action [
-				down [face/state: on act-face face event 'on-click]
-				up [if face/state [face/show-dropdown] face/state: off]
-				over [face/state: on]
-				away [face/state: off]
+				down [face/state: 'on act-face face event 'on-click]
+				up [if face/state = 'on [face/show-dropdown] face/state: 'off]
+				over [face/state: 'on]
+				away [face/state: 'off]
 			]
 			show face
 		]
@@ -1010,7 +1000,11 @@ ctx-access: context [
 	]
 
 	data-state: make data [ ; e.g. toggle
-		set-face*: func [face value][face/data: face/state: value]
+		set-face*: func [face value][
+			face/data: value
+			face/state: pick head face/states not value
+			face/states: find head face/states face/state
+		]
 	]
 
 	data-number: make data [ ; e.g. slider
@@ -1499,7 +1493,7 @@ ctx-access: context [
 			f: find words value
 			if found? f [
 				v: pick face/pane index? f
-				set-face v true
+				set-face v true ; this breaks state
 			]
 		]
 		clear-face*: func [face /local i] [

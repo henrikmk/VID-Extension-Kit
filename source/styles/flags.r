@@ -27,7 +27,8 @@ REBOL [
 ; FIXED				- used during layout for removing calculation of face size and offset
 ; DROP				- used during layout for setting custom size of backdrop
 ; FLAGS				- ?
-; FONT				- contains shared font object
+; FONT				- contains modified or shared font object
+; PARA				- contains modified or shared para object
 ; CHECK				- ?
 ; RADIO				- ?
 ; TOGGLE			- ?

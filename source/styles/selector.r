@@ -58,6 +58,7 @@ stylize/master [
 				i: i + 1
 				face/emit compose/deep [
 					; uses toggle flags for some reason rather than selector-toggle flags
+					; [!] - does not display depressed state
 					selector-toggle (face/color) (as-pair face/widths/:i face/size/y) (value) of 'selection [
 						face/parent-face/dirty?: true
 						set-face face/parent-face face/var
@@ -156,10 +157,6 @@ stylize/master [
 
 	; Vertical list of radio buttons
 	RADIO-SELECTOR: SELECTOR with [
-		; build it with vertical radio buttons instead
-;		size: 100x100 ; perhaps not set here
-		; the problem is that vertical button arrays demand varying amounts of space
-		; so the face needs to be layed out before we can do anything else
 		color: none
 		do-setup: func [face input-value /local first-key keys i][
 			keys: extract input-value 2
@@ -169,7 +166,7 @@ stylize/master [
 			foreach [key value] input-value [
 				i: i + 1
 				; [ ] - allow disabling of single radio buttons in this panel
-				face/emit compose/deep [
+				face/emit probe compose/deep [
 					radio-line (value) of 'selection with [
 						var: (to-lit-word key)
 					] [

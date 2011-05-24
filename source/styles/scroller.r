@@ -69,7 +69,7 @@ stylize/master [
 			redrag 0.1
 		]
 		redrag: func [val /local tmp][
-			state: none
+			state: 'off
 			; clip the ratio to proper range (save for possible resize)
 			ratio: min 1 max 0 val
 			; compute page step size
@@ -148,7 +148,8 @@ stylize/master [
 			if tmp: axis = 'x [pane/3/offset: reverse pane/3/offset]
 			pane/2/data: pick [left up] tmp
 			pane/3/data: pick [right down] tmp
-			state: pane/2/effect: pane/3/effect: none
+			state: 'off
+			pane/2/effect: pane/3/effect: none
 			do pane/2/init do pane/3/init
 			pane/1/offset: 0x0
 			redrag any [ratio 0.1]

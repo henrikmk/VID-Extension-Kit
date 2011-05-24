@@ -27,6 +27,7 @@ stylize/master [
 		text: "Toggle"
 		feel: svvf/toggle
 		surface: 'toggle
+		states: [off on]
 		keep: true
 		access: ctx-access/toggle
 	]

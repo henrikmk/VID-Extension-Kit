@@ -30,8 +30,7 @@ stylize/master [
 		effects: none
 		depth: 128
 		disabled-colors: none
-		surface: 'button
-		state: 'off
+		surface: 'frame
 		access: ctx-access/button
 		doc: [
 			info: "Rectangular, rendered buttons"
@@ -105,12 +104,12 @@ stylize/master [
 			engage: func [face action event] bind [
 				switch action [
 					time [face/glow face] ; not working, very flakey.
-					down [face/state: on]
-					alt-down [face/state: on]
-					up [if face/state [do-face face face/text] face/state: off]
-					alt-up [if face/state [do-face-alt face face/text] face/state: off]
-					over [face/state: on]
-					away [face/state: off]
+					down [face/state: 'on]
+					alt-down [face/state: 'on]
+					up [if face/state = 'on [do-face face face/text] face/state: 'off]
+					alt-up [if face/state = 'on [do-face-alt face face/text] face/state: 'off]
+					over [face/state: 'on]
+					away [face/state: 'off]
 				]
 				cue face action
 				show face
@@ -151,76 +150,45 @@ stylize/master [
 	
 	CHECK: SENSOR with [
 		set [font edge para] none
-		feel: svvf/check-radio
+		size: 24x24
+		feel: svvf/toggle
+		surface: 'check
 		access: ctx-access/data
-		images: load-stock-block [check-off-up check-on-up check-off-down check-on-down check-off-over check-on-over]
-		size: images/1/size
-		hover: off
-		append init [if none? data [data: false] text: none state: off]
+		states: [off on]
+		access: make access ctx-access/selector-nav
+		append init [if none? data [data: false] text: none]
 	]
 
 	CHECK-MARK: CHECK
 
-	CHECK-LINE: BASE-TEXT middle with [
-		; size of check line is not tall enough
-		images: load-stock-block [check-off-up check-on-up check-off-down check-on-down check-off-over check-on-over]
-		size: as-pair -1 images/1/size/y
-		feel: svvf/check-radio
-		access: ctx-access/data
-		edge-size: none
-		hover: false
+	CHECK-LINE: BUTTON middle with [
+		feel: svvf/toggle
+		access: ctx-access/data-state
+		states: [off on]
+		surface: 'check-line
 		text: "Value"
-		pad: 5 ; space between text and image
-		access: make access [
-			disable-face*: func [face] [
-				face/font/color: 80.80.80
-				append face/pane/effect [brightness 1 contrast -1]
-			]
-			enable-face*: func [face] [
-				clear find/reverse tail face/pane/effect 'brightness
-			]
-		]
+		size: 100x24
 		access: make access ctx-access/selector-nav
-		insert init [
-			pane: make-face/spec 'check compose [
-				size: (images/1/size)
-				offset: 0x0
-				feel: edge: color: none
-				flags: copy []
-			]
-			para: make para []
-			either font/align = 'right [
-				para/margin/x: pane/size/x + pad
-			][
-				para/origin/x: pane/size/x + pad
-			] 
-		]
 		append init [
-			state: off
-			edge-size: edge-size? self
-			pane/offset/y: size/y - edge-size/y + 1 - pane/size/y / 2
-			all [font/align = 'right pane/offset/x: size/x - edge-size/x - 2 - pane/size/x]
 			if none? data [data: false]
 		]
 	]
 
 	; the radio could be the tri-state radio button, but we won't deal with that right now
 	RADIO: CHECK with [
-		images: load-stock-block [radio-off-up radio-on-up radio-off-down radio-on-down radio-off-over radio-on-over]
-		size: images/1/size
+		feel: svvf/mutex
+		surface: 'radio
+		virgin: true
 		related: 'default ; radios are related, unless OF is used
 		saved-area: true
 	]
 
 	; Radio button with text label
 	RADIO-LINE: CHECK-LINE with [
-		images: load-stock-block [radio-off-up radio-on-up radio-off-down radio-on-down radio-off-over radio-on-over]
-		; wrong size is used here
-		size: as-pair -1 images/1/size/y
+		feel: svvf/mutex
+		surface: 'radio-line
+		virgin: true
 		related: 'default ; radios are related, unless OF is used
-		append init [
-			pane/saved-area: true
-		]
 	]
 
 	; BUTTON with a flat layout, no edge and mouse over background color. To be used in large button layouts like calendar
@@ -248,16 +216,30 @@ stylize/master [
 	ARROW: BUTTON 20x20 with [
 		font: none ; must stand alone
 		text: none
+		surface: 'arrow
+		direction: 0
 		init: [
-			unless effect [
-;				state: either all [colors state: pick colors 2] [state][black]
-				effect: compose [fit arrow (svvc/glyph-color) .7 rotate (
-					select [up 0 right 90 down 180 left 270] data)]
-				state: off
-;					if all [colors image] [insert next effect reduce ['colorize first colors]]
-			]
+			direction:
+				switch data [
+					up north [0]
+					up-right north-east [45]
+					right east [90]
+					right-down south-east [135]
+					down south [180]
+					left-down south-west [225]
+					left west [270]
+					up-left north-west [315]
+				]
 		]
-		words: [up right down left [new/data: first args args]]
+;			unless effect [
+;;				state: either all [colors state: pick colors 2] [state][black]
+;				effect: compose [fit arrow (svvc/glyph-color) .7 rotate (
+;					select [up 0 right 90 down 180 left 270] data)]
+;				state: 'off
+;;					if all [colors image] [insert next effect reduce ['colorize first colors]]
+;			]
+;		]
+		words: [up right down left north south east west north-east north-west south-east south-west [new/data: first args args]]
 	]
 
 	; button without and edge and optimized for images. see vid-styles.r for appearance.

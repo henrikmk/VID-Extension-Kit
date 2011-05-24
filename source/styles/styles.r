@@ -105,9 +105,9 @@ stylize/master [
 	ROTARY: ROTARY svvc/action-color edge [color: 160.160.160 effect: 'bevel]
 ;	TOGGLE: TOGGLE svvc/action-color edge normal-edge
 	STATE: STATE svvc/action-color edge normal-edge
-	SELECTOR-TOGGLE: SELECTOR-TOGGLE svvc/action-color edge normal-edge
-	MULTI-SELECTOR-TOGGLE: MULTI-SELECTOR-TOGGLE svvc/action-color edge narrow-edge
-	ARROW: ARROW svvc/manipulator-color edge normal-edge
+;	SELECTOR-TOGGLE: SELECTOR-TOGGLE svvc/action-color edge normal-edge
+;	MULTI-SELECTOR-TOGGLE: MULTI-SELECTOR-TOGGLE svvc/action-color edge narrow-edge
+;	ARROW: ARROW svvc/manipulator-color edge normal-edge
 ;	BUTTON: BUTTON svvc/action-color edge normal-edge
 	ACT-BUTTON: BUTTON svvc/action-color edge normal-edge
 	FOLD-BUTTON: FOLD-BUTTON svvc/action-color edge normal-edge
@@ -121,17 +121,17 @@ stylize/master [
 	SAVE-BUTTON: SAVE-BUTTON svvc/true-color edge normal-edge
 	VALIDATE-BUTTON: VALIDATE-BUTTON svvc/true-color edge normal-edge
 	LEFT-BUTTON: LEFT-BUTTON svvc/true-color edge normal-edge
-	TRUE-BUTTON: TRUE-BUTTON svvc/true-color edge normal-edge
-	RETRY-BUTTON: RETRY-BUTTON svvc/true-color edge normal-edge
-	USE-BUTTON: USE-BUTTON svvc/true-color edge normal-edge
-	SEND-BUTTON: SEND-BUTTON svvc/true-color edge normal-edge
-	OK-BUTTON: OK-BUTTON svvc/true-color edge normal-edge
-	YES-BUTTON: YES-BUTTON svvc/true-color edge normal-edge
-	CANCEL-BUTTON: CANCEL-BUTTON svvc/false-color edge normal-edge
-	RIGHT-BUTTON: RIGHT-BUTTON svvc/false-color edge normal-edge
-	FALSE-BUTTON: FALSE-BUTTON svvc/false-color edge normal-edge
-	NO-BUTTON: NO-BUTTON svvc/false-color edge normal-edge
-	CLOSE-BUTTON: CLOSE-BUTTON svvc/false-color edge normal-edge
+;	TRUE-BUTTON: TRUE-BUTTON svvc/true-color edge normal-edge
+;	RETRY-BUTTON: RETRY-BUTTON svvc/true-color edge normal-edge
+;	USE-BUTTON: USE-BUTTON svvc/true-color edge normal-edge
+;	SEND-BUTTON: SEND-BUTTON svvc/true-color edge normal-edge
+;	OK-BUTTON: OK-BUTTON svvc/true-color edge normal-edge
+;	YES-BUTTON: YES-BUTTON svvc/true-color edge normal-edge
+;	CANCEL-BUTTON: CANCEL-BUTTON svvc/false-color edge normal-edge
+;	RIGHT-BUTTON: RIGHT-BUTTON svvc/false-color edge normal-edge
+;	FALSE-BUTTON: FALSE-BUTTON svvc/false-color edge normal-edge
+;	NO-BUTTON: NO-BUTTON svvc/false-color edge normal-edge
+;	CLOSE-BUTTON: CLOSE-BUTTON svvc/false-color edge normal-edge
 	POP-BUTTON: POP-BUTTON 24x24 svvc/action-color edge normal-edge
 	SORT-BUTTON: SORT-BUTTON -1x24 svvc/manipulator-color font [color: black shadow: none] edge normal-edge
 	SORT-RESET-BUTTON: SORT-RESET-BUTTON svvc/action-color edge none

@@ -104,5 +104,5 @@ foreach file read %../resources/skins/ [
 ]
 
 load-skin 'standard
-probe ctx-surface/surfaces
+;probe ctx-surface/surfaces
 ;halt
