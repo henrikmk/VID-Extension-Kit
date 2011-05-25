@@ -20,7 +20,7 @@ REBOL [
 ]
 
 svvf: system/view/vid/vid-feel: context [
-	
+
 	;-- Feel Functions
 
 	; resets related faces in a mutex group
@@ -40,20 +40,30 @@ svvf: system/view/vid/vid-feel: context [
 	]
 
 	; set face data state and UI feedback state
-	set-face-state: func [face event /local new-state] [
+	set-face-state: func [face [object!] event [none! word!] /local new-state] [
 		; Update touch/feedback information
+		face/see:
+			case [
+				flag-face? face disabled ['disabled]
+				face = system/view/focal-face ['focused]
+				true ['unfocused]
+			]
 		face/touch:
 			switch/default event [
+				time [
+					; need a method to switch so that we allow face/touch to repeat
+					; which means that it becomes a repeat event
+					; and while repeating, the action is done
+					; this requires a configuration in the face, possibly rate
+					; if the rate is set, then we can do this
+					; if we don't have a face rate, then we can't do this
+					face/touch
+				]
 				up [
-					; it appears to be possible to perform this over the wrong face, when moving over it
-					; it performs it over the right face
-					; when dragging anywhere, other faces respond, while the mouse is down
-					; this face does not respond here
-					if find [drag-over pressed] face/touch [
+					if all [not face/rate find [drag-over pressed] face/touch] [
 						; Do face action on button release above face
 						do-face face face/text
 						act-face face event 'on-click
-						; this might be too much, as it might get into a fight with other places where the state is managed
 						; Update face state information
 						if all [block? face/states not empty? head face/states] [
 							face/states: next face/states
@@ -128,26 +138,14 @@ svvf: system/view/vid/vid-feel: context [
 		]
 	]
 
-	; unused
-	hot-area: make hot [
-		over: func [face action event][
-			if face/colors [
-				face/color: pick face/colors not action
-				show face
-				face/color: first face/colors
-			]
-		]
-		cue: none
-	]
-
-	; Used in radio groups
+	; Used in toggles, check and radio groups
 	mutex: make hot [
 		redraw: func [face act pos][
 			if all [not svv/resizing? act = 'draw] [
 				ctx-draw/set-draw-body face
 			]
 		]
-		; mutual exclusion
+		; mutual exclusion, if there is a relation
 		engage: func [face action event][
 			if releasing? face action [
 				face/data: true
@@ -160,7 +158,9 @@ svvf: system/view/vid/vid-feel: context [
 
 	led: make sensor [
 		over: none
-		redraw: func [face act pos][face/color: either face/data [face/colors/1][face/colors/2]]
+		redraw: func [face act pos][
+;			face/color: either face/data [face/colors/1][face/colors/2]
+		]
 		engage: func [face action event][
 			if any [action = 'time all [action = 'down get in face 'action]][do-face face face/data: not face/data]
 			show face
@@ -189,31 +189,8 @@ svvf: system/view/vid/vid-feel: context [
 		redraw: func [f a c] [f/parent-face/feel/redraw f/parent-face a c]
 	]
 
-	toggle: make button [
-		engage: func [face action event][
-			set-face-state face action
-			if find [down alt-down] action [
-				if face/related [
-					foreach item face/parent-face/pane [
-						if all [
-							any [all [in face 'keep face/keep] face <> item]
-							flag-face? item toggle
-							item/related
-							item/related = face/related
-							item/data
-						][
-							clear-face item
-							show item
-						]
-					]
-				]
-				face/data: not face/data
-			]
-			show face
-		]
-	]
-
 	; perhaps suitable as a replacement for standard button, so we don't have to deal with on/off being a word
+	; this is obsolete, but is still used in list for sorting
 	state: make button [
 		engage: func [face action event][
 			if find [down alt-down] action [
@@ -321,6 +298,7 @@ svvf: system/view/vid/vid-feel: context [
 				; [ ] - move function to standardized setup
 				; [x] - start selection on the opened selection rather than the first selection, but this is specific to list
 				; [ ] - size is 4x4 too far out, when the height is set to 100x20
+				; [ ] - fix choice face problem
 				face/open-choice-face face
 			]
 		]
@@ -385,18 +363,25 @@ svvf: system/view/vid/vid-feel: context [
 	slide: make face/feel [
 		redraw: func [face act pos][
 			face/data: max 0 min 1 face/data
-			if face/data <> face/state [
-				pos: face/size - face/pane/1/size - (2 * face/edge/size) - (2 * face/clip)
-				either face/size/x > face/size/y [face/pane/1/offset/x: face/data * pos/x + face/clip/x][
-					face/pane/1/offset/y: face/data * pos/y + face/clip/y]
-				face/state: face/data
-				; RAMBO #3407
-				if act = 'draw [show face/pane/1]
+			; this needs to be redone as it interferes with state
+			;if face/data <> face/state [
+				pos: face/size - face/dragger/size - (2 * face/edge/size) - (2 * face/clip)
+				either face/size/x > face/size/y [
+					face/dragger/offset: as-pair face/data * pos/x + face/clip/x 0
+				][
+					face/dragger/offset: as-pair 0 face/data * pos/y + face/clip/y
+				]
+			;	face/state: face/data
+			;	; RAMBO #3407
+			;	if act = 'draw [show face/pane/1]
+			;]
+			if all [not svv/resizing? act = 'draw] [
+				ctx-draw/set-draw-body face
 			]
 		]
 		engage: func [face action event][
 			if action = 'down [
-				drag-off face face/pane/1 event/offset - (face/pane/1/size / 2)
+				drag-off face face/dragger event/offset - (face/dragger/size / 2)
 				act-face face event 'on-click
 				show face
 			]
@@ -410,41 +395,47 @@ svvf: system/view/vid/vid-feel: context [
 		/page	"move each time by one page"
 	][
 		any [
-			all [back page move-drag face/pane/2 face/page]
-			all [back move-drag face/pane/2 face/step]
-			all [page move-drag face/pane/3 face/page]
-			move-drag face/pane/3 face/step
+			all [back page move-drag face/up-arrow face/page]
+			all [back move-drag face/up-arrow face/step]
+			all [page move-drag face/down-arrow face/page]
+			move-drag face/down-arrow face/step
 		]
 	]
 
-	move-drag: func [face val][
+	move-drag: func [face val /local old][
+		; val changes to 'down
+		old: face/parent-face/data
 		face/parent-face/data: min 1 max 0 face/parent-face/data + (face/dir * val)
-		do-face face/parent-face none
-		show face/parent-face
+		if face/parent-face/data <> old [
+			do-face face/parent-face none
+			show face/parent-face
+		]
 	]
 
 	scroll: make slide [
 		engage: func [f act evt /local tmp][
 			if act = 'down [
 				tmp: f/axis
-				do-face pick reduce [f/pane/3 f/pane/2] evt/offset/:tmp > f/pane/1/offset/:tmp f/page
+				do-face pick reduce [f/down-arrow f/up-arrow] evt/offset/:tmp > f/dragger/offset/:tmp f/page
 			]
 		]
 	]
 
 	scroll-button: make button [
 		engage: func [f act evt][
+			set-face-state f act
 			switch act [
-				down	[f/state: on do-face f f/parent-face/step f/rate: 4]
-				up		[f/state: flag: no f/rate: none]
-				time	[either flag [either f/rate <> f/parent-face/speed [f/rate: f/parent-face/speed][do-face f f/parent-face/step]][flag: on exit]]
-				over	[f/state: on if flag [f/rate: f/parent-face/speed]]
-				away	[f/state: no f/rate: none]; set-col f 2]
+				time	[do-face f f/parent-face/step]
+				down	[f/rate: f/parent-face/speed]
+				up		[f/rate: none]
 			]
-			cue f act
+			; determine here whether to keep scrolling, when outside the arrow
+			switch f/touch [
+				drag-over [f/rate: f/parent-face/speed]
+				drag-away [f/rate: none]
+			]
 			show f
 		]
-		flag: no
 	]
 
 ;-------- Balancer and Resizer
@@ -872,20 +863,20 @@ enable-face: func [
 		]
 		restore-feel face
 		restore-font face
-		either all [
-			in face 'access
-			in face/access 'enable-face*
-		] [
-			face/access/enable-face* face
-		][
-;			if flag-face? face disabled [
-				remove/part
-					find/reverse
-						tail face/effect
-						first disabled-effect
-					length? disabled-effect
-;			]
-		]
+		;either all [
+		;	in face 'access
+		;	in face/access 'enable-face*
+		;] [
+		;	face/access/enable-face* face
+		;][
+;		;	if flag-face? face disabled [
+		;		remove/part
+		;			find/reverse
+		;				tail face/effect
+		;				first disabled-effect
+		;			length? disabled-effect
+;		;	]
+		;]
 		act-face face none 'on-enable
 	]
 	if any [
@@ -894,6 +885,7 @@ enable-face: func [
 	] [
 		traverse-face face [enable-face/no-show face]
 	]
+	svvf/set-face-state face none
 	any [no-show show face]
 ]
 
@@ -920,18 +912,18 @@ disable-face: func [
 ;			unless in face 'saved-feel [print dump-obj face]
 		save-feel face make face/feel [over: engage: detect: none] ; don't touch redraw
 		save-font face make face/font []
-		either all [
-			in face 'access
-			in face/access 'disable-face*
-		] [
-			face/access/disable-face* face
-		][
-			either block? face/effect [
-				append face/effect copy disabled-effect
-			][
-				face/effect: copy disabled-effect
-			]
-		]
+		;either all [
+		;	in face 'access
+		;	in face/access 'disable-face*
+		;] [
+		;	face/access/disable-face* face
+		;][
+		;	either block? face/effect [
+		;		append face/effect copy disabled-effect
+		;	][
+		;		face/effect: copy disabled-effect
+		;	]
+		;]
 		act-face face none 'on-disable
 	]
 	;-- Disable any faces in panes
@@ -941,6 +933,7 @@ disable-face: func [
 	] [
 		traverse-face face [disable-face/no-show face] ; does traverse-face fail on an empty panel?
 	]
+	svvf/set-face-state face none
 	any [no-show show face]
 ]
 
@@ -1055,54 +1048,6 @@ ctx-access: context [
 		]
 	]
 
-	button: context [
-		disable-face*: func [face /local tmp] [
-			if face/disabled-colors [
-				tmp: face/colors
-				face/colors: face/disabled-colors
-				face/disabled-colors: tmp
-				face/color: first face/colors
-			]
-			if face/font [
-				face/font/color: face/color - 50
-			]
-			face/edge: make face/edge disabled-normal-edge
-		]
-		enable-face*: func [face /local tmp] [
-			if face/disabled-colors [
-				tmp: face/disabled-colors
-				face/disabled-colors: face/colors
-				face/colors: tmp
-				face/color: first face/colors
-			]
-			face/edge: make face/edge normal-edge
-		]
-	]
-
-	toggle: make data-state [
-		disable-face*: func [face /local tmp] [
-			if face/disabled-colors [
-				tmp: face/colors
-				face/colors: face/disabled-colors
-				face/disabled-colors: tmp
-				face/color: first face/colors
-			]
-			if face/font [
-				face/font/color: face/color - 50
-			]
-			face/edge: make face/edge disabled-normal-edge
-		]
-		enable-face*: func [face /local tmp] [
-			if face/disabled-colors [
-				tmp: face/disabled-colors
-				face/disabled-colors: face/colors
-				face/colors: tmp
-				face/color: first face/colors
-			]
-			face/edge: make face/edge normal-edge
-		]
-	]
-
 	field: make text [
 		get-face*: func [face][
 			case [
@@ -1162,31 +1107,18 @@ ctx-access: context [
 			if y [face/para/scroll/y: y * size/y]
 			face/para/scroll
 		]
-		disable-face*: func [face /local tmp] [
-			; [ ] - font color does not work properly on init due to redraw and common font object
-			tmp: face/colors
-			face/colors: face/disabled-colors
-			face/disabled-colors: tmp
-			face/font/color: 80.80.80
-			face/edge: make face/edge disabled-field-edge
-		]
-		enable-face*: func [face /local tmp] [
-			tmp: face/disabled-colors
-			face/disabled-colors: face/colors
-			face/colors: tmp
-			face/effect: none
-			face/edge: make face/edge field-edge
-		]
 	]
 
 	image: context [
 		set-face*: func [face value][
 			if any [image? value none? value][
-				set-image face value
+				; [s!] - this will be a problem with surface overriding this
+				face/draw-body/draw-image: value
+				ctx-draw/set-draw-body face
 			]
 		]
-		get-face*: func [face][face/draw-image]
-		clear-face*: func [face][set-image face none]
+		get-face*: func [face][face/draw-body/draw-image]
+		clear-face*: func [face][set-face* face none]
 		reset-face*: func [face][set-face* face face/default]
 	]
 
@@ -1496,7 +1428,10 @@ ctx-access: context [
 				set-face v true ; this breaks state
 			]
 		]
-		clear-face*: func [face /local i] [
+		get-face*: func [face] [
+			foreach f face/pane [if f/data [break/return f/var]]
+		]
+		clear-face*: func [face] [
 			foreach f face/pane [set-face/no-show f false]
 			face/data: none
 		]
@@ -1565,6 +1500,11 @@ ctx-access: context [
 			]
 			if empty? face/data [show face exit]
 			set-selectors face
+		]
+		get-face*: func [face] [
+			values: make block! []
+			foreach f face/pane [if f/data [insert tail values f/var]]
+			values
 		]
 		key-face*: func [face event] [
 			case [

@@ -42,8 +42,8 @@ stylize/master [
 	ASPECT-BOX: BOX with [fixed-aspect: true]
 
 	; Dummy box for replacing fields or other user manipulated elements.
-	; need tile effect here, possibly through DRAW
-	DUMMY: BOX load-stock 'blocked 200x24 spring [bottom] with [
+	DUMMY: BOX 200x24 spring [bottom] with [
+		surface: 'dummy
 		access: make access [
 			set-face*: func [face value] [value]
 			get-face*: func [face] [none]
@@ -51,17 +51,17 @@ stylize/master [
 		]
 	]
 
-	DRAWING: IMAGE with [
-		spring: none
-		access: make access [
-			set-face*: func [face value] [
-				face/draw-body/draw: value
-				ctx-draw/set-draw-body face
-			]
-		]
-		append init [
-			access/set-face* self second :action
-			action: none
-		]
-	]
+	;DRAWING: IMAGE with [
+	;	spring: none
+	;	access: make access [
+	;		set-face*: func [face value] [
+	;			face/draw-body/draw: value
+	;			ctx-draw/set-draw-body face
+	;		]
+	;	]
+	;	append init [
+	;		access/set-face* self second :action
+	;		action: none
+	;	]
+	;]
 ]

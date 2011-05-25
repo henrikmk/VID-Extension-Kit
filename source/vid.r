@@ -153,6 +153,9 @@ text-body: context [
 ]
 
 draw-body: context [
+	; state
+	state:				none	; Block which holds the last used states to generate this draw-body
+
 	; draw blocks
 	draw:				none	; DRAW block (none or block)
 	template:			none	; DRAW block which contains the template of the face
@@ -178,7 +181,8 @@ draw-body: context [
 	image-outer:		none	; the four outer positions in clock wise direction of the upper left position of the image (block)
 	image-inner:		none	;
 	image-center:		0x0		; the position that is the upper left corner of the draw image, if centered (pair)
-	vertices:			none	; other DRAW coordinates with spring information (block of pairs)
+	vertices:			none	; points with calculation information (block of parenthesis)
+	points:				none	; calcuated points with DRAW coordinates (block of pairs)
 ]
 
 set 'svvc vid-colors
@@ -188,6 +192,7 @@ vid-face: make face [ ; root definition
 	states:					; multiple states in order
 	virgin:					; whether the first state in the STATES block can only be invoked once by the user
 	touch:					; current state of UI feedback, such as LMB pressed, dragging, etc.
+	see:					; results of UI feedback, such as focused, unfocused, disabled, etc.
 	setup:					; face setup for constructs
 	access:					; face value access functions (object)
 	style:					; style used to define face
@@ -221,9 +226,7 @@ vid-face: make face [ ; root definition
 	text-body: none			; object with info about positions of the text
 	draw-body: none			; object with info about draw blocks in the face
 	flags: []				; option flags
-	;para: none
-	;font: none
-	font: make font [];style: none color: white align: 'left valign: 'top shadow: 1x1 colors: vid-colors/font-color]
+	font: make font [align: 'left];style: none color: white align: 'left valign: 'top shadow: 1x1 colors: vid-colors/font-color]
 	edge: make edge [size: 0x0]		; face edge
 	doc: none				; auto-doc
 	options:				; face options for popup
@@ -352,18 +355,23 @@ vid-face/multi: context [ ; default multifacet handlers
 	]
 	file: func [face blk] [
 		if pick blk 1 [
-			set-image face load-image face/file: first blk
-			if pick blk 2 [
-				face/colors: reduce [face/draw-image]
-				foreach i next blk [
-					append face/colors load-image i
-				]
-			]
+			; [s] - will be a problem with surface
+			;face/draw-body/draw-image: face load-image face/file: first blk
+			;ctx-draw/set-draw-body face
+			;if pick blk 2 [
+			;	face/colors: reduce [face/draw-image]
+			;	foreach i next blk [
+			;		append face/colors load-image i
+			;	]
+			;]
 		]
 	]
 	image: func [face blk] [
 		if pick blk 1 [
-			set-image face first blk
+			; [s] - will be a problem with surface. also we have no draw-body here
+			; the draw-body is not specified by stylize
+			;face/draw-body/draw-image: first blk
+			;ctx-draw/set-draw-body face
 			if pick blk 2 [face/images: copy blk]
 		]
 	]
@@ -542,20 +550,20 @@ grow-facets: func [new args /local pairs texts images colors files blocks val tm
 	forall args [
 		val: first args
 		switch/default type?/word val [
-			pair!   [append pairs val]
-			integer! [append pairs val]
-			string! [append texts val]
-			tuple!  [append colors val]
-			block!  [append/only blocks val]
-			file!   [append files val]
-			url!    [append files val]
-			image!  [append images val]
-			char!   [new/keycode: val]
-			logic!  [new/data: val]
-			;logic!  [new/data: new/state: val] ; big change
-			decimal! [new/data val]
-			time!   [new/rate: val]
-			word!   [
+			pair!		[append pairs val]
+			integer!	[append pairs val]
+			string!		[append texts val]
+			tuple!		[append colors val]
+			block!		[append/only blocks val]
+			file!		[append files val]
+			url!		[append files val]
+			image!		[append images val]
+			char!		[new/keycode: val]
+			logic!		[new/data: val]
+			;logic!		[new/data: new/state: val] ; big change
+			decimal!	[new/data val]
+			time!		[new/rate: val]
+			word!		[
 				any [
 					if all [new/words tmp: find new/words :val] [
 						until [function? first tmp: next tmp]	; function follows words, guaranteed
@@ -624,6 +632,8 @@ set 'stylize func [
 		new-face/flags: exclude new-face/flags state-flags
 ;		probe new
 ;		if get-style 'txt [probe get in get-style 'txt 'font]
+		; [s] - needs draw-body present to allow grow-facets to be used in it, but we don't have draw-body, as the surface has not been
+		; assigned yet and won't be until layout. therefore we have to consider that draw-body should be unimportant in certain aspects
 		grow-facets new-face args
 		either old: find styles new [change next old new-face][repend styles [new new-face]]
 		if tmp: new-face/words [  ; convert word actions to functions
@@ -803,7 +813,7 @@ set 'layout func [
 			new/styles: styles
 			new/flags: exclude new/flags state-flags
 			new/text-body: make text-body []
-			new/draw-body: make draw-body [image-inner: copy image-outer: copy inner: copy outer: array/initial 4 0x0]
+			new/draw-body: make draw-body [image-inner: copy image-outer: copy inner: copy outer: array/initial 8 0x0]
 			new/actors: make new/actors []
 			unless flag-face? new fixed [new/offset: where]
 			grow-facets new facets
@@ -815,7 +825,7 @@ set 'layout func [
 			][
 				new/parent-face: none ; used to flag that child needs to be parent
 				if :var [new/var: bind to-word :var :var] ; New 1.2.30
-				do bind new/init in new 'init
+				if get in new 'init [do bind new/init in new 'init]
 				if get in new 'surface [set-surface new]
 				if new/parent-face [new: new/parent-face]
 				if :var [set :var new var: none] ; New 1.2.30

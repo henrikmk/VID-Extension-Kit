@@ -28,8 +28,8 @@ stylize/master [
 		feel: svvf/sensor
 		access: ctx-access/image
 ;		effect: [fit]
-		edge: [size: 0x0 color: black]
-		font: [size: 16 align: 'center valign: 'middle style: 'bold shadow: 2x2]
+;		edge: [size: 0x0 color: black]
+;		font: [size: 16 align: 'center valign: 'middle style: 'bold shadow: 2x2]
 		doc: [
 			info:	"Base style for images"
 			image:	"loaded image data"
@@ -40,11 +40,14 @@ stylize/master [
 			url:	"load as image data"
 			block:	["execute when clicked" "execute when alt-clicked"]
 		]
+		surface: 'image
 		init: [
+			; need to figure out how to pass the image to the draw-body as it is not part of the surface object
+			; [s] - same problem here
 			if image? image [
 				if none? size [size: image/size]
 				if size/y < 0 [size/y: size/x * image/size/y / image/size/x  effect: insert copy effect 'fit]
-				if color [effect: join effect ['colorize color]]
+;				if color [effect: join effect ['colorize color]]
 			]
 			if none? size [size: 100x100]
 		]
@@ -95,7 +98,8 @@ stylize/master [
 			engage: func [face action event][
 				if action = 'time [
 					if empty? face/frames [exit]
-					set-image face first face/frames
+					; [s] - will be a problem with surface
+					face/draw-body/draw-image: first face/frames
 					if tail? face/frames: next face/frames [
 						face/frames: head face/frames
 					]
@@ -127,22 +131,25 @@ stylize/master [
 			set-face*: func [face image] [
 				if none? image [
 					face/data: none
-					set-image face false
+					; [s] - will be a problem with surface
+					face/draw-body/draw-image: none
 				]
 				if any [
 					logic? image
 					integer? image
 				] [
 					face/data: image
-					set-image face pick face/images image
+					; [s] - will be a problem with surface
+					face/draw-body/draw-image: pick face/images image
 				]
 				if word? image [
 					all [
 						face/data: image
-						set-image face select face/images image
+						; [s] - will be a problem with surface
+						face/draw-body/draw-image: select face/images image
 					]
 				]
-				show face
+				ctx-draw/set-draw-body face
 				image
 			]
 			get-face*: func [face] [face/data]
@@ -150,7 +157,7 @@ stylize/master [
 		init: [
 			if none? size [size: 100x100]
 			unless empty? images [
-				set-face self data
+				access/set-face* self data
 			]
 		]
 	]

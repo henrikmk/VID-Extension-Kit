@@ -59,6 +59,8 @@ effect-window-restore:	[draw [anti-alias off pen black box 3x7 12x12 fill-pen bl
 effect-window-iconify:	[draw [pen black fill-pen black box 3x12 7x16]]
 effect-window-resize:	[draw [anti-alias off pen black fill-pen black triangle 4x13 13x13 13x4]]
 
+dummy-image: load-stock 'blocked
+
 stylize/master [
 	; ---------- Labels
 	LABEL: LABEL 100x24 right black shadow none
@@ -68,7 +70,7 @@ stylize/master [
 	TEXT: TEXT 100x24 font [valign: 'middle] with stretch-x
 	FORM-TEXT: TEXT svvc/body-text-color snow para [wrap?: false] edge read-only-edge
 	LED: LED edge field-edge
-	DUMMY: DUMMY edge read-only-edge
+;	DUMMY: DUMMY edge read-only-edge
 
 	; ---------- Groups
 	BACKDROP: BACKDROP svvc/window-background-color with stretch-fill
@@ -85,13 +87,13 @@ stylize/master [
 	PARAMETER-LIST: PARAMETER-LIST edge frame-edge
 
 	; ---------- Fields
-	AREA: AREA edge field-edge with stretch-xy
-	FIELD: FIELD edge field-edge
-	INFO: INFO edge field-edge
-	NAME-FIELD: NAME-FIELD edge field-edge
-	COMPLETION-FIELD: COMPLETION-FIELD edge field-edge
-	DATA-FIELD: DATA-FIELD edge field-edge
-	SECURE-FIELD: SECURE-FIELD edge field-edge
+;	AREA: AREA edge field-edge with stretch-xy
+;	FIELD: FIELD edge field-edge
+;	INFO: INFO edge field-edge
+;	NAME-FIELD: NAME-FIELD edge field-edge
+;	COMPLETION-FIELD: COMPLETION-FIELD edge field-edge
+;	DATA-FIELD: DATA-FIELD edge field-edge
+;	SECURE-FIELD: SECURE-FIELD edge field-edge
 
 	; ---------- Lines
 	LINE: BOX svvc/line-color 2x2
@@ -101,16 +103,16 @@ stylize/master [
 	; ---------- Buttons
 	CHECK: CHECK 24x24
 	RADIO: RADIO 24x24
-	CHOICE: CHOICE svvc/action-color edge normal-edge with [font: make font [align: 'left color: black]]
+;	CHOICE: CHOICE svvc/action-color edge normal-edge with [font: make font [align: 'left color: black]]
 	ROTARY: ROTARY svvc/action-color edge [color: 160.160.160 effect: 'bevel]
 ;	TOGGLE: TOGGLE svvc/action-color edge normal-edge
-	STATE: STATE svvc/action-color edge normal-edge
+;	STATE: STATE svvc/action-color edge normal-edge
 ;	SELECTOR-TOGGLE: SELECTOR-TOGGLE svvc/action-color edge normal-edge
 ;	MULTI-SELECTOR-TOGGLE: MULTI-SELECTOR-TOGGLE svvc/action-color edge narrow-edge
 ;	ARROW: ARROW svvc/manipulator-color edge normal-edge
 ;	BUTTON: BUTTON svvc/action-color edge normal-edge
 	ACT-BUTTON: BUTTON svvc/action-color edge normal-edge
-	FOLD-BUTTON: FOLD-BUTTON svvc/action-color edge normal-edge
+;	FOLD-BUTTON: FOLD-BUTTON svvc/action-color edge normal-edge
 	HIGHLIGHT-BUTTON: BUTTON svvc/important-color with [font: make font [colors: svvc/important-font-color shadow: 1x1]]
 	MINI-BUTTON: BUTTON 100x20 font-size 10 edge mini-edge
 	TOOL-BUTTON: BUTTON edge [size: 1x1 color: 100.100.100] 50x20
@@ -118,9 +120,9 @@ stylize/master [
 	GLYPH-BUTTON: BUTTON 24x24 edge normal-edge
 	BOTTOM-BUTTON: BUTTON with [spring: [top right]]
 	CENTER-BUTTON: BUTTON with [align: [left right]]
-	SAVE-BUTTON: SAVE-BUTTON svvc/true-color edge normal-edge
-	VALIDATE-BUTTON: VALIDATE-BUTTON svvc/true-color edge normal-edge
-	LEFT-BUTTON: LEFT-BUTTON svvc/true-color edge normal-edge
+;	SAVE-BUTTON: SAVE-BUTTON svvc/true-color edge normal-edge
+;	VALIDATE-BUTTON: VALIDATE-BUTTON svvc/true-color edge normal-edge
+;	LEFT-BUTTON: LEFT-BUTTON svvc/true-color edge normal-edge
 ;	TRUE-BUTTON: TRUE-BUTTON svvc/true-color edge normal-edge
 ;	RETRY-BUTTON: RETRY-BUTTON svvc/true-color edge normal-edge
 ;	USE-BUTTON: USE-BUTTON svvc/true-color edge normal-edge
@@ -132,11 +134,11 @@ stylize/master [
 ;	FALSE-BUTTON: FALSE-BUTTON svvc/false-color edge normal-edge
 ;	NO-BUTTON: NO-BUTTON svvc/false-color edge normal-edge
 ;	CLOSE-BUTTON: CLOSE-BUTTON svvc/false-color edge normal-edge
-	POP-BUTTON: POP-BUTTON 24x24 svvc/action-color edge normal-edge
-	SORT-BUTTON: SORT-BUTTON -1x24 svvc/manipulator-color font [color: black shadow: none] edge normal-edge
-	SORT-RESET-BUTTON: SORT-RESET-BUTTON svvc/action-color edge none
-	COLOR-BUTTON: COLOR-BUTTON edge normal-edge
-	PATH-CHOICE: PATH-CHOICE svvc/action-color edge normal-edge
+;	POP-BUTTON: POP-BUTTON 24x24 svvc/action-color edge normal-edge
+;	SORT-BUTTON: SORT-BUTTON -1x24 svvc/manipulator-color font [color: black shadow: none] edge normal-edge
+;	SORT-RESET-BUTTON: SORT-RESET-BUTTON svvc/action-color edge none
+;	COLOR-BUTTON: COLOR-BUTTON edge normal-edge
+;	PATH-CHOICE: PATH-CHOICE svvc/action-color edge normal-edge
 
 	; ---------- Cells
 	DATE-WEEKDAY-CELL: DATE-WEEKDAY-CELL
@@ -156,15 +158,15 @@ stylize/master [
 	;menu-items: menu-items edge normal-edge
 
 	; ---------- Selectors
-	SELECTOR: SELECTOR svvc/action-color with [font: make font [shadow: none size: 12 style: 'bold align: 'center]]
-	MULTI-SELECTOR: MULTI-SELECTOR svvc/action-color with [font: make font [shadow: none size: 12 style: 'bold align: 'center]]
+;	SELECTOR: SELECTOR svvc/action-color with [font: make font [shadow: none size: 12 style: 'bold align: 'center]]
+;	MULTI-SELECTOR: MULTI-SELECTOR svvc/action-color with [font: make font [shadow: none size: 12 style: 'bold align: 'center]]
 
 	; ---------- Misc
 	PROGRESS: PROGRESS edge field-edge
-	SCROLLER: SCROLLER coal svvc/manipulator-color with [
-		dragger: make dragger [edge: make face/edge normal-edge]
-	]
-	SLIDER: SLIDER edge field-edge
+	;SCROLLER: SCROLLER coal svvc/manipulator-color with [
+	;	dragger: make dragger [edge: make face/edge normal-edge]
+	;]
+;	SLIDER: SLIDER edge field-edge
 	GRADIENT-SLIDER: GRADIENT-SLIDER edge field-edge
 	BALANCER: BALANCER svvc/frame-background-color edge field-edge
 	RESIZER: RESIZER svvc/frame-background-color edge field-edge

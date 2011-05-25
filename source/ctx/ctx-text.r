@@ -141,6 +141,7 @@ ctx-text: [
 				caret: tail focal-face/text
 			]
 			if flag-face? focal-face field [hilight-all focal-face]
+			svvf/set-face-state focal-face none
 		]
 		set in root-face face 'focal-face focal-face
 		act-face face none 'on-focus
@@ -178,6 +179,7 @@ ctx-text: [
 		caret: none
 		unlight-text
 		if tmp-face [
+			svvf/set-face-state tmp-face none
 			show tmp-face
 			act-face tmp-face none 'on-unfocus
 		]
@@ -719,8 +721,8 @@ ctx-text: [
 	edit: make face/feel [
 
 		redraw: func [face act pos][
-			if all [in face 'colors block? face/colors] [
-				face/color: pick face/colors face <> focal-face
+			if all [not svv/resizing? act = 'draw] [
+				ctx-draw/set-draw-body face
 			]
 		]
 
@@ -734,6 +736,7 @@ ctx-text: [
 					show face
 					act-face face event 'on-click
 					set-text-body face caret
+					svvf/set-face-state face none
 				]
 				over [
 					if not-equal? caret offset-to-caret face event/offset [
@@ -766,6 +769,7 @@ ctx-text: [
 					]
 					show face
 					set-text-body face caret
+					svvf/set-face-state face none
 					face/action face get-face face
 				]
 				up [

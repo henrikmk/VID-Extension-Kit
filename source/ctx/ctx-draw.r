@@ -89,42 +89,51 @@ set-facet-value: func [facet value 'output] [
 ]
 
 ; returns a value from a surface facet by state and event
-get-surface-facet: func [face facet state touch /local end-rule depth touch-word state-word out] [
-	facet: to-lit-word facet			; always a word
-	touch-word: to-lit-word touch		; always a word
-	state-word: to-lit-word state		; always a word
-	out: none							; output value
+get-surface-facet: func [face facet state touch see init /local end-rule depth init-word pure see-word touch-word state-word out] [
+	facet: to-lit-word facet					; always a word
+	touch-word: to-lit-word touch				; always a word
+	state-word: to-lit-word state				; always a word
+	see-word: to-lit-word see					; always a word
+	init-word: either init ['init]['no-init]	; always a word
+	out: none									; output value
 	depth: 0
 	end-rule: []
-	; we may no longer need the default, as the default is now specified with set-face-state
-	first-state-rule:	[first-state: (touch-word: to-lit-word either word? touch [touch][first-state/1])]
-	value-rule:			[set value any-type! (set-facet-value facet value out)]
-	word-rule:			[[thru state-word | thru touch-word] any [state-rule | word! | value-rule break]]
-	depth-rule:			[(if 2 = depth: depth + 1 [end-rule: [to end]])]
-	state-rule:			['state into [first-state-rule depth-rule any [word-rule | state-rule | skip]] end-rule]
-	facet-rule:			[thru facet [state-rule (end-rule: [])| value-rule]]
+	value-rule:	[set value any-type! (set-facet-value facet value out) pure-rule]
+	word-rule:	[[thru init-word pure: | thru state-word | thru see-word | thru touch-word] any [state-rule | word! | value-rule break]]
+	depth-rule:	[(if 2 = depth: depth + 1 [end-rule: [to end]])]
+	pure-rule:	[(if pure [remove/part back pure 2] pure: none)]
+	state-rule:	['state into [depth-rule any [word-rule | state-rule | skip]] end-rule]
+	facet-rule:	[thru facet [state-rule (end-rule: []) | pure: value-rule]]
 	parse face/surface [any facet-rule]
 	out
 ]
 
 ; determines the draw body from face surface, the data state and the touch state
-set-draw-body: func [face /local debug state touch value] [
+set-draw-body: func [face /init /local debug state state-block see touch value] [
+	if empty? face/surface [return false]
 	; Gather state information
-	state: all [in face 'state word? face/state face/state]
-	touch: all [in face 'touch word? face/touch face/touch]
+	state-block: reduce [
+		state: all [in face 'state word? face/state face/state]
+		touch: all [in face 'touch word? face/touch face/touch]
+		see: all [in face 'see word? face/see face/see]
+	]
+	; Do not update, if state has not changed
+	if equal? state-block face/draw-body/state [return false]
 	debug: find ctx-vid-debug/debug 'draw-body
-	if debug [print ["State:" state "Touch:" touch]]
+	if debug [print ["Init:" pick ["No" "Yes"] not init "State:" state "Touch:" touch "See:" see]]
 	foreach facet [font para margin colors draw-image template draw] [
 		; Obtain value from surface facet
 		if debug [print ["Facet:" facet "for:" describe-face face]]
-		value: get-surface-facet face facet state touch
-		; Apply surface facet to draw-body facet
-		set in face/draw-body facet
-			either all [object? value object? get in face/draw-body facet] [
-				make get in face/draw-body facet value
-			][
-				value
-			]
+		value: get-surface-facet face facet state touch see init
+		; Apply surface facet to draw-body facet if the value exists
+		if value [
+			set in face/draw-body facet
+				either all [object? value object? get in face/draw-body facet] [
+					make get in face/draw-body facet value
+				][
+					value
+				]
+		]
 		; Apply facet value to face from surface
 		switch facet [
 			font para [
@@ -134,6 +143,7 @@ set-draw-body: func [face /local debug state touch value] [
 						face/:facet: make face/:facet []
 						flag-face face :facet
 					]
+					; this overwrites any changes that are done to this
 					foreach word words-of value [
 						set in face/:facet word value/:word
 					]
@@ -161,15 +171,23 @@ set-draw-body: func [face /local debug state touch value] [
 			]
 		]
 	]
+	; [!] - should be possible to update points here as well
+	insert clear face/draw-body/points reduce face/draw-body/vertices
+	face/draw-body/state: state-block
 ]
 
 ; resizes all vertices in the DRAW body
 resize-draw-body: func [face /local fd fdo fdi fdd fdds] [
-	any [fd: face/draw-body return none]
+	unless all [
+		fd: face/draw-body
+		any [fd/template fd/draw]
+	] [
+		return false
+	]
 	fdo: fd/outer
 	fdi: fd/inner
 	; Determine outer positions
-	fd/center: face/size - 1 / 2
+	fd/center: face/size / 2
 	insert clear fdo reduce [
 		0x0										; top left
 		fd/center * 1x0 - 0x1					; top center
@@ -208,15 +226,14 @@ resize-draw-body: func [face /local fd fdo fdi fdd fdds] [
 		fdi/1									; top left
 		fdi/2 - (fdds * 1x0 / 2) + 1			; top center
 		fdi/3 - (fdds * 1x0)					; top right
-		fdi/4 - fdds + (fdds / 2 * 0x1) - 0x1	; center right
+		fdi/4 - fdds + (fdds / 2 * 0x1)			; center right
 		fdi/5 - fdds							; bottom right
 		fdi/6 - fdds + (fdds / 2 * 1x0) - 1x0	; bottom center
 		fdi/7 - (fdds * 0x1)					; bottom left
 		fdi/8 - (fdds * 0x1 / 2) + 0x1			; left center
 	]
-	fd/image-center: either image? fdd [face/size - 1 - fdd/size / 2][fd/center]
-	; go through all vertices for spring information
-	fd/vertices
+	fd/image-center: either image? fdd [face/size - fdd/size / 2][fd/center]
+	insert clear fd/points reduce fd/vertices
 ]
 
 ]

@@ -72,7 +72,7 @@ stylize/master [
 				out/style:			'pane
 				set-parent-faces/parent out face
 			] [
-;				probe disarm err
+				probe disarm err
 				throw make error! reform ["Layout error in pane" word]
 			]
 			repend face/panes [word out]

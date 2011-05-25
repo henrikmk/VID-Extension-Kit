@@ -21,9 +21,12 @@ REBOL [
 
 stylize/master [
 	SELECTOR-TOGGLE: TOGGLE with [
+		virgin: true
 		access: make access ctx-access/selector-nav
 	]
-	MULTI-SELECTOR-TOGGLE: SELECTOR-TOGGLE ; different flags
+	MULTI-SELECTOR-TOGGLE: SELECTOR-TOGGLE with [
+		virgin: false
+	] ; different flags
 
 	; list of toggles that can't be multi-selected
 	SELECTOR: FACE-CONSTRUCT with [
@@ -57,20 +60,12 @@ stylize/master [
 			foreach [key value] input-value [
 				i: i + 1
 				face/emit compose/deep [
-					; uses toggle flags for some reason rather than selector-toggle flags
-					; [!] - does not display depressed state
 					selector-toggle (face/color) (as-pair face/widths/:i face/size/y) (value) of 'selection [
 						face/parent-face/dirty?: true
-						set-face face/parent-face face/var
 						do-face face/parent-face none
 						validate-face face/parent-face
 					] with [
 						var: (to-lit-word key)
-						;edge: (make face/edge []) ; can't eliminate the outer edge here
-						append init [
-							font: make font []
-							para: make para []
-						]
 					]
 				]
 			]
@@ -142,10 +137,10 @@ stylize/master [
 			face/emit [across space 0]
 			foreach [key text value] input-value [
 				i: i + 1
+				; should be the same as for check
 				face/emit compose/deep [
 					multi-selector-toggle (widths/:i) (text) (value) (clr) [
 						face/parent-face/dirty?: true
-						alter face/parent-face/data face/var
 						do-face face/parent-face none
 						validate-face face/parent-face
 					] with [var: (to-lit-word key)]
@@ -166,12 +161,11 @@ stylize/master [
 			foreach [key value] input-value [
 				i: i + 1
 				; [ ] - allow disabling of single radio buttons in this panel
-				face/emit probe compose/deep [
+				face/emit compose/deep [
 					radio-line (value) of 'selection with [
 						var: (to-lit-word key)
 					] [
 						face/parent-face/dirty?: true
-						face/parent-face/data: face/var
 						do-face face/parent-face none
 						validate-face face/parent-face
 					]
@@ -213,6 +207,7 @@ stylize/master [
 	; Normal choice
 	CHOICE: BUTTON 150 with [
 		setup: [choice1 "Choice 1" choice2 "Choice 2" choice3 "Choice 3"]
+		surface: 'choice
 		feel: svvf/choice
 		; opens and positions the menu list
 		open-choice-face: func [face /local idx y-size] [
@@ -251,21 +246,6 @@ stylize/master [
 			get-face*: func [face] [
 				first face/data
 			]
-			resize-face*: func [face size x y /local pos] [
-				if face/font/align = 'right [exit]
-				pos: none
-				if face/effect [
-					parse face/effect [
-						thru 'draw into ['image pos: pair!]
-					]
-				]
-				if pos [
-					change pos as-pair size/x - 24 0
-				]
-				if face/choice-face [
-					; resize choice-face as well
-				]
-			]
 			key-face*: func [face event] [
 				switch event/key [
 					#" " [  ; space
@@ -284,8 +264,8 @@ stylize/master [
 			]
 		]
 		choice-face: none ; cache of choice layout
+		choice-face?: false ; whether the choice face is open
 		init: [
-			set-image self load-stock 'arrow-pop
 			; the choice face should appear in a separate layout
 			choice-face: layout/tight [
 				space 0 origin 0 caret-list 100x100 fill 1x1
@@ -320,7 +300,7 @@ stylize/master [
 					on-click [
 						; perform this action every time the mouse is clicked
 						unset-menu-face face/parent-face/pop-face
-						face/parent-face/choice-face?: false
+						face/parent-face/pop-face/choice-face?: false
 					] [
 						; perform this action only when the click happens on a different entry than the current one
 						; happens before ON-CLICK
@@ -354,12 +334,11 @@ stylize/master [
 					]
 			]
 			flag-face choice-face tabbed
-			;dump-face self; choice-face
 			; [ ] - tab-panel causes the offset to be incorrect. perhaps it's really a problem with win-offset and the edge
 			sub-face: choice-face/pane/1/sub-face
 			sub-face/pane/1/real-size: sub-face/real-size: none
 			sub-face/pane/1/size: sub-face/size: size - (2 * edge-size face)
-			sub-face/pane/1/font: make self/font []
+			sub-face/pane/1/font: make self/font [align: 'left]
 			if setup [
 				access/setup-face* self setup
 			]
@@ -385,17 +364,20 @@ stylize/master [
 
 	; Tab buttons for panel selection
 	TAB-SELECTOR: SELECTOR with [
-		; [ ] - display highlighted tabs properly
+		color: none
 		setup: [choice1 "Choice 1" 160.128.128 choice2 "Choice 2" 128.160.128 choice3 "Choice 3" 128.128.160]
 		do-setup: func [face input-value /local i][
 			i: 0
 			face/emit [across space 0]
 			foreach [pane text color] input-value [
 				i: i + 1
+				; does not perform selection properly
 				face/emit compose/deep [
 				 	tab-button (text) (any [color svvc/menu-color]) of 'selection [
 						set-face/no-show face/parent-face (to-lit-word pane)
 						do-face face/parent-face none
+					] with [
+						var: (to-lit-word pane)
 					] ; switch pane
 				]
 			]

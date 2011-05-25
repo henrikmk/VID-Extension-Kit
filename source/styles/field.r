@@ -29,12 +29,8 @@ stylize/master [
 		key-range: range: none
 		color: none
 		max-length: -1
-		colors: reduce [svvc/field-color svvc/field-select-color]
-		disabled-colors: reduce [svvc/field-color - 20 svvc/field-select-color]
+		surface: 'field
 		ctrl-keys: make bitset! [#"^H" #"^M" #"^~" #"^-" #" "]
-		;edge: [size: 2x2 color: svvc/bevel effect: 'ibevel]
-		font: [color: svvc/font-color/1 style: colors: shadow: none]
-		para: [wrap?: off]
 		feel: ctx-text/edit
 		access: ctx-access/field
 		flags: [field return tabbed on-unfocus input]
@@ -59,7 +55,6 @@ stylize/master [
 			max-length [new/max-length: second args args: next args]
 		]
 		init: [
-			if color [colors: reduce [color colors/2]]
 			;unless string? text [text: either text [form text][copy ""]]
 			;-- use actors here to map action to unfocus and return
 			if function? :action [
@@ -73,6 +68,7 @@ stylize/master [
 
 	; Read only field
 	INFO: FIELD with [
+		surface: 'info
 		colors: 180.180.180
 		feel: ctx-text/swipe
 	]
@@ -184,7 +180,7 @@ stylize/master [
 	]
 
 	AREA: FIELD spring none with [
-		para: make para [wrap?: true]
+		surface: 'area
 		; not sure that old-value is usable
 		old-value: none
 		set-old-value: func [face] [face/old-value: copy get-face face]
@@ -194,6 +190,13 @@ stylize/master [
 				sz: face/text-body/area
 				dsz: ssz - sz
 				lh: face/text-body/line-height
+				; the face does not update, but the number looks correct
+				; it seems to be updating the wrong face
+				; the show resets the face, which may bebecause of the surface resetting it
+				; we need to manipulate the surface with this way
+				; this is something that already is missing from other parts, such as changing single colors or just values
+				; the problem is described in omnifocus
+				
 				face/para/origin:
 					either 1 < abs y [ ; OSX sends only 1 step instead of 3
 						;-- Scroll wheel
@@ -226,6 +229,7 @@ stylize/master [
 		; [ ] - check that set-text-body actually sets correct ratio for the face
 		; [ ] - when focusing the text area with a mouse-click the focus ring is not set
 		area: v-scroller: h-scroller: none
+		area-surface: 'area
 		size: 200x200
 		set-scroller: func [face /local fc fp ft] [ ; used in both area and text-area
 			fc: either face/style = 'area [face][face/area]
@@ -236,7 +240,7 @@ stylize/master [
 			set-face fp/v-scroller ft/v-scroll
 			show fp/v-scroller
 			;-- Adjust horizontal scroller, if used
-			unless fc/para/wrap? [
+			unless in fp 'h-scroller [
 				fp/h-scroller/redrag ft/h-ratio
 				set-face fp/h-scroller ft/h-scroll
 				show fp/h-scroller
@@ -273,9 +277,13 @@ stylize/master [
 			;-- Build pane
 			pane: compose/deep/only [
 				across space 0
-				area 100x100 spring none
+				area 100x100 spring none with [surface: (to-lit-word area-surface)]
 				scroller 20x100 spring [left] align [right]
-					on-scroll [scroll-face face/parent-face/area 0 value]
+				; this does not scroll
+				; value is passed correctly
+				; scroll-face does not scroll properly
+				; the para is reset to 4x4, where it shouldn't be
+					on-scroll [scroll-face face/parent-face/area 0 value]; probe face/parent-face/area/para/origin]
 			]
 			;-- Add horizontal scroller if no text wrapping is used
 			unless self/para/wrap? [
@@ -290,9 +298,9 @@ stylize/master [
 ;			any [size <> -1x-1 size: pane/size + any [all [object? edge 2 * edge/size] 0]] ; not sure
 			panes: reduce ['default pane: pane/pane]
 			set [area v-scroller h-scroller] pane
-			if font [
-				area/font: font
-			]
+;			if font [
+;				area/font: font ; can't propagate it like this, as the font is now determined by the surface
+;			]
 			;-- Set actor sharing between self and area
 			foreach act [on-key on-return on-escape on-tab] [
 				insert-actor-func self act :set-scroller
@@ -319,5 +327,6 @@ stylize/master [
 		]
 	]
 
-	CODE-TEXT-AREA: FULL-TEXT-AREA font [shadow: none color: black name: "courier"]
+; can't append surface here, as the surface has already been defined during layout
+	CODE-TEXT-AREA: FULL-TEXT-AREA with [area-surface: 'code]; font [shadow: none color: black name: "courier"]
 ]

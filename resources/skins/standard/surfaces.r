@@ -1,5 +1,7 @@
 base: [
-	margin 2x2
+	margin 2x2 ; this gets deleted somehow
+	font [shadow: none valign: 'middle size: 12 align: 'left]
+	para [origin: 4x2 wrap?: on]
 ]
 frame: base [
 	colors state [
@@ -18,6 +20,11 @@ frame: base [
 			background: 210.210.210
 			shadow: 150.150.150
 		]
+		disabled [
+			shine: 220.220.220
+			background: 200.200.200
+			shadow: 160.160.160
+		]
 	]
 	template [
 		anti-alias off
@@ -33,12 +40,69 @@ frame: base [
 		released away drag-away [color: black]
 		over [color: blue]
 		pressed drag-over [color: white]
+		disabled [color: 140.140.140]
 	]
 ]
-toggle: frame [
+recessed: frame [
+	template [
+		anti-alias off
+		pen none
+		fill-pen colors/shadow
+		polygon outer/1 outer/3 inner/3 inner/7 outer/7 outer/1
+		fill-pen colors/shine
+		polygon outer/3 outer/5 outer/7 inner/7 inner/3 outer/3
+		fill-pen colors/background
+		box inner/1 inner/5 1
+	]
+]
+button: frame [
+	font [align: 'center style: 'bold]
+]
+info: recessed [
+]
+dummy: recessed [
+	draw-image (load-stock 'blocked)
+	draw [
+		pen none
+		fill-pen draw-image
+		box inner/1 inner/5
+	]
+]
+field: info [
 	colors state [
-		on [value: green]
-		off [value: black]
+		focused [
+			shine: 240.240.240
+			background: yellow
+			shadow: 140.140.140
+		]
+		unfocused [
+			shine: 240.240.240
+			background: 230.230.230
+			shadow: 140.140.140
+		]
+		disabled [
+			shine: 220.220.220
+			background: 210.210.210
+			shadow: 160.160.160
+		]
+	]
+]
+area: field [
+	para [wrap?: true]
+]
+code: field [
+	font [name: "courier"]
+]
+toggle: button [
+	colors state [
+		disabled state [
+			on [value: 0.200.0]
+			off [value: 80.80.80]
+		]
+		focused unfocused state [
+			on [value: green]
+			off [value: black]
+		]
 	]
 	draw [
 		anti-alias off
@@ -56,9 +120,9 @@ right-icon: frame [
 	font [align: 'left]
 	para [origin: 4x2]
 ]
-;choice: right-icon [
-;	draw-image (load-stock 'arrow-pop)
-;]
+choice: right-icon [
+	draw-image (load-stock 'arrow-pop)
+]
 image: base [
 	draw [
 		image image-center draw-image
@@ -93,9 +157,9 @@ radio: image [
 		]
 	]
 ]
-glyph: button [
+glyph: frame [
 	colors state [
-		released away [
+		released away drag-away [
 			value: 0.0.0
 		]
 		pressed drag-over [
@@ -104,6 +168,9 @@ glyph: button [
 		over [
 			value: blue
 		]
+		disabled [
+			value: 100.100.100
+		]
 	]
 ]
 arrow: glyph [
@@ -111,14 +178,14 @@ arrow: glyph [
 		anti-alias on
 		pen none
 		fill-pen colors/value
-		translate 10x10
+		translate center
 		rotate direction
 		triangle 0x-5 5x5 -5x5
 	]
 ]
 check-line: check [
 	draw [image image-outer/8 draw-image]
-	para [origin: 26x2] ; appears to be shared
+	para [origin: 26x2]
 	font state [
 		released away drag-away [align: 'left style: none color: black]
 		over [color: blue]
@@ -132,5 +199,122 @@ radio-line: radio [
 		released away drag-away [align: 'left style: none color: black]
 		over [color: blue]
 		pressed drag-over [color: white]
+	]
+]
+tab: button [
+	colors state [
+		on state [
+			released away drag-away [
+				shine: 240.240.240
+				background: 210.210.210
+				shadow: 140.140.140
+			]
+			pressed drag-over [
+				shine: 140.140.140
+				background: 100.100.100
+				shadow: 240.240.240
+			]
+			over [
+				shine: 250.250.250
+				background: 220.220.220
+				shadow: 150.150.150
+			]
+			disabled [
+				shine: 220.220.220
+				background: 200.200.200
+				shadow: 160.160.160
+			]
+		]
+		off state [
+			released away drag-away [
+				shine: 240.240.240
+				background: 160.160.160
+				shadow: 140.140.140
+			]
+			pressed drag-over [
+				shine: 140.140.140
+				background: 100.100.100
+				shadow: 240.240.240
+			]
+			over [
+				shine: 250.250.250
+				background: 170.170.170
+				shadow: 150.150.150
+			]
+			disabled [
+				shine: 220.220.220
+				background: 160.160.160
+				shadow: 160.160.160
+			]
+		]
+	]
+	template state [
+		on [
+			anti-alias off
+			pen none
+			fill-pen colors/shine
+			box outer/7 (inner/1 + 0x3)
+			box (outer/1 + 4x0) (inner/3 - 2x0)
+			fill-pen colors/shadow
+			box outer/5 (inner/3 + 0x3)
+			; Background
+			fill-pen colors/background
+			shape [
+				move (inner/7 + 0x2)
+				line (inner/1 + 0x3)
+				line (inner/1 + 3x0)
+				line (inner/3 - 3x0)
+				line (inner/3 + 0x3)
+				line (inner/5 + 0x2)
+			]
+			fill-pen (colors/shine + 10)
+			shape [
+				move 0x5
+				'line 5x-5
+				'line 1x1
+				'line -4x4
+			]
+			fill-pen (second interpolate colors/shine colors/shadow 3)
+			shape [
+				move outer/3
+				'move 0x5
+				'line -5x-5
+				'line 0x1
+				'line 4x4
+			]
+		]
+		off [
+			anti-alias off
+			pen none
+			fill-pen colors/shine
+			box (outer/7 - 0x2) (inner/1 + 0x5)
+			box (outer/1 + 4x2) (inner/3 - 2x-2)
+			fill-pen colors/shadow
+			box (outer/5 - 0x2) (inner/3 + 0x5)
+			fill-pen colors/background
+			shape [
+				move inner/7
+				line (inner/1 + 0x5)
+				line (inner/1 + 3x2)
+				line (inner/3 - 3x-2)
+				line (inner/3 + 0x4)
+				line inner/5
+			]
+			fill-pen (colors/shine + 10)
+			shape [
+				move 0x7
+				'line 5x-5
+				'line 1x1
+				'line -4x4
+			]
+			fill-pen (second interpolate colors/shine colors/shadow 3)
+			shape [
+				move (outer/3 + 0x2)
+				'move 0x5
+				'line -5x-5
+				'line 0x1
+				'line 4x4
+			]
+		]
 	]
 ]

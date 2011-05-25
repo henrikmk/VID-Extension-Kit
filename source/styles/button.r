@@ -25,13 +25,10 @@ stylize/master [
 	BUTTON: FACE 100x24 "Button" spring [bottom right] with [
 		value: false
 		color: image: none
-		font: [align: 'center valign: 'middle shadow: 0x0 style: 'bold]
 		feel: svvf/button
 		effects: none
 		depth: 128
-		disabled-colors: none
-		surface: 'frame
-		access: ctx-access/button
+		surface: 'button
 		doc: [
 			info: "Rectangular, rendered buttons"
 			string: ["button label" "button down label"]
@@ -46,6 +43,9 @@ stylize/master [
 				;-- Adjust size/x, if size/x = -1
 				size: face-size-from-text self 'x
 			]
+			; this ignores colors until they are fixed in surfaces
+			; which is currently a design problem
+			if color [color: none]
 		]
 	]
 	; Multi-state button
@@ -151,7 +151,7 @@ stylize/master [
 	CHECK: SENSOR with [
 		set [font edge para] none
 		size: 24x24
-		feel: svvf/toggle
+		feel: svvf/mutex
 		surface: 'check
 		access: ctx-access/data
 		states: [off on]
@@ -162,7 +162,7 @@ stylize/master [
 	CHECK-MARK: CHECK
 
 	CHECK-LINE: BUTTON middle with [
-		feel: svvf/toggle
+		feel: svvf/mutex
 		access: ctx-access/data-state
 		states: [off on]
 		surface: 'check-line
@@ -218,27 +218,25 @@ stylize/master [
 		text: none
 		surface: 'arrow
 		direction: 0
-		init: [
-			direction:
-				switch data [
-					up north [0]
-					up-right north-east [45]
-					right east [90]
-					right-down south-east [135]
-					down south [180]
-					left-down south-west [225]
-					left west [270]
-					up-left north-west [315]
+		access: make access [
+			set-face*: func [face value] [
+				face/direction: switch/default face/data: value [
+					up north				[0]
+					up-right north-east		[45]
+					right east				[90]
+					right-down south-east	[135]
+					down south				[180]
+					left-down south-west	[225]
+					left west				[270]
+					up-left north-west		[315]
+				] [
+					0
 				]
+			]
 		]
-;			unless effect [
-;;				state: either all [colors state: pick colors 2] [state][black]
-;				effect: compose [fit arrow (svvc/glyph-color) .7 rotate (
-;					select [up 0 right 90 down 180 left 270] data)]
-;				state: 'off
-;;					if all [colors image] [insert next effect reduce ['colorize first colors]]
-;			]
-;		]
+		init: [
+			access/set-face* self data
+		]
 		words: [up right down left north south east west north-east north-west south-east south-west [new/data: first args args]]
 	]
 

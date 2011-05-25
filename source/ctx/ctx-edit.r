@@ -69,7 +69,7 @@ ctx-text: [
 		/local tmp-face
 	][
 		unfocus
-		if not face [exit]
+		any [face exit]
 		focal-face: face
 		if not string? face/text [
 			face/text: either face/text [form face/text][copy ""]
@@ -81,7 +81,7 @@ ctx-text: [
 			caret: tail face/text
 		]
 		if flag-face? face field [hilight-all face]
-		if not no-show [show face]
+		any [no-show show face]
 	]
 
 	set 'unfocus func [

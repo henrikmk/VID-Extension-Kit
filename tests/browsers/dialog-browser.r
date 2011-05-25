@@ -44,6 +44,7 @@ view make-window [
 			h3 "Requesters"
 			bar
 			bt "REQUEST-COLOR"
+			bt "REQUEST-DIR"
 			bt "REQUEST-FILE"
 			bt "REQUEST-VALUE"
 			bt "REQUEST-RENAME"

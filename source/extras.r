@@ -88,14 +88,40 @@ face-size-from-text: func [face dir /local sz] [
 	face/size
 ]
 
+; interpolate between two colors
+interpolate: func [color1 color2 length /local step] [
+	blk: make block! length
+	color1: color1 + 0.0.0.0
+	color2: color2 + 0.0.0.0
+	diff: reduce [
+		color2/1 - color1/1
+		color2/2 - color1/2
+		color2/3 - color1/3
+		color2/4 - color1/4
+	]
+	append blk color1
+	; linear interpolate between colors
+	; negative is showing the diff properly
+	length: length - 1
+	repeat i length - 1 [
+		append blk to-tuple reduce [
+			to-integer diff/1 / length * i + color1/1
+			to-integer diff/2 / length * i + color1/2
+			to-integer diff/3 / length * i + color1/3
+			to-integer diff/4 / length * i + color1/4
+		]
+	]
+	append blk color2
+]
 ; put this somewhere as a VID draw function
 ; sets an image via DRAW instead of FACE/IMAGE. Assumes an IMAGE-DRAW-BLOCK. Takes text adjustment into account.
-set-image: func [face image] [
-	unless block? face/effect [face/effect: copy/deep [draw [image 0x0 none]]]
-	pos: 0x0
-	if all [face/size face/text image face/font/align <> 'right] [
-		pos: face/size - image/size - any [all [face/edge face/edge/size * 2] 0x0]
-	]
-	face/effect/draw/2: pos ; set position
-	face/effect/draw/3: face/draw-image: image ; set image
-]
+; obsolete
+;set-image: func [face image] [
+;	unless block? face/effect [face/effect: copy/deep [draw [image 0x0 none]]]
+;	pos: 0x0
+;	if all [face/size face/text image face/font/align <> 'right] [
+;		pos: face/size - image/size - any [all [face/edge face/edge/size * 2] 0x0]
+;	]
+;	face/effect/draw/2: pos ; set position
+;	face/effect/draw/3: face/draw-image: image ; set image
+;]

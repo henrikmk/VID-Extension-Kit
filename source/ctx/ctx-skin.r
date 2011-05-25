@@ -59,12 +59,12 @@ set 'read-skin func [file /local item skin p paren-rule] [
 		if exists? item: to-file rejoin [dirize file join type '.r] [
 			set in skin type load item
 		]
-		; Process parenthesis blocks
+		; Process parenthesis blocks, except for template and draw
 		switch type [
 			surfaces [
 				; [!] - this executes code in the skin, which is not secure
 				; so the dialect should be extended with specific image loading
-				paren-rule: [any [p: paren! (change p do p/1) | into paren-rule | skip]]
+				paren-rule: [any [p: paren! (change p do p/1) | ['template | 'draw] opt 'state skip | into paren-rule | skip]]
 				parse skin/surfaces paren-rule
 			]
 		]
