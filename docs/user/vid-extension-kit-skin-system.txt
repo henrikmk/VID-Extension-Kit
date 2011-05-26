@@ -4,7 +4,7 @@ VID Extension Kit Skin System
 
 The skin system in the VID Extension Kit works by applying skin information to faces, such as draw blocks, colors, images, etc. as they would appear in different states. This means for example that if a button is pressed, a separate DRAW block can be used to draw the face, for the period of time, where the left mouse button is pressed.
 
-The relation between skins and faces is not 1:1, which means that several faces can share the same skin and the skin information is not tied to the face, as skins are stored as separate resources.
+The relation between skins and faces is not 1:1, which means that several faces can share the same surface and the skin information is not tied to the face, as skins are stored as separate resources.
 
 Between the skin and the face, a number of concepts are used to translate skin information to something that the face can use.
 
@@ -14,7 +14,7 @@ In the sections below, each concept is described.
 
 ---Skin
 
-A SKIN is a list of surfaces, images, colors, etc.
+A SKIN is a list of surfaces, images, colors, etc. The skin exists as a list of files on disk, which when included are loaded off disk at startup, or when building the VID Extension Kit using <tt>build.r</tt>, includes the skin in the skin stock.
 
 +++Functions
 
@@ -22,101 +22,146 @@ A SKIN is a list of surfaces, images, colors, etc.
 
 :load-skin - Loads a skin from the skin stock in memory into the surfaces list.
 
-:read-skin - Reads a skin from disk, using a specific file structure and appends it to the skin stock.
+:read-skin - Reads a skin from disk, using a specific file structure, evaluates parenthesis values, such as for loading images directly into the facet. This is done for all facets except DRAW and TEMPLATE and appends it to the skin stock.
 
 ---Surfaces
 
-SURFACES are a list of objects that contain information about how a face should appear in different states. The list of surfaces is updated every time a new skin is loaded.
+SURFACES are a list of objects that contain information about how a face should appear in different states. The list of surfaces is updated every time a new skin is loaded or if a new surface is added.
 
 Surfaces are inherited, so if you create a base surface, a child may contain changed or additional facets.
 
 One surface may have several children. Surfaces may only have one direct parent, but can have any number of ancestors.
 
-Surfaces are described in the <tt>surfaces.r</tt> file by a dialect, starting with the base surface. The dialect is described in a separate chapter
+For example, in the standard skin:
+
+# The BUTTON surface is the child of FRAME and contains specific font details for BUTTON.
+
+# FRAME contains a DRAW template for how a button will appear in the GUI for all states as well as a set of standard colors for each state. 
+
+# FRAME is then again based on the BASE surface, which contains basic margin, font and paragraph information.
+
+# BASE is the base style with no ancestors.
+
+Surfaces are described in the <tt>surfaces.r</tt> file by a dialect, starting with the base surface. The dialect is described in a separate chapter.
+
+All surface descriptions for one skin are listed in the <tt>surfaces.r</tt> file.
 
 +++Functions
 
-...make-surface
-
-This creates a surface object using the surface dialect. A surface description may either stand alone or refer to a parent. This function is used, when loading a skin from the skin stock.
-
-Each surface is an object that contains <strong>surface facets</strong>, and these facets are supported:
-
-:colors - The colors are a block of tuples with a set-word! name. The colors are bound to the TEMPLATE and DRAW blocks.
-
-:margin - This describes the vertical and horizontal distance in pixels between INNER and OUTER edges of the draw blocks.
-
-:template - This is the background DRAW block.
-
-:draw - This is the foreground DRAW block.
-
-:font - This contains FONT object changes.
-
-:para - This contains PARA object changes.
-
-Some maintenance facets:
-
-:parent - This is a word which describes the parent of this face and is used when combining surfaces for the draw body object.
-
-Example:
-
-	make-surface/parent
-		'frame
-		[
-			colors: (
-				up alt-up [
-					shine: 240.240.240
-					background: 200.200.200
-					shadow: 140.140.140
-				]
-				down alt-down [
-					shine: 140.140.140
-					background: 100.100.100
-					shadow: 240.240.240
-				]
-			)
-			template: [
-				anti-alias off
-				pen none
-				fill-pen colors/shine
-				polygon outer/1 outer/3 inner/3 inner/7 outer/7 outer/1
-				fill-pen colors/shadow
-				polygon outer/3 outer/5 outer/7 inner/7 inner/3 outer/3
-				fill-pen colors/background
-				box inner/1 inner/5 1
-			]
-			font: (
-				up alt-up away [color: black]
-				over [color: blue]
-				down alt-down [color: white]
-			)
-		]
-		'base
-
 ...set-surface
 
-This builds a combined surface object from a surface and all of its ancestors. It uses the face to work on as an input argument. The face should contain a word, with the name of the surface to use in FACE/SURFACE. The function then converts that word into the combined surface object.
+This builds a combined surface object from a surface and all of its ancestors. It uses the face to work on as an input argument and the face should contain a word, with the name of the surface to use in FACE/SURFACE. The function then converts that word into the combined surface object.
+
+if the face does not contain a DRAW-BODY object or does not contain a SURFACE word, the SET-SURFACE function returns immediately.
 
 If the function is called, when FACE/SURFACE is NONE or already is an object, nothing will occur.
 
-When done, it calls the set-draw-body function to create draw body information from the state of the face and the new surface object in FACE/SURFACE, so it will have correct appearance, when displayed.
+When the surface object is being built, the surface object may contain DRAW or TEMPLATE facets with DRAW blocks that contain parenthesis
 
-The function is called during layout.
+When the surface object is built, it's <strong>copied</strong> and put in the face at FACE/SURFACE.
 
-Example:
+Then, it calls the SET-DRAW-BODY function to create DRAW-BODY information from the state of the face and the new surface object in FACE/SURFACE, so it will have correct appearance, when displayed.
+
+The function is called during layout, so it's normally not necessary to call it.
+
+Example of using the FRAME surface:
 
 	face/surface: 'frame
 	set-surface face
 
----draw-body
+---DRAW-BODY
 
-The DRAW-BODY is an object that resides inside each face as FACE/DRAW-BODY and describes skin information to be applied to the face for one state. That information is taken from FACE/SURFACE, FACE/STATE and FACE/EVENT.
+The DRAW-BODY is an object that resides inside each face as FACE/DRAW-BODY and describes skin information to be applied to the face for one state. That information is taken from FACE/SURFACE, FACE/STATE, FACE/SEE and FACE/TOUCH as well as during an initialization phase.
 
 A facet from the draw-body object is known as a <strong>draw-body facet</strong>. This is to differentiate from a <strong>surface facet</strong>.
 
 The draw-body object also contains coordinate information for resizing DRAW blocks.
 
-+++Contents
++++States
+
+The face object contains multiple state words that are managed and generated at different times:
+
+...FACE/STATE
+
+This is a word which is generated, when the face switches <strong>data state</strong> and may be related to GET-FACE and SET-FACE. If you click a TOGGLE, it switches between the states ON and OFF, where both are words.
+
+The state words are generated from the FACE/STATES block and you can define any words you want, as long as they don't collide with words used in FACE/SEE, FACE/TOUCH or by using the INIT word.
+
+You should not set the word directly, as FACE/STATE will be generated by the SET-FACE-STATE function, at the same time as the action is run. See more details on when the face action is run for a face under FACE/TOUCH.
+
+For TOGGLE, the FACE/STATES block is:
+
+	[off on]
+
+where the first state is the default state. The FACE/STATES block is repeated, once the last state is reached.
+
+The FACE/VIRGIN value, which is TRUE or FALSE is used to determine whether the first state in the STATES block should be used. in subsequent repetitions.
+
+Example for a basic multi-state face:
+
+	face/virgin: true
+	face/states: [multi on off]
+
+And in use:
+
+	*starting point*
+	face/states: [multi on off]
+	face/state: 'multi
+	*click*
+	face/states: [on off]
+	face/state: 'on
+	*click*
+	face/states: [off]
+	face/state: 'off
+	*click*
+	face/states: [on off]
+	face/state: 'on
+	*click*
+	face/states: [off]
+	face/state: 'off
+	etc.
+
+...FACE/SEE
+
+This is a word which is generated when the face changes appearance due to a system change:
+
+:FOCUSED - When the face is focused, using the FOCUS function.
+
+:UNFOCUSED - When the face is unfocused. This is default.
+
+:DISABLED - When the face is disabled, using the DISABLE-FACE function.
+
+...FACE/TOUCH
+
+This is a word which is generated, when the user interacts with the face, essentially "touching" it with the mouse cursor. The reason for this word is to combine the otherwise tedious detection of whether the mouse button is clicked, while over the face, as the event system does not provide this information directly. This is also why the event is not passed to the surface directly.
+
+The value of FACE/TOUCH is generated using the SET-FACE-STATE function.
+
+:RELEASED - When a mouse button is released over or away from the face. Just before setting this word, the SET-FACE-STATE function runs the action of the face, if the face does not have a FACE/RATE and also only if the previous state is PRESSED or DRAG-OVER. This means that you can't run the action of a face, while the mouse is not over the face.
+
+:PRESSED - When the mouse is pressed over the face.
+
+:DRAG-OVER - When the mouse while pressed, is dragged over the face.
+
+:DRAG-AWAY - When the mouse while pressed, is dragged away from the face.
+
+:OVER - When the mouse, while released, is moved over the face.
+
+:AWAY - When the mouse, while released, is moved away from the face.
+
+When FACE/RATE is not NONE, the face action needs to be run separately from the SET-FACE-STATE function inside the FEEL object. The FACE/TOUCH value does not change on a TIME event.
+
+...INIT
+
+The special INIT state is run when the surface is created, so that values that only need to be set once, are only set that one time. This counts for values in state blocks. When the state has been found and applied, the state is removed, so the amount of information in the surface object to parse is reduced.
+
+Values that stand alone are set only once, automatically and then removed from the surface object.
+
+...Order of State Words
+
+The order of the words is important, as they determine, which state is detected first in the state block. First the INIT word is searched for, then FACE/STATE, then FACE/SEE and finally FACE/TOUCH.
+
++++DRAW-BODY Contents
 
 The content of the DRAW-BODY object is:
 
@@ -128,7 +173,7 @@ The content of the DRAW-BODY object is:
 
 :template - The TEMPLATE, i.e. background draw block. Is visible behind the DRAW draw block. This block is meant to be bound to the draw body object.
 
-:draw-image - An image used in the DRAW or TEMPLATE draw block
+:draw-image - An image or a state block of images used in the DRAW or TEMPLATE draw block.
 
 :inner - A block of 8 pairs, positioned around the edge of the face minus the distance set by MARGIN, starting from the upper left corner and moving clockwise around the face.
 
@@ -146,13 +191,19 @@ The content of the DRAW-BODY object is:
 
 :para - Changes to the para object as used in the face.
 
+:vertices - A block of code blocks, extracted from the TEMPLATE or the DRAW draw blocks during creation of the surface object with SET-SURFACE. Each block represents a coordinate that is recalculated, when the DRAW block is resized, enabling movable points at any positions in the face. This is bound to the DRAW-BODY itself, so you can reference INNER, OUTER, etc. as reference points for calculating relative positions.
+
+:points - The result pair values from the reduced VERTICES block. This is bound to the DRAW block.
+
 +++Functions
 
 ...set-draw-body
 
-This applies surface information to the draw-body object, based on the input states and the combined surface object that exists in FACE/SURFACE.
+This applies surface information to the DRAW-BODY object, based on the input states (FACE/STATE, FACE/SEE, FACE/TOUCH and a special INIT state) and the combined surface object that exists in FACE/SURFACE.
 
-The input states are set in various places in FEEL objects and are set as FACE/EVENT and FACE/STATE.
+If the face does not have a DRAW-BODY object or does not have any surface information, the function returns immediately.
+
+The input states are set in various places in FEEL objects and are set as FACE/STATE, FACE/SEE and FACE/TOUCH.
 
 :FACE/EVENT - This describes a single word as used with user input, such as when clicking a button, you would have a 'down event. Note that this is <strong>not</strong> an event! object. It is allowed to have this value to be NONE.
 
@@ -166,41 +217,134 @@ Whenever FACE/EVENT or FACE/STATE contain values that do not exist for a facet i
 
 ...resize-draw-body
 
-This changes coordinate information in the draw-body object and is called only during resize.
+This changes coordinate information in the DRAW-BODY object and is called only during resize. It allows the DRAW or TEMPLATE block to scale with the face.
 
 ---Draw Blocks
 
-DRAW blocks are bound to the draw-body object, so that you can define a draw block statically, and simply use the coordinate words stored in the draw-body. Whenever the coordinates change due to a resize, the draw block does not need to be changed. It simply redraws the draw block in the new dimensions.
+DRAW blocks are bound to the DRAW-BODY object, so that you can define a draw block statically, and simply use the coordinate words stored in the DRAW-BODY to scale the draw block as the face resizes. It simply redraws the draw block in the new dimensions after the resize.
 
-There are two draw blocks: TEMPLATE and DRAW. The idea is then that each face will be able to use both draw blocks to draw the background and the foreground of the face. The intent is then that you use the TEMPLATE draw block, to, say, draw the button frame of any kind of button, and then use the DRAW block to draw in details and icons.
+There is no extension to DRAW other than allowing for paren! blocks to be used to compute point positions that move relative to a resize, and are otherwise arbitrarily positioned in the DRAW block.
+
+There are two DRAW blocks: TEMPLATE and DRAW. The idea is then that each face will be able to use both DRAW blocks to draw the background and the foreground of the face. The intent is then that you use the TEMPLATE draw block, to, say, draw the button frame of any kind of button, and then use the DRAW block to draw in details, indication and icons.
 
 The face text is generated by View, so DRAW text is not used for face text.
 
++++Coordinates
+
+There are a range of standard coordinates available to quickly position images or draw lines and edges along common locations in the face. When used in a DRAW block, they will be converted to coordinates appropriate for the current size of the face.
+
+Up to 34 different points are calculated.
+
+...OUTER
+
+The DRAW block has 9 positions, which are used for generating coordinates, one in each corner and one in the middle of each edge, and finally one in the center. This is one of 8 pairs, starting from the upper left corner and moves clockwise around the face. These 8 pairs constitute the OUTER block of pairs, that follow the outer edge of the face.
+
+The 9th pair constitutes the center of the face.
+
+...INNER
+
+Another 8 pairs are generated from OUTER, called INNER, by adding a MARGIN value, which are positioned (by default 2 pixels) inwards from the edge of the face.
+
+...IMAGE-OUTER
+
+Then another 8 pairs are generated from OUTER, called IMAGE-OUTER. They form coordinates based on the size of the image currently stored in FACE/DRAW-BODY/DRAW-IMAGE, allowing you to place the image as "knobs" around the edge of the DRAW block.
+
+...IMAGE-INNER
+
+Finally the last 8 pairs, IMAGE-INNER are the same as IMAGE-OUTER, just based on the INNER pairs, rather than the OUTER pairs.
+
+...CENTER
+
+This is the center of the face.
+
+...IMAGE-CENTER
+
+This is the center of the face, taking the image size into account. This is useful for placing an image at the center of the face.
+
+Box that spans the upper left corner (first point) and the lower right corner (fifth point):
+
+	[
+		pen none
+		fill-pen black
+		box inner/1 inner/5
+	]
+
+Plain centered image:
+
+	[
+		image image-center draw-image
+	]
+
++++Vertices
+
+Arbitrary points can also be computed by doing this in parenthesis. These are called vertices. There can be any number of vertices.
+
+They are points that are offset in relation to one of the 34 points calculated in the previous section.
+
+The contents of each computation block is bound to the DRAW-BODY object and when SET-SURFACE creates the surface object, each parenthesis block is converted to a point reference, POINTS/1, POINTS/2, etc., so you will see those words instead of the parenthesis blocks, if you probe the FACE/SURFACE draw blocks.
+
+As such, a 5x5 pixel offset from the upper right and lower right corner of the face to draw a line, is done like this:
+
+	[
+		line (outer/3 + -5x5) (outer/5 - 5)
+	]
+
 ===Creating a Skin
+
+The skin consists of images, colors, materials, surfaces. Currently, only the surfaces aspect is implemented.
+
+---Skin Files
+
+The skin files are located in the resources/skins/ directory. Each skin has its own name, by the name of the directory under the skins/ directory. This allows you to reference a skin only by that directory name and the VID Extension Kit will know how to load it.
+
+Under each skin directory a number of files can exist:
+
+:images.r - This will contain all image bitmaps in any form that is understandable by REBOL. If this file is not present, it will be ignored.
+
+:colors.r - This will contain all colors either as calculated values or as tuples. If this file is not present, it will be ignored.
+
+:materials.r - Images and colors can be used to form materials. Materials are a concept for simplifying the creation of complex widget appearances with highlights, shadows and gradients. If this file is not present, it will be ignored.
+
+:surfaces.r - This contains all surface information that can be used in styles and is the last file to be loaded. It bases its content on draw blocks and materials, colors and images. <strong>This file must be present.</strong>
 
 ---Surface Dialect
 
-The surfaces.r file contains a list of surfaces, which is read with READ-SKIN. The content is a dialect.
+The <tt>surfaces.r</tt> file contains a list of surfaces, which is read with READ-SKIN. The content is a dialect.
 
 Example:
 
 	base: [
-		margin: 2x2
+		margin 2x2
+		font [shadow: none valign: 'middle size: 12 align: 'left]
+		para [origin: 4x2 wrap?: on]
+	]
+	box: base [
+		font [shadow: 2x2 size: 16 align: 'center color: white style: 'bold]
 	]
 	frame: base [
-		colors: (
-			up alt-up [
-				shine: 240.240.240
+		colors state [
+			released away drag-away [
+				background: any [color 200.200.200]
+				shine: background + 40
+				shadow: background - 60
+			]
+			pressed drag-over [
+				background: any [all [color color / 2] 100.100.100]
+				shine: background - 40
+				shadow: background + 60
+			]
+			over [
+				background: any [all [color color + 10] 210.210.210]
+				shine: background + 40
+				shadow: background - 60
+			]
+			disabled [
 				background: 200.200.200
-				shadow: 140.140.140
+				shine: background + 20
+				shadow: background - 30
 			]
-			down alt-down [
-				shine: 140.140.140
-				background: 100.100.100
-				shadow: 240.240.240
-			]
-		)
-		template: [
+		]
+		template [
 			anti-alias off
 			pen none
 			fill-pen colors/shine
@@ -210,20 +354,55 @@ Example:
 			fill-pen colors/background
 			box inner/1 inner/5 1
 		]
-		font: (
-			up alt-up away [color: black]
+		font state [
+			released away drag-away [color: black]
 			over [color: blue]
-			down alt-down [color: white]
-		)
+			pressed drag-over [color: white]
+			disabled [color: 140.140.140]
+		]
 	]
 
-Each surface is a name, followed by a block. If a surface has a parent, the block is preceded by the name of that parent surface.
+Each surface is a name as a set-word!, followed by a <em>value</em> or a <em>state block</em>. If a surface has a parent, the value or the state block is preceded by the name of that parent surface.
 
-+++ Facet Contents
++++ State Blocks
 
-Each facet (margin, font, template, draw) can contain a plain value or a paren!:
+A state block is the word 'state followed by a block of states, where each state is a word from FACE/STATE, FACE/TOUCH or FACE/SEE or the INIT word. State words can be combined, if multiple states should represent the same outcome.
 
-:Plain value - This is used directly, and is returned, whenever the particular facet is requested. If the plain value is an object!, it will be combined with its own parent. If not, the child value will be used.
+The state words are then followed by a value.
 
-:Paren! - This is recognized as a state block; A block which contains set-words! for states and any other types for values. As shown, several states, such as UP and ALT-UP in the COLORS facet, may share the same value. The paren!s are not evaluated, but are converted to objects at load time.
+In this example, the COLORS facet uses a state block with the PRESSED and RELEASED states. If FACE/TOUCH contains the PRESSED state, the returned value is [value: 0.0.0]:
 
+	colors state [
+		pressed [value: 0.0.0]
+		released [value: 50.50.50]
+	]
+
+In this example, multiple states are used for the same outcome:
+
+	font state [
+		released away drag-away [color: black]
+		over [color: blue]
+		pressed drag-over [color: white]
+		disabled [color: 140.140.140]
+	]
+
+State blocks can exist inside other state blocks. This is useful in cases where you want to create a state block for FACE/STATE, where each outcome would then be evaluated for FACE/TOUCH. It doesn't necessarily have to be divided this way, as you can mix the words as you like, but it makes sense.
+
+Example:
+
+	colors state [
+		disabled state [
+			on [value: 0.200.0]
+			off [value: 80.80.80]
+		]
+		focused unfocused state [
+			on [value: green]
+			off [value: black]
+		]
+	]
+
++++ Plain Values
+
+Plain values are simply used directly. Example:
+
+	colors [value: 0.200.0]

@@ -41,17 +41,6 @@ surface: make object! [
 		none
 ]
 
-; creates a new surface or updates an existing one
-set 'make-surface func [name data] [
-	name: to-word name
-	either find surfaces name [
-		change next find surfaces name data
-	][
-		append surfaces name
-		append surfaces data
-	]
-]
-
 ; sets the skin of the face by applying skin information to the DRAW-BODY
 set 'set-surface func [face /local i parent paren-rule s] [
 	unless all [word? face/surface object? face/draw-body] [return false]
