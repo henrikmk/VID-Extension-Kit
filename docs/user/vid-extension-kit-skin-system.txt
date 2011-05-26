@@ -175,25 +175,25 @@ The content of the DRAW-BODY object is:
 
 :draw-image - An image or a state block of images used in the DRAW or TEMPLATE draw block.
 
-:inner - A block of 8 pairs, positioned around the edge of the face minus the distance set by MARGIN, starting from the upper left corner and moving clockwise around the face.
+:inner - See the Coordinates section.
 
-:outer - A block of 8 pairs, positioned around the edge of the face, starting from the upper left corner and moving clockwise around the face.
+:outer - See the Coordinates section.
 
-:center - The center of the face as a pair.
+:center - See the Coordinates section.
 
-:image-center - The center of the face as a pair, calculating in the size of the DRAW-IMAGE. Used for centering an image.
+:image-center - See the Coordinates section.
 
-:image-inner - A block of 8 pairs, positioned around the edge of the face minus the distance set by MARGIN, starting from the upper left corner and moving clockwise around the face. Takes the size of the DRAW-IMAGE into account, so the image can be placed on these points.
+:image-inner - See the Coordinates section.
 
-:image-outer - A block of 8 pairs, positioned around the edge of the face, starting from the upper left corner and moving clockwise around the face. Takes the size of the DRAW-IMAGE into account, so the image can be placed on these points.
+:image-outer - See the Coordinates section.
+
+:vertices - See the Coordinates section.
+
+:points - See the Coordinates section.
 
 :font - Changes to the font object as used in the face.
 
 :para - Changes to the para object as used in the face.
-
-:vertices - A block of code blocks, extracted from the TEMPLATE or the DRAW draw blocks during creation of the surface object with SET-SURFACE. Each block represents a coordinate that is recalculated, when the DRAW block is resized, enabling movable points at any positions in the face. This is bound to the DRAW-BODY itself, so you can reference INNER, OUTER, etc. as reference points for calculating relative positions.
-
-:points - The result pair values from the reduced VERTICES block. This is bound to the DRAW block.
 
 +++Functions
 
@@ -366,9 +366,9 @@ Each surface is a name as a set-word!, followed by a <em>value</em> or a <em>sta
 
 +++ State Blocks
 
-A state block is the word 'state followed by a block of states, where each state is a word from FACE/STATE, FACE/TOUCH or FACE/SEE or the INIT word. State words can be combined, if multiple states should represent the same outcome.
+A state block is the word <tt>'state</tt> followed by a block of states, where each state is a word from FACE/STATE, FACE/TOUCH or FACE/SEE or the INIT word. Several state words can follow eachother, if multiple states should represent the same outcome.
 
-The state words are then followed by a value.
+The state words are then followed by a value or another state block.
 
 In this example, the COLORS facet uses a state block with the PRESSED and RELEASED states. If FACE/TOUCH contains the PRESSED state, the returned value is [value: 0.0.0]:
 
@@ -386,11 +386,25 @@ In this example, multiple states are used for the same outcome:
 		disabled [color: 140.140.140]
 	]
 
-State blocks can exist inside other state blocks. This is useful in cases where you want to create a state block for FACE/STATE, where each outcome would then be evaluated for FACE/TOUCH. It doesn't necessarily have to be divided this way, as you can mix the words as you like, but it makes sense.
+State blocks can exist inside other state blocks. This is useful in cases where you want to create a state block for FACE/STATE, where each outcome would then be evaluated for FACE/TOUCH. It doesn't necessarily have to be divided this way, as you can mix the words from each source as you like, but it can make logical sense to do it.
 
-Example:
+In this example, the FACE/TOUCH state is used as the outer state description, while the FACE/STATE state is used to provide the inner state description:
 
 	colors state [
+		disabled state [
+			on [value: 0.200.0]
+			off [value: 80.80.80]
+		]
+		focused unfocused state [
+			on [value: green]
+			off [value: black]
+		]
+	]
+
+Using the INIT state, is simply done by using the INIT word:
+
+	colors state [
+		init [value: 50.50.50]
 		disabled state [
 			on [value: 0.200.0]
 			off [value: 80.80.80]
