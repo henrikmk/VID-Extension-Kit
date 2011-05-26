@@ -35,7 +35,7 @@ make-window: func [pane /options opts] [
 		; so perhaps we need some way to use the pane-size differently
 			get-style 'resizable-window
 			[
-				color: svvc/window-background-color
+				color: ctx-colors/colors/window-background-color
 				feel: make object! [
 					redraw: none
 					detect: get in system/view/window-feel 'detect

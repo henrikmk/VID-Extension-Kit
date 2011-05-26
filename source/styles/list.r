@@ -237,18 +237,18 @@ stylize/master [
 			either find face/selected cell/pos/y [ ; [!] - this is bound on visible selection?
 				cell/color:
 					either flag-face? face disabled [
-						svvc/select-disabled-color
+						ctx-colors/colors/select-disabled-color
 					][
-						svvc/select-color
+						ctx-colors/colors/select-color
 					]
-				cell/font/color: svvc/select-body-text-color
+				cell/font/color: ctx-colors/colors/select-body-text-color
 			][
-				cell/color: svvc/field-color
+				cell/color: ctx-colors/colors/field-color
 				cell/font/color:
 					either flag-face? face disabled [
-						svvc/body-text-disabled-color
+						ctx-colors/colors/body-text-disabled-color
 					][
-						svvc/body-text-color
+						ctx-colors/colors/body-text-color
 					]
 			]
 			if odd? cell/pos/y [

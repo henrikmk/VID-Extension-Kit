@@ -306,9 +306,9 @@ For a better experience, it helps to look at the original standard VID source fo
 
 	FIELD: FACE 200x24 with [
 		color: none
-		colors: reduce [svvc/field svvc/field-select]
-		edge: [size: 2x2 color: svvc/bevel effect: 'ibevel]
-		font: [color: svvc/field-font style: colors: shadow: none]
+		colors: reduce [ctx-colors/colors/field ctx-colors/colors/field-select]
+		edge: [size: 2x2 color: ctx-colors/colors/bevel effect: 'ibevel]
+		font: [color: ctx-colors/colors/field-font style: colors: shadow: none]
 		para: [wrap?: off]
 		feel: ctx-text/edit
 		access: ctx-access/field
@@ -321,7 +321,7 @@ For a better experience, it helps to look at the original standard VID source fo
 		words: [hide [new/data: copy "" flag-face new hide args]]
 	]
 
-Now the resources we use become clear; There is <tt>svvc</tt>, which is short for <tt>system/view/vid/vid-colors</tt>. There is <tt>ctx-text</tt> which is for text editing and <tt>ctx-access</tt>, which provides standard accessors to styles like <tt>FIELD</tt>.
+Now the resources we use become clear; There is <tt>ctx-colors/colors</tt>, which is short for <tt>system/view/vid/vid-colors</tt>. There is <tt>ctx-text</tt> which is for text editing and <tt>ctx-access</tt>, which provides standard accessors to styles like <tt>FIELD</tt>.
 
 Like when creating any REBOL object, the definition order is important. But the placement of the <tt>init</tt> block becomes less important, because it will not be executed until after it has been placed in the layout.
 

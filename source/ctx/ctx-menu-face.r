@@ -30,9 +30,9 @@ menu-face: none		; the menu face in the window
 set 'make-menu-face does [
 	make get-style 'face [
 		size: 0x0
-		color: svvc/window-background-color
+		color: ctx-colors/colors/window-background-color
 		font: make font [color: black shadow: none size: 12]
-		edge: make face/edge [color: svvc/window-background-color size: 2x2 effect: 'bevel]
+		edge: make face/edge [color: ctx-colors/colors/window-background-color size: 2x2 effect: 'bevel]
 		style: 'menu
 		flags: [scrollable]
 		show?: false

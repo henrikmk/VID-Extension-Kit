@@ -195,7 +195,7 @@ stylize/master [
 ; so this needs to be entirely rewritten
 
 	REBOL-WINDOW: COMPOUND spring [right bottom] with [
-		color: svvc/window-background-color
+		color: ctx-colors/colors/window-background-color
 		size: none
 		access: make access [
 			;-- sets the window title if string is passed. if block is passed, window content is set
@@ -283,7 +283,7 @@ stylize/master [
 
 	; REBOL window with vertical and horizontal scrollbars and resize
 	;REBOL-WINDOW-OLD: FACE spring [right bottom] with [
-	;	color: svvc/window-background-color
+	;	color: ctx-colors/colors/window-background-color
 	;	size: none
 	;	access: make access [
 	;		;-- sets the window title if string is passed. if block is passed, window content is set

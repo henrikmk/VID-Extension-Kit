@@ -179,19 +179,19 @@ stylize/master [
 					face/text: form value/day
 				]
 				;-- Cell indicators
-				face/color: svvc/day-color
+				face/color: ctx-colors/colors/day-color
 				if block? value [
 					either find value 'out-of-month [
-						face/color: svvc/out-of-month-color
+						face/color: ctx-colors/colors/out-of-month-color
 					][
 						if find value 'weekend [
-							face/color: svvc/weekend-color
+							face/color: ctx-colors/colors/weekend-color
 						]
 						if find value 'selected [
 							face/color: face/color + 20
 						]
 						if find value 'day [
-							face/color: svvc/today-color
+							face/color: ctx-colors/colors/today-color
 						]
 					]
 				]
@@ -206,7 +206,7 @@ stylize/master [
 	DATE-MONTH: COMPOUND with [
 		dates: none
 		sunday: false
-		color: svvc/grid-color
+		color: ctx-colors/colors/grid-color
 		access: make access [
 			set-face*: func [face value /local i] [
 				if date? value [face/data: value/date]                  ; store date as for month to display

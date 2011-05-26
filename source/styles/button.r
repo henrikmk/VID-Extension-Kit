@@ -254,7 +254,6 @@ stylize/master [
 		spring: [bottom right]
 		append init [
 			access/set-face* self any [color black]
-			color: svvc/action-color
 		]
 		access: make access [
 			set-face*: func [face value] [

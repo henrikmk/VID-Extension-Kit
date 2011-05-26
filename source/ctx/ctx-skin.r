@@ -38,7 +38,7 @@ skin-object: make object! [
 ; parse the skin and build images, colors and surfaces in that order
 set 'make-skin func [skin [object!]] [
 	;---------- Colors
-	; colors are appliable for draw blocks, which means they must be ready before surfaces
+	append clear ctx-colors skin/colors
 	;---------- Images
 	; images are appliable as draw images, which means they must be ready before surfaces
 	;---------- Materials

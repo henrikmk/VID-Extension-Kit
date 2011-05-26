@@ -260,7 +260,7 @@ stylize/master [
 						fs/pane/1/color:
 						fs/pane/2/color:
 						fs/pane/3/color:
-							svvc/focus-ring-color
+							ctx-colors/colors/focus-ring-color
 						if all [object? face/submenu face/submenu/pos <> id] [
 							; this works, now we need to display the submenu so we can undisplay it
 							;print ["clearing old submenu" face/submenu/pos]

@@ -23,18 +23,18 @@ REBOL [
 ]
 
 ; ---------- Edges
-normal-edge:			[color: svvc/window-background-color + 5 size: 2x2 effect: 'bevel]
+normal-edge:			[color: ctx-colors/colors/window-background-color + 5 size: 2x2 effect: 'bevel]
 disabled-normal-edge:	[image: standard-edge.png size: 2x2 effect: [extend 2 2 contrast -30 luma 50]]
-narrow-edge:			[color: svvc/window-background-color size: 1x2 effect: 'bevel]
-horizontal-edge:		[color: svvc/window-background-color size: 0x2 effect: 'bevel]
-field-edge:				[color: svvc/window-background-color + 5 size: 2x2 effect: 'ibevel]
+narrow-edge:			[color: ctx-colors/colors/window-background-color size: 1x2 effect: 'bevel]
+horizontal-edge:		[color: ctx-colors/colors/window-background-color size: 0x2 effect: 'bevel]
+field-edge:				[color: ctx-colors/colors/window-background-color + 5 size: 2x2 effect: 'ibevel]
 disabled-field-edge:	[image: standard-edge.png size: 2x2 effect: [invert extend 2 2 contrast -30 luma 50]]
-read-only-edge:			[color: svvc/line-color size: 2x2 effect: none]
-frame-edge:				[color: svvc/frame-background-color size: 2x2 effect: 'ibevel]
-mini-edge:				[color: svvc/window-background-color size: 1x1]
-tip-edge:				[color: svvc/tool-tip-edge-color size: 1x1]
+read-only-edge:			[color: ctx-colors/colors/line-color size: 2x2 effect: none]
+frame-edge:				[color: ctx-colors/colors/frame-background-color size: 2x2 effect: 'ibevel]
+mini-edge:				[color: ctx-colors/colors/window-background-color size: 1x1]
+tip-edge:				[color: ctx-colors/colors/tool-tip-edge-color size: 1x1]
 warning-edge:			[size: 2x2 color: 240.240.0 effect: [tile colorize 100.100.100] image: load-stock 'blocked]
-window-edge:			[size: 1x1 color: svvc/line-color effect: none]
+window-edge:			[size: 1x1 color: ctx-colors/colors/line-color effect: none]
 
 ; ---------- Borders and Spacing
 system/view/vid/vid-space: 2x2
@@ -68,14 +68,14 @@ stylize/master [
 
 	; ---------- Texts
 	TEXT: TEXT 100x24 font [valign: 'middle] with stretch-x
-	FORM-TEXT: TEXT svvc/body-text-color snow para [wrap?: false] edge read-only-edge
+	FORM-TEXT: TEXT ctx-colors/colors/body-text-color snow para [wrap?: false] edge read-only-edge
 	LED: LED edge field-edge
 ;	DUMMY: DUMMY edge read-only-edge
 
 	; ---------- Groups
-	BACKDROP: BACKDROP svvc/window-background-color with stretch-fill
+	BACKDROP: BACKDROP ctx-colors/colors/window-background-color with stretch-fill
 	GROUP: PANEL fill 1x0 spring [top]
-	FRAME: FRAME svvc/frame-background-color edge frame-edge
+	FRAME: FRAME ctx-colors/colors/frame-background-color edge frame-edge
 	WARNING-FRAME: WARNING-FRAME edge warning-edge
 	SCROLL-FRAME: SCROLL-FRAME edge frame-edge
 	H-SCROLL-FRAME: H-SCROLL-FRAME edge frame-edge
@@ -96,59 +96,59 @@ stylize/master [
 ;	SECURE-FIELD: SECURE-FIELD edge field-edge
 
 	; ---------- Lines
-	LINE: BOX svvc/line-color 2x2
+	LINE: BOX ctx-colors/colors/line-color 2x2
 	BAR: LINE fill 1x0 spring [bottom]
 	VLINE: LINE fill 0x1 spring [right]
 
 	; ---------- Buttons
 	CHECK: CHECK 24x24
 	RADIO: RADIO 24x24
-;	CHOICE: CHOICE svvc/action-color edge normal-edge with [font: make font [align: 'left color: black]]
-;	ROTARY: ROTARY svvc/action-color edge [color: 160.160.160 effect: 'bevel]
-;	TOGGLE: TOGGLE svvc/action-color edge normal-edge
-;	STATE: STATE svvc/action-color edge normal-edge
-;	SELECTOR-TOGGLE: SELECTOR-TOGGLE svvc/action-color edge normal-edge
-;	MULTI-SELECTOR-TOGGLE: MULTI-SELECTOR-TOGGLE svvc/action-color edge narrow-edge
-;	ARROW: ARROW svvc/manipulator-color edge normal-edge
-;	BUTTON: BUTTON svvc/action-color edge normal-edge
-	ACT-BUTTON: BUTTON svvc/action-color edge normal-edge
-;	FOLD-BUTTON: FOLD-BUTTON svvc/action-color edge normal-edge
-	HIGHLIGHT-BUTTON: BUTTON svvc/important-color with [font: make font [colors: svvc/important-font-color shadow: 1x1]]
+;	CHOICE: CHOICE ctx-colors/colors/action-color edge normal-edge with [font: make font [align: 'left color: black]]
+;	ROTARY: ROTARY ctx-colors/colors/action-color edge [color: 160.160.160 effect: 'bevel]
+;	TOGGLE: TOGGLE ctx-colors/colors/action-color edge normal-edge
+;	STATE: STATE ctx-colors/colors/action-color edge normal-edge
+;	SELECTOR-TOGGLE: SELECTOR-TOGGLE ctx-colors/colors/action-color edge normal-edge
+;	MULTI-SELECTOR-TOGGLE: MULTI-SELECTOR-TOGGLE ctx-colors/colors/action-color edge narrow-edge
+;	ARROW: ARROW ctx-colors/colors/manipulator-color edge normal-edge
+;	BUTTON: BUTTON ctx-colors/colors/action-color edge normal-edge
+	ACT-BUTTON: BUTTON ctx-colors/colors/action-color edge normal-edge
+;	FOLD-BUTTON: FOLD-BUTTON ctx-colors/colors/action-color edge normal-edge
+	HIGHLIGHT-BUTTON: BUTTON ctx-colors/colors/important-color with [font: make font [colors: ctx-colors/colors/important-font-color shadow: 1x1]]
 	MINI-BUTTON: BUTTON 100x20 font-size 10 edge mini-edge
 	TOOL-BUTTON: BUTTON edge [size: 1x1 color: 100.100.100] 50x20
 	ICON-BUTTON: BUTTON 24x24 edge none with [init: []] ; problematic as we want an icon-button with edge as well
 	GLYPH-BUTTON: BUTTON 24x24 edge normal-edge
 	BOTTOM-BUTTON: BUTTON with [spring: [top right]]
 	CENTER-BUTTON: BUTTON with [align: [left right]]
-;	SAVE-BUTTON: SAVE-BUTTON svvc/true-color edge normal-edge
-;	VALIDATE-BUTTON: VALIDATE-BUTTON svvc/true-color edge normal-edge
-;	LEFT-BUTTON: LEFT-BUTTON svvc/true-color edge normal-edge
-;	TRUE-BUTTON: TRUE-BUTTON svvc/true-color edge normal-edge
-;	RETRY-BUTTON: RETRY-BUTTON svvc/true-color edge normal-edge
-;	USE-BUTTON: USE-BUTTON svvc/true-color edge normal-edge
-;	SEND-BUTTON: SEND-BUTTON svvc/true-color edge normal-edge
-;	OK-BUTTON: OK-BUTTON svvc/true-color edge normal-edge
-;	YES-BUTTON: YES-BUTTON svvc/true-color edge normal-edge
-;	CANCEL-BUTTON: CANCEL-BUTTON svvc/false-color edge normal-edge
-;	RIGHT-BUTTON: RIGHT-BUTTON svvc/false-color edge normal-edge
-;	FALSE-BUTTON: FALSE-BUTTON svvc/false-color edge normal-edge
-;	NO-BUTTON: NO-BUTTON svvc/false-color edge normal-edge
-;	CLOSE-BUTTON: CLOSE-BUTTON svvc/false-color edge normal-edge
-;	POP-BUTTON: POP-BUTTON 24x24 svvc/action-color edge normal-edge
-;	SORT-BUTTON: SORT-BUTTON -1x24 svvc/manipulator-color font [color: black shadow: none] edge normal-edge
-;	SORT-RESET-BUTTON: SORT-RESET-BUTTON svvc/action-color edge none
+;	SAVE-BUTTON: SAVE-BUTTON ctx-colors/colors/true-color edge normal-edge
+;	VALIDATE-BUTTON: VALIDATE-BUTTON ctx-colors/colors/true-color edge normal-edge
+;	LEFT-BUTTON: LEFT-BUTTON ctx-colors/colors/true-color edge normal-edge
+;	TRUE-BUTTON: TRUE-BUTTON ctx-colors/colors/true-color edge normal-edge
+;	RETRY-BUTTON: RETRY-BUTTON ctx-colors/colors/true-color edge normal-edge
+;	USE-BUTTON: USE-BUTTON ctx-colors/colors/true-color edge normal-edge
+;	SEND-BUTTON: SEND-BUTTON ctx-colors/colors/true-color edge normal-edge
+;	OK-BUTTON: OK-BUTTON ctx-colors/colors/true-color edge normal-edge
+;	YES-BUTTON: YES-BUTTON ctx-colors/colors/true-color edge normal-edge
+;	CANCEL-BUTTON: CANCEL-BUTTON ctx-colors/colors/false-color edge normal-edge
+;	RIGHT-BUTTON: RIGHT-BUTTON ctx-colors/colors/false-color edge normal-edge
+;	FALSE-BUTTON: FALSE-BUTTON ctx-colors/colors/false-color edge normal-edge
+;	NO-BUTTON: NO-BUTTON ctx-colors/colors/false-color edge normal-edge
+;	CLOSE-BUTTON: CLOSE-BUTTON ctx-colors/colors/false-color edge normal-edge
+;	POP-BUTTON: POP-BUTTON 24x24 ctx-colors/colors/action-color edge normal-edge
+;	SORT-BUTTON: SORT-BUTTON -1x24 ctx-colors/colors/manipulator-color font [color: black shadow: none] edge normal-edge
+;	SORT-RESET-BUTTON: SORT-RESET-BUTTON ctx-colors/colors/action-color edge none
 ;	COLOR-BUTTON: COLOR-BUTTON edge normal-edge
-;	PATH-CHOICE: PATH-CHOICE svvc/action-color edge normal-edge
+;	PATH-CHOICE: PATH-CHOICE ctx-colors/colors/action-color edge normal-edge
 
 	; ---------- Cells
 	DATE-WEEKDAY-CELL: DATE-WEEKDAY-CELL
-		svvc/weekday-color 30x30 with [font: make font [color: svvc/weekday-font-color shadow: none size: 12]]
-	DATE-CELL: DATE-CELL 30x30 with [font: make font [color: svvc/day-font-color shadow: none size: 12]]
+		ctx-colors/colors/weekday-color 30x30 with [font: make font [color: ctx-colors/colors/weekday-font-color shadow: none size: 12]]
+	DATE-CELL: DATE-CELL 30x30 with [font: make font [color: ctx-colors/colors/day-font-color shadow: none size: 12]]
 	;MENU-BUTTON: menu-button
-	;	with [colors: reduce [svvc/menu-color black]]
+	;	with [colors: reduce [ctx-colors/colors/menu-color black]]
 	;	font [
-	;		color: first svvc/menu-text-color
-	;		colors: svvc/menu-text-color
+	;		color: first ctx-colors/colors/menu-text-color
+	;		colors: ctx-colors/colors/menu-text-color
 	;		shadow: none
 	;		offset: 6x2 ; this is basically to allow correct font display for font-size 12
 	;	]
@@ -158,23 +158,23 @@ stylize/master [
 	;menu-items: menu-items edge normal-edge
 
 	; ---------- Selectors
-;	SELECTOR: SELECTOR svvc/action-color with [font: make font [shadow: none size: 12 style: 'bold align: 'center]]
-;	MULTI-SELECTOR: MULTI-SELECTOR svvc/action-color with [font: make font [shadow: none size: 12 style: 'bold align: 'center]]
+;	SELECTOR: SELECTOR ctx-colors/colors/action-color with [font: make font [shadow: none size: 12 style: 'bold align: 'center]]
+;	MULTI-SELECTOR: MULTI-SELECTOR ctx-colors/colors/action-color with [font: make font [shadow: none size: 12 style: 'bold align: 'center]]
 
 	; ---------- Misc
 	PROGRESS: PROGRESS edge field-edge
-	;SCROLLER: SCROLLER coal svvc/manipulator-color with [
+	;SCROLLER: SCROLLER coal ctx-colors/colors/manipulator-color with [
 	;	dragger: make dragger [edge: make face/edge normal-edge]
 	;]
 ;	SLIDER: SLIDER edge field-edge
 	GRADIENT-SLIDER: GRADIENT-SLIDER edge field-edge
-	BALANCER: BALANCER svvc/frame-background-color edge field-edge
-	RESIZER: RESIZER svvc/frame-background-color edge field-edge
+	BALANCER: BALANCER ctx-colors/colors/frame-background-color edge field-edge
+	RESIZER: RESIZER ctx-colors/colors/frame-background-color edge field-edge
 
 	; ---------- Windows
 	REBOL-WINDOW: REBOL-WINDOW edge window-edge
 	REBOL-DIALOG-WINDOW: REBOL-DIALOG-WINDOW edge window-edge
-	WINDOW-BUTTON: WINDOW-BUTTON svvc/action-color edge normal-edge
-	WINDOW-TITLE: WINDOW-TITLE svvc/action-color edge normal-edge
+	WINDOW-BUTTON: WINDOW-BUTTON ctx-colors/colors/action-color edge normal-edge
+	WINDOW-TITLE: WINDOW-TITLE ctx-colors/colors/action-color edge normal-edge
 	
 ]

@@ -990,7 +990,7 @@ The color list exists in <tt>system/view/vid/vid-colors</tt> and is as follows:
 		disabled-action-colors:		reduce [action-color - 50 action-color - 50]
 	]
 
-A global shortcut to these colors is in <tt>svvc</tt>.
+A global shortcut to these colors is in <tt>ctx-colors/colors</tt>.
 
 +++Limitations
 

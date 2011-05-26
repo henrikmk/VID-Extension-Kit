@@ -314,16 +314,16 @@ stylize/master [
 							; [ ] - when using keyboard, colors are swapped here, due to the keyboard moving the selected face
 							case [
 								all [face/over face/over/y = cell/pos/y] [
-									cell/color: svvc/line-color
-									cell/font/color: svvc/select-body-text-color
+									cell/color: ctx-colors/colors/line-color
+									cell/font/color: ctx-colors/colors/select-body-text-color
 								]
 								find face/selected cell/pos/y [
-									cell/color: svvc/select-color
-									cell/font/color: svvc/select-body-text-color
+									cell/color: ctx-colors/colors/select-color
+									cell/font/color: ctx-colors/colors/select-body-text-color
 								]
 								true [
-									cell/color: svvc/menu-color
-									cell/font/color: svvc/body-text-color
+									cell/color: ctx-colors/colors/menu-color
+									cell/font/color: ctx-colors/colors/body-text-color
 								]
 							]
 						]
@@ -377,7 +377,7 @@ stylize/master [
 				i: i + 1
 				; does not perform selection properly
 				face/emit compose/deep [
-				 	tab-button (text) (any [color svvc/menu-color]) of 'selection [
+				 	tab-button (text) (any [color ctx-colors/colors/menu-color]) of 'selection [
 						set-face/no-show face/parent-face (to-lit-word pane)
 						do-face face/parent-face none
 					] with [

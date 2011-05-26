@@ -26,7 +26,7 @@ ctx-focus-ring: context [
 focus-edge: func [side] [
 	make get-style 'face [
 		size: 2x2
-		color: svvc/focus-ring-color
+		color: ctx-colors/colors/focus-ring-color
 		edge: none
 		style: 'highlight
 		var: side

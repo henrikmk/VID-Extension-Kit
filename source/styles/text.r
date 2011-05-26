@@ -56,7 +56,7 @@ stylize/master [
 
 	VTEXT: BASE-TEXT with [
 		feel: ctx-text/swipe
-		font: [color: black shadow: 0x0 colors: svvc/font-color]
+		font: [color: black shadow: 0x0 colors: ctx-colors/colors/font-color]
 		doc: [info: "Video text (light on dark)"]
 		insert init [
 			if :action [feel: svvf/hot saved-area: true]
@@ -65,7 +65,7 @@ stylize/master [
 
 	; Text style with string/numeric awareness
 	TEXT: VTEXT
-		svvc/body-text-color
+		ctx-colors/colors/body-text-color
 		shadow none
 		doc [info: "Document text"]
 		with [
@@ -148,9 +148,9 @@ stylize/master [
 		]
 	]
 	TXT: TEXT
-	BANNER: VTEXT "Banner" svvc/title-text-color bold font-size 24 center middle shadow 3x3
+	BANNER: VTEXT "Banner" ctx-colors/colors/title-text-color bold font-size 24 center middle shadow 3x3
 		doc [info: "Video text title"]
-	VH1: BANNER "Video Text" svvc/title-text-color font-size 20 doc [info: "Video text heading"]
+	VH1: BANNER "Video Text" ctx-colors/colors/title-text-color font-size 20 doc [info: "Video text heading"]
 	VH2: VH1 font-size 16 shadow 2x2
 	VH3: VH2 font [style: [bold italic]]
 	VH4: VH2 font-size 14
