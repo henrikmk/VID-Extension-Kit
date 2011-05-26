@@ -69,7 +69,7 @@ stylize/master [
 		surface: 'draw-test
 	] [
 		; action sets draw body
-		ctx-draw/set-draw-body face
+		set-draw-body face
 	]
 ]
 

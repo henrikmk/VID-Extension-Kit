@@ -1,29 +1,32 @@
 base: [
-	margin 2x2 ; this gets deleted somehow
+	margin 2x2
 	font [shadow: none valign: 'middle size: 12 align: 'left]
 	para [origin: 4x2 wrap?: on]
+]
+box: base [
+	font [shadow: 2x2 size: 16 align: 'center color: white style: 'bold]
 ]
 frame: base [
 	colors state [
 		released away drag-away [
-			shine: 240.240.240
-			background: 200.200.200
-			shadow: 140.140.140
+			background: any [color 200.200.200]
+			shine: background + 40
+			shadow: background - 60
 		]
 		pressed drag-over [
-			shine: 140.140.140
-			background: 100.100.100
-			shadow: 240.240.240
+			background: any [all [color color / 2] 100.100.100]
+			shine: background - 40
+			shadow: background + 60
 		]
 		over [
-			shine: 250.250.250
-			background: 210.210.210
-			shadow: 150.150.150
+			background: any [all [color color + 10] 210.210.210]
+			shine: background + 40
+			shadow: background - 60
 		]
 		disabled [
-			shine: 220.220.220
 			background: 200.200.200
-			shadow: 160.160.160
+			shine: background + 20
+			shadow: background - 30
 		]
 	]
 	template [
@@ -117,7 +120,7 @@ toggle: button [
 ]
 right-icon: frame [
 	draw [image image-inner/4 draw-image]
-	font [align: 'left]
+	font [align: 'left style: 'bold]
 	para [origin: 4x2]
 ]
 choice: right-icon [

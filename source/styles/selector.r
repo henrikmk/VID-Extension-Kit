@@ -22,11 +22,13 @@ REBOL [
 stylize/master [
 	SELECTOR-TOGGLE: TOGGLE with [
 		virgin: true
+		feel: svvf/mutex
 		access: make access ctx-access/selector-nav
 	]
-	MULTI-SELECTOR-TOGGLE: SELECTOR-TOGGLE with [
+	MULTI-SELECTOR-TOGGLE: TOGGLE with [
 		virgin: false
-	] ; different flags
+		access: make access ctx-access/selector-nav
+	]
 
 	; list of toggles that can't be multi-selected
 	SELECTOR: FACE-CONSTRUCT with [
@@ -347,20 +349,22 @@ stylize/master [
 	]
 
 	; Normal rotary
-	ROTARY: BUTTON with [
-		data: copy [choice1 "Choice 1" choice2 "Choice 2" choice3 "Choice 3"]
-		edge: [size: 4x2 effect: 'bezel]
-		feel: svvf/rotary
-		access: ctx-access/data-find
-		insert init [if texts [data: texts]]
-		flags: [input]
-		words: [data [
-			;second args
-			if all [block? args new/texts: args/2 not empty? new/texts][new/text: first new/texts]
-			next args
-		]]
-		access: ctx-access/selector
-	]
+	; redesign this later
+	;ROTARY: BUTTON with [
+	;	data: copy [choice1 "Choice 1" choice2 "Choice 2" choice3 "Choice 3"]
+	;	edge: [size: 4x2 effect: 'bezel]
+	;	surface: none
+	;	feel: svvf/rotary
+	;	access: ctx-access/data-find
+	;	insert init [if texts [data: texts]]
+	;	flags: [input]
+	;	words: [data [
+	;		;second args
+	;		if all [block? args new/texts: args/2 not empty? new/texts][new/text: first new/texts]
+	;		next args
+	;	]]
+	;	access: ctx-access/selector
+	;]
 
 	; Tab buttons for panel selection
 	TAB-SELECTOR: SELECTOR with [

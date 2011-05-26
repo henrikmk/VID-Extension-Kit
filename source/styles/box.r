@@ -22,7 +22,7 @@ REBOL [
 ]
 
 stylize/master [
-	BOX: IMAGE doc [info: "shortcut for image"]
+	BOX: IMAGE doc [info: "shortcut for image"] with [surface: 'box]
 
 	BAR: BLANK-FACE -1x3 fill 1x0 spring [bottom] with [
 		edge: [size: 1x1 effect: 'bevel]
@@ -56,7 +56,7 @@ stylize/master [
 	;	access: make access [
 	;		set-face*: func [face value] [
 	;			face/draw-body/draw: value
-	;			ctx-draw/set-draw-body face
+	;			set-draw-body face
 	;		]
 	;	]
 	;	append init [

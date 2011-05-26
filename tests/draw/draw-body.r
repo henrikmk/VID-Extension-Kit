@@ -52,7 +52,7 @@ button "Enable" [enable-face t]
 ;	ok-button
 ;	cancel-button
 ;]
-	y: multi-selector []
+	y: multi-selector [probe value]
 ;	button "Get Face" [
 ;		probe get-face y
 ;	]
@@ -67,23 +67,23 @@ button "Enable" [enable-face t]
 ;field
 ;a: text-area ; scroller not working, but this is a general problem
 ;ct: code-text-area
-tab-selector [probe value]
-;t: tab-button spring none
-t: tab-panel setup [
-	a "A" [origin 4 field]
-	b "B" [origin 4 button button]
-	c "C" []
-]
+;tab-selector [probe value]
+;;t: tab-button spring none
+;t: tab-panel setup [
+;	a "A" [origin 4 field]
+;	b "B" [origin 4 button button]
+;	c "C" []
+;]
 ;code-text-area
 ;c: choice ; crashes on open
-	rs: radio-selector [probe value]
+;	rs: radio-selector [probe value]
 ;;   check-selector
 ;;	r1: radio-line "radio" [probe 'asd] ; cannot clear-face. cannot set-face.
 ;;	button "Set Face" [clear-face r1] ; does not display change in toggle
 ;;	check-line "asd"
-;;	t1: toggle "Toggle Test 1" [probe get-face face]
-;;   t2: toggle "Toggle Test 2"
-;;   t3: toggle "Toggle Test 3"
+	t1: toggle "Toggle Test 1" [probe get-face face]
+   t2: toggle "Toggle Test 2" [probe value]
+   t3: toggle "Toggle Test 3"
 ;;   ;check
 ;;   text "Test"
 ;ar:   arrow

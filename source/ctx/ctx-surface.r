@@ -71,7 +71,8 @@ set 'set-surface func [face /local i parent paren-rule s] [
 	face/surface: copy/deep surface-block
 	; Parse template and draw blocks for vertices
 	i: 0
-	face/draw-body/vertices: copy face/draw-body/points: make block! []
+	clear face/draw-body/vertices
+	clear face/draw-body/points
 	paren-rule: [
 		any [
 			p: paren! (i: i + 1 append/only face/draw-body/vertices p/1 change/only p to-path reduce ['points i])
@@ -83,7 +84,7 @@ set 'set-surface func [face /local i parent paren-rule s] [
 	bind face/draw-body/vertices face/draw-body
 	bind bind face/surface face face/draw-body
 	svvf/set-face-state face none
-	ctx-draw/set-draw-body/init face ; do an initial set here
+	set-draw-body/init face ; do an initial set here
 ]
 
 ]

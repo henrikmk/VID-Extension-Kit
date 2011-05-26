@@ -152,39 +152,6 @@ text-body: context [
 	highlight-end:		none	; highlight end index in text, from system/view (none or string)
 ]
 
-draw-body: context [
-	; state
-	state:				none	; Block which holds the last used states to generate this draw-body
-
-	; draw blocks
-	draw:				none	; DRAW block (none or block)
-	template:			none	; DRAW block which contains the template of the face
-
-	; fonts
-	font:				none	; Font object (object)
-	para:				none	; Paragraph object (object)
-
-	; colors
-	colors:				none	; object with colors from surface (object)
-
-	; images
-	draw-image:			none	; image used in DRAW block
-
-	; sizes
-	margin:				0x0		; size of the margin, i.e. distance between outer and inner limits (pair)
-
-	; positions
-	outer:				none	; the four outer corners in clock wise direction of the drawing (block)
-	inner:				none	; the four inner corners in clock wise direction of the drawing (block)
-	center:				0x0		; the center of the drawing (pair)
-	size:				0x0		; the full size of the face (pair)
-	image-outer:		none	; the four outer positions in clock wise direction of the upper left position of the image (block)
-	image-inner:		none	;
-	image-center:		0x0		; the position that is the upper left corner of the draw image, if centered (pair)
-	vertices:			none	; points with calculation information (block of parenthesis)
-	points:				none	; calcuated points with DRAW coordinates (block of pairs)
-]
-
 set 'svvc vid-colors
 
 vid-face: make face [ ; root definition
@@ -355,23 +322,18 @@ vid-face/multi: context [ ; default multifacet handlers
 	]
 	file: func [face blk] [
 		if pick blk 1 [
-			; [s] - will be a problem with surface
-			;face/draw-body/draw-image: face load-image face/file: first blk
-			;ctx-draw/set-draw-body face
-			;if pick blk 2 [
-			;	face/colors: reduce [face/draw-image]
-			;	foreach i next blk [
-			;		append face/colors load-image i
-			;	]
-			;]
+			set-image face load-image face/file: first blk
+			if pick blk 2 [
+				face/colors: reduce [face/draw-image]
+				foreach i next blk [
+					append face/colors load-image i
+				]
+			]
 		]
 	]
 	image: func [face blk] [
 		if pick blk 1 [
-			; [s] - will be a problem with surface. also we have no draw-body here
-			; the draw-body is not specified by stylize
-			;face/draw-body/draw-image: first blk
-			;ctx-draw/set-draw-body face
+			set-image face first blk
 			if pick blk 2 [face/images: copy blk]
 		]
 	]
@@ -813,7 +775,7 @@ set 'layout func [
 			new/styles: styles
 			new/flags: exclude new/flags state-flags
 			new/text-body: make text-body []
-			new/draw-body: make draw-body [image-inner: copy image-outer: copy inner: copy outer: array/initial 8 0x0]
+			if new/surface [new/draw-body: make-draw-body]
 			new/actors: make new/actors []
 			unless flag-face? new fixed [new/offset: where]
 			grow-facets new facets

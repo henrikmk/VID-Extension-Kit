@@ -722,7 +722,7 @@ ctx-text: [
 
 		redraw: func [face act pos][
 			if all [not svv/resizing? act = 'draw] [
-				ctx-draw/set-draw-body face
+				set-draw-body face
 			]
 		]
 

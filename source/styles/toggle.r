@@ -25,7 +25,7 @@ stylize/master [
 	; Standard TOGGLE
 	TOGGLE: BUTTON with [
 		text: "Toggle"
-		feel: svvf/mutex
+		feel: svvf/toggle
 		surface: 'toggle
 		states: [off on]
 		access: ctx-access/data-state
@@ -34,9 +34,9 @@ stylize/master [
 	; Tab selector button
 	TAB-BUTTON: TOGGLE with [
 		text: "Tab"
-		surface: 'tab
+		feel: svvf/mutex
 		virgin: true
-		edge: none
+		surface: 'tab
 		access: make access ctx-access/selector-nav
 	]
 

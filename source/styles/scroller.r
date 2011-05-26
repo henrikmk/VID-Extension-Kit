@@ -79,7 +79,7 @@ stylize/master [
 			; don't let dragger get smaller than 10 pixels
 			if tmp < 10 [page: either val/:axis = tmp: 10 [1][tmp / (val/:axis - tmp)]]
 			either axis = 'y [dragger/size/y: tmp][dragger/size/x: tmp]
-			ctx-draw/resize-draw-body dragger
+			resize-draw-body dragger
 		]
 	]
 
@@ -162,8 +162,8 @@ stylize/master [
 				if tmp: axis = 'x [face/down-arrow/offset: reverse face/down-arrow/offset]
 				set-face/no-show face/up-arrow pick [left up] tmp
 				set-face/no-show face/down-arrow pick [right down] tmp
-				ctx-draw/resize-draw-body face/up-arrow
-				ctx-draw/resize-draw-body face/down-arrow
+				resize-draw-body face/up-arrow
+				resize-draw-body face/down-arrow
 				face/redrag any [face/ratio 0.1]
 			]
 		]

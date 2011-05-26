@@ -26,6 +26,9 @@ stylize/master [
 	; 6 images: not validated, valid, invalid, not required, required, attention
 	VALID-INDICATOR: IMAGES 24x24 spring [left bottom] with [
 		; [ ] - load as stock instead
+		; these images must be passable to the draw-body/draw-image
+		; actually no, we must ignore draw-image, so the images surface should be blank
+		; so we need a method to keep an entirely blank face that surface system completely ignores
 		images: reduce [
 			'not-validated	load-stock 'validation-not-validated
 			'valid			load-stock 'validation-valid

@@ -99,7 +99,7 @@ This builds a combined surface object from a surface and all of its ancestors. I
 
 If the function is called, when FACE/SURFACE is NONE or already is an object, nothing will occur.
 
-When done, it calls the SET-DRAW-BODY function to create draw body information from the state of the face and the new surface object in FACE/SURFACE, so it will have correct appearance, when displayed.
+When done, it calls the set-draw-body function to create draw body information from the state of the face and the new surface object in FACE/SURFACE, so it will have correct appearance, when displayed.
 
 The function is called during layout.
 

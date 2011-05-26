@@ -30,7 +30,7 @@ ctx-draw: context [
 ; [!] - method to bind DRAW blocks on layout, possibly after init, and do this only once
 ; [x] - never restate the DRAW blocks
 ; [x] - test with some face to do this
-; [ ] - figure out when to use SET-DRAW-BODY, possibly through FEEL
+; [ ] - figure out when to use set-draw-body, possibly through FEEL
 ; [x] - apply template to a DRAW block
 ; [x] - need way to set margin easily. possibly the same as setting color and skin information
 ;       we need to do this currently by appending to init
@@ -44,11 +44,11 @@ ctx-draw: context [
 ; [ ] - allow flexing draw between lines and no lines as the corners won't be usable for both at the same time
 ; [x] - create FEEL object that uses DRAW-BODY states for mouse over, up, down
 ; [ ] - allow over, up, down states for DRAW and substates or frames for each state. the frames are determined using the states as now.
-; [ ] - determine states using set-draw-body with the FEEL object and frames using SET-DRAW-BODY
+; [ ] - determine states using set-draw-body with the FEEL object and frames using set-draw-body
 ; [ ] - alter BUTTON to use this new scheme
-; [ ] - figure out how to pass event to SET-DRAW-BODY, as FACE/STATE, FACE/STATES and FACE/DATA are normally used
+; [ ] - figure out how to pass event to set-draw-body, as FACE/STATE, FACE/STATES and FACE/DATA are normally used
 ; [ ] - keep states inside events mapping
-; [ ] - bind during SET-SURFACE instead of inside SET-DRAW-BODY, as it is less intense
+; [ ] - bind during SET-SURFACE instead of inside set-draw-body, as it is less intense
 ; [x] - support multiple words per block. a problem is that it may be possible to confuse DRAW blocks with state blocks
 ; [x] - extend objects in draw body if they are already defined instead of replacing them
 ; [x] - return value in GET-SURFACE-FACET both on event and on face state
@@ -58,6 +58,52 @@ b: v: none
 
 ; Surface parse rules
 word-rule: none
+
+; DRAW-BODY object
+draw-body: context [
+	; state
+	state:				none	; Block which holds the last used states to generate this draw-body
+
+	; draw blocks
+	draw:				none	; DRAW block (none or block)
+	template:			none	; DRAW block which contains the template of the face
+
+	; fonts
+	font:				none	; Font object (object)
+	para:				none	; Paragraph object (object)
+
+	; colors
+	colors:				none	; object with colors from surface (object)
+
+	; images
+	draw-image:			none	; image used in DRAW block
+
+	; sizes
+	margin:				0x0		; size of the margin, i.e. distance between outer and inner limits (pair)
+
+	; positions
+	outer:				none	; the four outer corners in clock wise direction of the drawing (block)
+	inner:				none	; the four inner corners in clock wise direction of the drawing (block)
+	center:				0x0		; the center of the drawing (pair)
+	size:				0x0		; the full size of the face (pair)
+	image-outer:		none	; the four outer positions in clock wise direction of the upper left position of the image (block)
+	image-inner:		none	;
+	image-center:		0x0		; the position that is the upper left corner of the draw image, if centered (pair)
+	vertices:			none	; points with calculation information (block of parenthesis)
+	points:				none	; calcuated points with DRAW coordinates (block of pairs)
+]
+
+; creates a draw-body object
+set 'make-draw-body does [
+	make draw-body [
+		image-inner: copy
+		image-outer: copy
+		inner: copy
+		outer: array/initial 8 0x0
+		points: copy
+		vertices: make block! 100
+	]
+]
 
 ; returns a facet value object by state or FALSE if not found
 get-facet-state: func [facet state] [
@@ -97,7 +143,7 @@ get-surface-facet: func [face facet state touch see init /local end-rule depth i
 	init-word: either init ['init]['no-init]	; always a word
 	out: none									; output value
 	depth: 0
-	end-rule: []
+	end-rule:	[]
 	value-rule:	[set value any-type! (set-facet-value facet value out) pure-rule]
 	word-rule:	[[thru init-word pure: | thru state-word | thru see-word | thru touch-word] any [state-rule | word! | value-rule break]]
 	depth-rule:	[(if 2 = depth: depth + 1 [end-rule: [to end]])]
@@ -109,8 +155,8 @@ get-surface-facet: func [face facet state touch see init /local end-rule depth i
 ]
 
 ; determines the draw body from face surface, the data state and the touch state
-set-draw-body: func [face /init /local debug state state-block see touch value] [
-	if empty? face/surface [return false]
+set 'set-draw-body func [face /init /local debug state state-block see touch value] [
+	if any [not face/draw-body empty? face/surface] [return false]
 	; Gather state information
 	state-block: reduce [
 		state: all [in face 'state word? face/state face/state]
@@ -177,7 +223,7 @@ set-draw-body: func [face /init /local debug state state-block see touch value] 
 ]
 
 ; resizes all vertices in the DRAW body
-resize-draw-body: func [face /local fd fdo fdi fdd fdds] [
+set 'resize-draw-body func [face /local fd fdo fdi fdd fdds] [
 	unless all [
 		fd: face/draw-body
 		any [fd/template fd/draw]

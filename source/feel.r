@@ -51,18 +51,12 @@ svvf: system/view/vid/vid-feel: context [
 		face/touch:
 			switch/default event [
 				time [
-					; need a method to switch so that we allow face/touch to repeat
-					; which means that it becomes a repeat event
-					; and while repeating, the action is done
-					; this requires a configuration in the face, possibly rate
-					; if the rate is set, then we can do this
-					; if we don't have a face rate, then we can't do this
 					face/touch
 				]
 				up [
 					if all [not face/rate find [drag-over pressed] face/touch] [
 						; Do face action on button release above face
-						do-face face face/text
+						do-face face face/data
 						act-face face event 'on-click
 						; Update face state information
 						if all [block? face/states not empty? head face/states] [
@@ -91,6 +85,7 @@ svvf: system/view/vid/vid-feel: context [
 					'pressed
 				]
 				over [
+					; Allow only release and there by a completed click cycle when mouse is over face
 					first select/skip [
 						pressed drag-over
 						drag-over drag-over
@@ -137,14 +132,22 @@ svvf: system/view/vid/vid-feel: context [
 			show face
 		]
 	]
-
-	; Used in toggles, check and radio groups
-	mutex: make hot [
+	
+	toggle: make hot [
 		redraw: func [face act pos][
 			if all [not svv/resizing? act = 'draw] [
-				ctx-draw/set-draw-body face
+				set-draw-body face
 			]
 		]
+		engage: func [face action event] [
+			if releasing? face action [face/data: not face/data]
+			set-face-state face action
+			show face
+		]
+	]
+
+	; Used in check, radio groups and selectors
+	mutex: make toggle [
 		; mutual exclusion, if there is a relation
 		engage: func [face action event][
 			if releasing? face action [
@@ -170,18 +173,13 @@ svvf: system/view/vid/vid-feel: context [
 	button: make hot [
 		redraw: func [face act pos] [
 			if all [not svv/resizing? act = 'draw] [
-				ctx-draw/set-draw-body face
+				set-draw-body face
 			]
 		]
 		cue: none
 	]
 
-	icon: make hot [
-		redraw: func [face act pos /local state] [
-			if face/pane/edge [face/pane/edge/effect: pick [ibevel bevel] 'on = face/state]
-		]
-		cue: none
-	]
+	icon: :button
 
 	subicon: make hot [
 		over: func [f a e] [f/parent-face/feel/over f/parent-face a e]
@@ -376,7 +374,7 @@ svvf: system/view/vid/vid-feel: context [
 			;	if act = 'draw [show face/pane/1]
 			;]
 			if all [not svv/resizing? act = 'draw] [
-				ctx-draw/set-draw-body face
+				set-draw-body face
 			]
 		]
 		engage: func [face action event][
@@ -1114,7 +1112,7 @@ ctx-access: context [
 			if any [image? value none? value][
 				; [s!] - this will be a problem with surface overriding this
 				face/draw-body/draw-image: value
-				ctx-draw/set-draw-body face
+				set-draw-body face
 			]
 		]
 		get-face*: func [face][face/draw-body/draw-image]

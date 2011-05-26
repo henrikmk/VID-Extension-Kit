@@ -45,7 +45,7 @@ stylize/master [
 			]
 			; this ignores colors until they are fixed in surfaces
 			; which is currently a design problem
-			if color [color: none]
+;			if color [color: none]
 		]
 	]
 	; Multi-state button
@@ -137,7 +137,7 @@ stylize/master [
 	CLOSE-BUTTON: FALSE-BUTTON "Close" align [left right] spring [left right]
 
 	; Pop button, pops an INFORM window with specific content
-	POP-BUTTON: ACT-BUTTON "..." with [
+	POP-BUTTON: ACT-BUTTON "..." 24x24 with [
 		content: none ; this could be a block or a face. if it's a face, we can assign a window title directly.
 		on-click: [
 			if face/content [
@@ -162,15 +162,20 @@ stylize/master [
 	CHECK-MARK: CHECK
 
 	CHECK-LINE: BUTTON middle with [
-		feel: svvf/mutex
+		feel: svvf/toggle
 		access: ctx-access/data-state
 		states: [off on]
 		surface: 'check-line
 		text: "Value"
-		size: 100x24
+		size: -1x24
 		access: make access ctx-access/selector-nav
 		append init [
 			if none? data [data: false]
+			if font [
+				;-- Adjust size/x, if size/x = -1
+				size: face-size-from-text self 'x
+				size: size + 24x0
+			]
 		]
 	]
 

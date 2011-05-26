@@ -88,6 +88,26 @@ face-size-from-text: func [face dir /local sz] [
 	face/size
 ]
 
+; put this somewhere as a VID draw function
+; sets an image via DRAW instead of FACE/IMAGE. Assumes an IMAGE-DRAW-BLOCK. Takes text adjustment into account.
+set-image: func [face image] [
+	either block? face/effect [
+		; Use standard face image, if the draw block is custom
+		unless parse face/effect ['draw into ['image pair! [word! | image!]]] [
+			return face/image: image
+		]
+	][
+		; Use DRAW effect image to allow centering it
+		face/effect: copy/deep [draw [image 0x0 none]]
+	]
+	pos: 0x0
+	if all [face/size face/text image face/font/align <> 'right] [
+		pos: face/size - image/size - any [all [face/edge face/edge/size * 2] 0x0]
+	]
+	face/effect/draw/2: pos ; set position
+	face/effect/draw/3: face/image ; set image
+]
+
 ; interpolate between two colors
 interpolate: func [color1 color2 length /local step] [
 	blk: make block! length
@@ -112,6 +132,13 @@ interpolate: func [color1 color2 length /local step] [
 		]
 	]
 	append blk color2
+]
+
+; set saturation level for an RGB color
+saturate: func [rgb level /local hsv] [
+	probe hsv: rgb-to-hsv rgb
+	hsv/2: level
+	hsv-to-rgb probe hsv
 ]
 ; put this somewhere as a VID draw function
 ; sets an image via DRAW instead of FACE/IMAGE. Assumes an IMAGE-DRAW-BLOCK. Takes text adjustment into account.
