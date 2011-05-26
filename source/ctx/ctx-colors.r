@@ -23,8 +23,8 @@ REBOL [
 
 ctx-colors: context [
 
-; Skin color map
-colors: []
+; Skin color object
+colors: none
 
 ; interpolate between two colors
 set 'interpolate func [color1 color2 length /local step] [
@@ -54,9 +54,9 @@ set 'interpolate func [color1 color2 length /local step] [
 
 ; set saturation level for an RGB color
 set 'saturate func [rgb level /local hsv] [
-	probe hsv: rgb-to-hsv rgb
+	hsv: rgb-to-hsv rgb
 	hsv/2: level
-	hsv-to-rgb probe hsv
+	hsv-to-rgb hsv
 ]
 
 ]

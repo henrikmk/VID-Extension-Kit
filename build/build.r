@@ -59,6 +59,7 @@ foreach file [
 	ctx/ctx-vid-debug	; debugging
 	feel				; feel and access contexts for various styles
 	ctx/ctx-text		; text editing core
+	ctx/ctx-colors		; COLORS core
 	ctx/ctx-draw		; Face DRAW core
 	ctx/ctx-surface		; SURFACE core
 	ctx/ctx-skin		; SKIN core
