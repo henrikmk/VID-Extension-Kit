@@ -24,7 +24,7 @@ REBOL [
 stylize/master [
 
 ; choice with selection of paths from root to current directory
-PATH-CHOICE: CHOICE with [
+PATH-CHOICE: CHOICE ctx-colors/colors/action-color with [
 	make-crumb: func [path /local blk root] [
 		blk: make block! 100
 		while [not root] [

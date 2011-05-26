@@ -23,7 +23,7 @@ REBOL [
 
 stylize/master [
 	; Standard TOGGLE
-	TOGGLE: BUTTON with [
+	TOGGLE: BUTTON ctx-colors/colors/action-color with [
 		text: "Toggle"
 		feel: svvf/toggle
 		surface: 'toggle

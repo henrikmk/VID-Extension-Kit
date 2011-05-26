@@ -101,44 +101,10 @@ stylize/master [
 	VLINE: LINE fill 0x1 spring [right]
 
 	; ---------- Buttons
-	CHECK: CHECK 24x24
-	RADIO: RADIO 24x24
-;	CHOICE: CHOICE ctx-colors/colors/action-color edge normal-edge with [font: make font [align: 'left color: black]]
-;	ROTARY: ROTARY ctx-colors/colors/action-color edge [color: 160.160.160 effect: 'bevel]
-;	TOGGLE: TOGGLE ctx-colors/colors/action-color edge normal-edge
-;	STATE: STATE ctx-colors/colors/action-color edge normal-edge
-;	SELECTOR-TOGGLE: SELECTOR-TOGGLE ctx-colors/colors/action-color edge normal-edge
-;	MULTI-SELECTOR-TOGGLE: MULTI-SELECTOR-TOGGLE ctx-colors/colors/action-color edge narrow-edge
-;	ARROW: ARROW ctx-colors/colors/manipulator-color edge normal-edge
-;	BUTTON: BUTTON ctx-colors/colors/action-color edge normal-edge
-	ACT-BUTTON: BUTTON ctx-colors/colors/action-color edge normal-edge
-;	FOLD-BUTTON: FOLD-BUTTON ctx-colors/colors/action-color edge normal-edge
-	HIGHLIGHT-BUTTON: BUTTON ctx-colors/colors/important-color with [font: make font [colors: ctx-colors/colors/important-font-color shadow: 1x1]]
 	MINI-BUTTON: BUTTON 100x20 font-size 10 edge mini-edge
 	TOOL-BUTTON: BUTTON edge [size: 1x1 color: 100.100.100] 50x20
 	ICON-BUTTON: BUTTON 24x24 edge none with [init: []] ; problematic as we want an icon-button with edge as well
 	GLYPH-BUTTON: BUTTON 24x24 edge normal-edge
-	BOTTOM-BUTTON: BUTTON with [spring: [top right]]
-	CENTER-BUTTON: BUTTON with [align: [left right]]
-;	SAVE-BUTTON: SAVE-BUTTON ctx-colors/colors/true-color edge normal-edge
-;	VALIDATE-BUTTON: VALIDATE-BUTTON ctx-colors/colors/true-color edge normal-edge
-;	LEFT-BUTTON: LEFT-BUTTON ctx-colors/colors/true-color edge normal-edge
-;	TRUE-BUTTON: TRUE-BUTTON ctx-colors/colors/true-color edge normal-edge
-;	RETRY-BUTTON: RETRY-BUTTON ctx-colors/colors/true-color edge normal-edge
-;	USE-BUTTON: USE-BUTTON ctx-colors/colors/true-color edge normal-edge
-;	SEND-BUTTON: SEND-BUTTON ctx-colors/colors/true-color edge normal-edge
-;	OK-BUTTON: OK-BUTTON ctx-colors/colors/true-color edge normal-edge
-;	YES-BUTTON: YES-BUTTON ctx-colors/colors/true-color edge normal-edge
-;	CANCEL-BUTTON: CANCEL-BUTTON ctx-colors/colors/false-color edge normal-edge
-;	RIGHT-BUTTON: RIGHT-BUTTON ctx-colors/colors/false-color edge normal-edge
-;	FALSE-BUTTON: FALSE-BUTTON ctx-colors/colors/false-color edge normal-edge
-;	NO-BUTTON: NO-BUTTON ctx-colors/colors/false-color edge normal-edge
-;	CLOSE-BUTTON: CLOSE-BUTTON ctx-colors/colors/false-color edge normal-edge
-;	POP-BUTTON: POP-BUTTON 24x24 ctx-colors/colors/action-color edge normal-edge
-;	SORT-BUTTON: SORT-BUTTON -1x24 ctx-colors/colors/manipulator-color font [color: black shadow: none] edge normal-edge
-;	SORT-RESET-BUTTON: SORT-RESET-BUTTON ctx-colors/colors/action-color edge none
-;	COLOR-BUTTON: COLOR-BUTTON edge normal-edge
-;	PATH-CHOICE: PATH-CHOICE ctx-colors/colors/action-color edge normal-edge
 
 	; ---------- Cells
 	DATE-WEEKDAY-CELL: DATE-WEEKDAY-CELL
@@ -167,14 +133,7 @@ stylize/master [
 	;	dragger: make dragger [edge: make face/edge normal-edge]
 	;]
 ;	SLIDER: SLIDER edge field-edge
-	GRADIENT-SLIDER: GRADIENT-SLIDER edge field-edge
 	BALANCER: BALANCER ctx-colors/colors/frame-background-color edge field-edge
 	RESIZER: RESIZER ctx-colors/colors/frame-background-color edge field-edge
 
-	; ---------- Windows
-	REBOL-WINDOW: REBOL-WINDOW edge window-edge
-	REBOL-DIALOG-WINDOW: REBOL-DIALOG-WINDOW edge window-edge
-	WINDOW-BUTTON: WINDOW-BUTTON ctx-colors/colors/action-color edge normal-edge
-	WINDOW-TITLE: WINDOW-TITLE ctx-colors/colors/action-color edge normal-edge
-	
 ]

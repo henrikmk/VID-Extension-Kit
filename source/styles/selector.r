@@ -20,12 +20,12 @@ REBOL [
 ]
 
 stylize/master [
-	SELECTOR-TOGGLE: TOGGLE with [
+	SELECTOR-TOGGLE: TOGGLE ctx-colors/colors/action-color with [
 		virgin: true
 		feel: svvf/mutex
 		access: make access ctx-access/selector-nav
 	]
-	MULTI-SELECTOR-TOGGLE: TOGGLE with [
+	MULTI-SELECTOR-TOGGLE: TOGGLE ctx-colors/colors/action-color with [
 		virgin: false
 		access: make access ctx-access/selector-nav
 	]

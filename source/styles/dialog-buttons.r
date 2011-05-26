@@ -23,22 +23,22 @@ REBOL [
 
 stylize/master [
 	;-- Buttons
-	LEFT-BUTTON: BUTTON
+	LEFT-BUTTON: BUTTON ctx-colors/colors/true-color
 	RIGHT-BUTTON: BUTTON align [right] spring [left bottom]
 	CENTER-BUTTON: BUTTON align [left right] spring [left right]
 	; the actions are not working here. review this. this may have changed.
-	TRUE-BUTTON: LEFT-BUTTON "True" [ctx-dialog/set-dialog-value face true]
-	FALSE-BUTTON: RIGHT-BUTTON "False" [ctx-dialog/set-dialog-value face false]
-	VALIDATE-BUTTON: TRUE-BUTTON "Validate" [ctx-dialog/dialog-use face]
-	OK-BUTTON: TRUE-BUTTON "OK"
-	YES-BUTTON: TRUE-BUTTON "Yes"
-	RETRY-BUTTON: TRUE-BUTTON "Retry"
-	SAVE-BUTTON: VALIDATE-BUTTON "Save"
-	USE-BUTTON: VALIDATE-BUTTON "Use"
-	SEND-BUTTON: VALIDATE-BUTTON "Send"
-	CANCEL-BUTTON: FALSE-BUTTON "Cancel"
+	TRUE-BUTTON: LEFT-BUTTON "True" ctx-colors/colors/true-color [ctx-dialog/set-dialog-value face true]
+	FALSE-BUTTON: RIGHT-BUTTON "False" ctx-colors/colors/false-color [ctx-dialog/set-dialog-value face false]
+	VALIDATE-BUTTON: TRUE-BUTTON "Validate" ctx-colors/colors/true-color [ctx-dialog/dialog-use face]
+	OK-BUTTON: TRUE-BUTTON "OK" ctx-colors/colors/true-color
+	YES-BUTTON: TRUE-BUTTON "Yes" ctx-colors/colors/true-color
+	RETRY-BUTTON: TRUE-BUTTON "Retry" ctx-colors/colors/true-color
+	SAVE-BUTTON: VALIDATE-BUTTON "Save" ctx-colors/colors/true-color
+	USE-BUTTON: VALIDATE-BUTTON "Use" ctx-colors/colors/true-color
+	SEND-BUTTON: VALIDATE-BUTTON "Send" ctx-colors/colors/true-color
+	CANCEL-BUTTON: FALSE-BUTTON "Cancel" ctx-colors/colors/false-color
 	CLOSE-BUTTON: CENTER-BUTTON "Close" [ctx-dialog/set-dialog-value face false]
-	NO-BUTTON: FALSE-BUTTON "No"
+	NO-BUTTON: FALSE-BUTTON "No" ctx-colors/colors/false-color
 
 	;-- Button Groups
 	BTN-GROUP: COMPOUND fill 1x0 spring [top]

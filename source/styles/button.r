@@ -22,7 +22,7 @@ REBOL [
 ]
 
 stylize/master [
-	BUTTON: FACE 100x24 "Button" spring [bottom right] with [
+	BUTTON: FACE 100x24 "Button" ctx-colors/colors/action-color spring [bottom right] with [
 		value: false
 		color: image: none
 		feel: svvf/button
@@ -55,7 +55,7 @@ stylize/master [
 		feel: svvf/state
 	]
 	; Action button
-	ACT-BUTTON: BUTTON with [
+	ACT-BUTTON: BUTTON ctx-colors/colors/action-color with [
 		on-click: none
 		text: "Action"
 		multi: make multi [
@@ -70,7 +70,7 @@ stylize/master [
 	]
 	; True button for performing a window-wide TRUE action
 	; this is no longer used. it's very complex, but may require some rework
-	TRUE-BUTTON: ACT-BUTTON "True" with [
+	TRUE-BUTTON: ACT-BUTTON "True" ctx-colors/colors/true-color with [
 		default: true
 		;rate: 10 ; not working, very flakey and keeps events, so we keep it turned off
 		on-click: [
@@ -118,13 +118,13 @@ stylize/master [
 		original-color: none
 	]
 	; Save button, used for a window wide SAVE action
-	SAVE-BUTTON: TRUE-BUTTON "Save" with [
+	SAVE-BUTTON: TRUE-BUTTON "Save" ctx-colors/colors/true-color with [
 		; additional graphics to indicate whether the face it's tied to is dirty
 		; find similar ways that this works elsewhere
 		; [ ] - how do we tie it there?
 		; [ ] - how do we update it?
 	]
-	FALSE-BUTTON: ACT-BUTTON "False" with [
+	FALSE-BUTTON: ACT-BUTTON "False" ctx-colors/colors/false-color with [
 		on-click: [
 			context [
 				win: root-face face
@@ -134,10 +134,10 @@ stylize/master [
 		]
 	]
 	; Close button, used for a window wide CLOSE action
-	CLOSE-BUTTON: FALSE-BUTTON "Close" align [left right] spring [left right]
+	CLOSE-BUTTON: FALSE-BUTTON "Close" ctx-colors/colors/false-color align [left right] spring [left right]
 
 	; Pop button, pops an INFORM window with specific content
-	POP-BUTTON: ACT-BUTTON "..." 24x24 with [
+	POP-BUTTON: ACT-BUTTON "..." 24x24 ctx-colors/colors/action-color with [
 		content: none ; this could be a block or a face. if it's a face, we can assign a window title directly.
 		on-click: [
 			if face/content [
@@ -218,7 +218,7 @@ stylize/master [
 		effect: copy []
 	]
 
-	ARROW: BUTTON 20x20 with [
+	ARROW: BUTTON 20x20 ctx-colors/colors/manipulator-color with [
 		font: none ; must stand alone
 		text: none
 		surface: 'arrow
@@ -280,7 +280,7 @@ stylize/master [
 	]
 
 	; Button that folds/unfolds the panel after it (visually below it) and pushes and pulls the remaining faces after it
-	FOLD-BUTTON: BUTTON right fill 1x0 spring [bottom] with [
+	FOLD-BUTTON: BUTTON ctx-colors/colors/action-color right fill 1x0 spring [bottom] with [
 		fold: func [face /local fc axis tab-face] [
 			any [fc: next-face face return false]
 			;-- Axis
@@ -336,4 +336,9 @@ stylize/master [
 			insert-actor-func self 'on-click :fold
 		]
 	]
+
+	BOTTOM-BUTTON: BUTTON with [spring: [top right]]
+	CENTER-BUTTON: BUTTON with [align: [left right]]
+	HIGHLIGHT-BUTTON: BUTTON ctx-colors/colors/important-color with [font: make font [colors: ctx-colors/colors/important-font-color shadow: 1x1]]
+
 ]

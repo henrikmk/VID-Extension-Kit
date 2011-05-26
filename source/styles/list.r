@@ -657,7 +657,7 @@ stylize/master [
 		]
 	]
 
-	SORT-BUTTON: STATE-BUTTON with [
+	SORT-BUTTON: STATE-BUTTON ctx-colors/colors/manipulator-color with [
 		column: none ; the name or index position of the column that is to be sorted. this is set from the DATA-LIST. no it's not.
 		list: none ; list face to sort
 		direction: none ; direction to sort in
@@ -687,7 +687,7 @@ stylize/master [
 		]
 	]
 	; [ ] perform reset sort action on parent list
-	SORT-RESET-BUTTON: BUTTON with [
+	SORT-RESET-BUTTON: BUTTON ctx-colors/colors/action-color with [
 		
 	]
 	TABLE: LIST

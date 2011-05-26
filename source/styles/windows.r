@@ -23,7 +23,7 @@ REBOL [
 
 stylize/master [
 	; button in a REBOL window that performs an action in the window manager
-	WINDOW-BUTTON: BUTTON 20x24 with [text: none] [
+	WINDOW-BUTTON: BUTTON 20x24 ctx-colors/colors/action-color with [text: none] [
 		face/manage: to-block face/manage
 		foreach manage face/manage [
 			do
@@ -36,7 +36,7 @@ stylize/master [
 	]
 
 	; window title bar
-	WINDOW-TITLE: WINDOW-BUTTON "Window" with [
+	WINDOW-TITLE: WINDOW-BUTTON "Window" ctx-colors/colors/action-color with [
 		dragging: false
 		old-offset: new-offset: 0x0
 		access: ctx-access/text
