@@ -159,9 +159,9 @@ set 'set-draw-body func [face /init /local debug state state-block see touch val
 	if any [not face/draw-body empty? face/surface] [return false]
 	; Gather state information
 	state-block: reduce [
-		state: all [in face 'state word? face/state face/state]
-		touch: all [in face 'touch word? face/touch face/touch]
-		see: all [in face 'see word? face/see face/see]
+		state: all [in face 'state face/state]
+		touch: all [in face 'touch face/touch]
+		see: all [in face 'see face/see]
 	]
 	; Do not update, if state has not changed
 	if equal? state-block face/draw-body/state [return false]

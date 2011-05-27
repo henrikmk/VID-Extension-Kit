@@ -29,7 +29,7 @@ do %../../build/include.r
 
 m: make-window [
 	toggle "Disable" [either value [disable-face f][enable-face f]]
-	f: button button
+	f: slider
 ]
 
 view m

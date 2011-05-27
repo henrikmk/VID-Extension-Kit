@@ -127,6 +127,11 @@ svvf: system/view/vid/vid-feel: context [
 	]
 
 	hot: make sensor [
+		redraw: func [face act pos][
+			if all [not svv/resizing? act = 'draw] [
+				set-draw-body face
+			]
+		]
 		over: func [face action event][
 			set-face-state face pick [over away] to-logic action
 			show face
@@ -134,11 +139,6 @@ svvf: system/view/vid/vid-feel: context [
 	]
 	
 	toggle: make hot [
-		redraw: func [face act pos][
-			if all [not svv/resizing? act = 'draw] [
-				set-draw-body face
-			]
-		]
 		engage: func [face action event] [
 			if releasing? face action [face/data: not face/data]
 			set-face-state face action
@@ -170,16 +170,7 @@ svvf: system/view/vid/vid-feel: context [
 		]
 	]
 
-	button: make hot [
-		redraw: func [face act pos] [
-			if all [not svv/resizing? act = 'draw] [
-				set-draw-body face
-			]
-		]
-		cue: none
-	]
-
-	icon: :button
+	icon: button: :hot
 
 	subicon: make hot [
 		over: func [f a e] [f/parent-face/feel/over f/parent-face a e]
@@ -245,58 +236,8 @@ svvf: system/view/vid/vid-feel: context [
 	]
 
 	choice: make hot [
-		;engage: func [face action event][
-		;	if action = 'down [
-		;		; needs to support a different data format
-		;		; so the list should be drawn here using the different data format
-		;		; which is word string word string
-		;		; alternatively, we need a different function for this
-		;		; we need to change the choose function
-		;		; the choose function should be different in that a real window should pop up here
-		;		; generate the layout with a pop-menu style
-        ;
-		;		choose/style/window extract/index face/data 2 2 func [face parent][
-		;			; do this differently
-		;			parent/data: find parent/texts face/text
-		;			do-face parent parent/text: face/text
-		;			act-face face event 'on-click
-		;		] face
-		;		; this has to be screen-face instead and with other options here
-		;		; if I use screen-face now, the face will be displayed as a root window
-		;		; the offset will however be relative to the screen and not the face
-		;		; so that offset must be set in the 'choose function
-		;		; it also means the face we are passing is probably not correct, or even necessary to pass
-		;		; it's also only used once, but that means we have to work on the design of the 'choose function
-		;		 face/parent-face
-		;	]
-		;	show face
-		;]
 		engage: func [face action event] [
 			if action = 'down [
-				; [x] - generate the poplist during init.
-				; [x] - or re-show it, if it already exists. doing that during init.
-				; [x] - LIST is used
-				; [x] - LIST pixel height is 24
-				; [ ] - different schemes can be used to do a win32 and OSX style choice list
-				; [x] - perform select
-				; [x] - filter out the words
-				; [x] - close menu-face on select
-				; [x] - fix setup to not form content for list somehow
-				; [x] - set-face choice face on select
-				; [x] - perform align of choice-face
-				; [x] - perform resize of choice-face, if needed and possible
-				; [ ] - face/setup needs to store in data
-				; [x] - show correct text in popup button
-				; [x] - color for hovering
-				; [ ] - mouse push nudge to get the right item as a supplement to scrolling
-				; [ ] - visible arrow for out of bounds parts
-				; [x] - keyface control for menu-face to control the list internally, but this is specific to list
-				; [ ] - keyface control allows moving the list
-				; [ ] - keyface control to open the list
-				; [ ] - move function to standardized setup
-				; [x] - start selection on the opened selection rather than the first selection, but this is specific to list
-				; [ ] - size is 4x4 too far out, when the height is set to 100x20
-				; [ ] - fix choice face problem
 				face/open-choice-face face
 			]
 		]
@@ -335,7 +276,7 @@ svvf: system/view/vid/vid-feel: context [
 	drag-action: func [face action event] [
 		if find [over away] action [
 			drag-off face/parent-face face face/offset + event/offset - face/data
-			show face
+			show face/parent-face
 		]
 		if find [down alt-down] action [face/data: event/offset]
 	]
@@ -348,6 +289,11 @@ svvf: system/view/vid/vid-feel: context [
 	]
 
 	drag: make face/feel [
+		redraw: func [face act pos][
+			if all [not svv/resizing? act = 'draw] [
+				set-draw-body face
+			]
+		]
 		engage: :drag-action
 	]
 
@@ -361,18 +307,13 @@ svvf: system/view/vid/vid-feel: context [
 	slide: make face/feel [
 		redraw: func [face act pos][
 			face/data: max 0 min 1 face/data
-			; this needs to be redone as it interferes with state
-			;if face/data <> face/state [
-				pos: face/size - face/dragger/size - (2 * face/edge/size) - (2 * face/clip)
+			pos: face/size - face/dragger/size - (2 * face/edge/size) - (2 * face/clip)
+			face/dragger/offset:
 				either face/size/x > face/size/y [
-					face/dragger/offset: as-pair face/data * pos/x + face/clip/x 0
+					as-pair face/data * pos/x + face/clip/x 0
 				][
-					face/dragger/offset: as-pair 0 face/data * pos/y + face/clip/y
+					as-pair 0 face/data * pos/y + face/clip/y
 				]
-			;	face/state: face/data
-			;	; RAMBO #3407
-			;	if act = 'draw [show face/pane/1]
-			;]
 			if all [not svv/resizing? act = 'draw] [
 				set-draw-body face
 			]
@@ -860,7 +801,6 @@ enable-face: func [
 			flag-face face tabbed
 		]
 		restore-feel face
-;		restore-font face
 		act-face face none 'on-enable
 	]
 	if any [
@@ -895,7 +835,6 @@ disable-face: func [
 		flag-face face disabled
 ;			unless in face 'saved-feel [print dump-obj face]
 		save-feel face make face/feel [over: engage: detect: none] ; don't touch redraw
-;		save-font face make face/font [] ; no need anymore
 		act-face face none 'on-disable
 	]
 	;-- Disable any faces in panes

@@ -159,6 +159,7 @@ view main: make-window [
 				get-face face
 				style/style
 				attempt [style/doc/info]
+				form style/surface
 				form style/tags
 				form style/flags
 				style/size
@@ -202,6 +203,7 @@ view main: make-window [
 						]
 					]
 				] return
+				label "Surface" i return
 				label "Tags" i 274 pop-button "..." spring [left bottom] [
 					inform/title style-tags-window "Style Tags"
 				] return

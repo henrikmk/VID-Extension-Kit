@@ -35,7 +35,7 @@ stylize/master [
 		font:		none
 		para:		none
 		text:		none
-		surface:	'base
+		surface:	'recessed
 		step:		0.02	; scrolling granularity (for btns, keys, wheels)
 		ratio:				; total size / view size (proportional draggers)
 		page:				; paging size (for btns, keys, wheels) ; !!! should use Ratio
