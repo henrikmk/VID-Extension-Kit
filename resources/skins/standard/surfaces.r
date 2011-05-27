@@ -6,6 +6,26 @@ base: [
 box: base [
 	font [shadow: 2x2 size: 16 align: 'center color: white style: 'bold]
 ]
+text: base [
+	font state [
+		released [color: black]
+		disabled [color: 140.140.140]
+	]
+]
+form-text: text [
+	colors [
+		border: ctx-colors/colors/line-color
+		background: snow
+	]
+	template [
+		anti-alias off
+		pen none
+		fill-pen colors/border
+		box outer/1 outer/5
+		fill-pen colors/background
+		box inner/1 inner/5
+	]
+]
 frame: base [
 	colors state [
 		released away drag-away [
@@ -14,7 +34,7 @@ frame: base [
 			shadow: background - 60
 		]
 		pressed drag-over [
-			background: any [all [color color / 2] 100.100.100]
+			background: any [all [color color / 2] 100.150.100]
 			shine: background - 40
 			shadow: background + 60
 		]
@@ -91,6 +111,7 @@ field: info [
 	]
 ]
 area: field [
+	font [valign: 'top]
 	para [wrap?: true]
 ]
 code: field [
@@ -187,21 +208,24 @@ arrow: glyph [
 	]
 ]
 check-line: check [
-	draw [image image-outer/8 draw-image]
+	; provide disabled bitmap somehow or put an alpha box over it
+	draw [image image-outer/1 draw-image]
 	para [origin: 26x2]
 	font state [
 		released away drag-away [align: 'left style: none color: black]
 		over [color: blue]
 		pressed drag-over [color: white]
+		disabled [color: 140.140.140]
 	]
 ]
 radio-line: radio [
-	draw [image image-outer/8 draw-image]
+	draw [image image-outer/1 draw-image]
 	para [origin: 26x2]
 	font state [
 		released away drag-away [align: 'left style: none color: black]
 		over [color: blue]
 		pressed drag-over [color: white]
+		disabled [color: 140.140.140]
 	]
 ]
 tab: button [

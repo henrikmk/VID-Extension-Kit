@@ -68,7 +68,6 @@ stylize/master [
 
 	; ---------- Texts
 	TEXT: TEXT 100x24 font [valign: 'middle] with stretch-x
-	FORM-TEXT: TEXT ctx-colors/colors/body-text-color snow para [wrap?: false] edge read-only-edge
 	LED: LED edge field-edge
 ;	DUMMY: DUMMY edge read-only-edge
 

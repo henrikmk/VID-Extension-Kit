@@ -168,6 +168,7 @@ stylize/master [
 		surface: 'check-line
 		text: "Value"
 		size: -1x24
+		color: none
 		access: make access ctx-access/selector-nav
 		append init [
 			if none? data [data: false]

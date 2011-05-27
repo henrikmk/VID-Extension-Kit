@@ -116,6 +116,8 @@ stylize/master [
 		]
 
 	; Various text styles based on TEXT and VTEXT
+	FORM-TEXT: TEXT ctx-colors/colors/body-text-color 100x24 para [wrap?: false] with [surface: 'form-text]
+
 	BODY: TEXT "Body" with [
 		spring: [bottom]
 		size: -1x-1 ; automatically fill horizontally

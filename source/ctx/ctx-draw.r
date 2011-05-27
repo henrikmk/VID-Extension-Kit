@@ -197,7 +197,10 @@ set 'set-draw-body func [face /init /local debug state state-block see touch val
 			]
 			template [
 				; Establish effect block
-				unless block? face/effect [
+				unless all [
+					block? face/effect
+					parse face/effect [2 ['draw [none! | block!]]]
+				] [
 					face/effect: reduce ['draw none 'draw none]
 				]
 				parse face/effect [

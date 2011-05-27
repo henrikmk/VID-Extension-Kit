@@ -28,8 +28,11 @@ do %../../build/include.r
 ;insert clear ctx-vid-debug/debug 'draw-body
 
 m: make-window [
+;	f: dummy ; shows binding issue
+	button
 	toggle "Disable" [either value [disable-face f][enable-face f]]
-	f: slider
+	f: form-text
+	ff: field
 ]
 
 view m

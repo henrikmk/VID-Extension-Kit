@@ -34,6 +34,7 @@ LAYOUT-COLOR: COMPOUND [
 	]
 	style lbl label 75x20
 	across
+	; [!] - interesting that surface is not used here
 	lbl "Red"		rgb-slider	setup [0.0.0 127.0.0 255.0.0]		with [channel: 'r] fl return
 	lbl "Green"		rgb-slider	setup [0.0.0 0.127.0 0.255.0]		with [channel: 'g] fl return
 	lbl "Blue"		rgb-slider	setup [0.0.0 0.0.127 0.0.255]		with [channel: 'b] fl return
