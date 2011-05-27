@@ -33,6 +33,7 @@ m: make-window [
 	toggle "Disable" [either value [disable-face f][enable-face f]]
 	f: form-text
 	ff: field
+	scroller
 ]
 
 view m

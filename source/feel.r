@@ -262,21 +262,27 @@ svvf: system/view/vid/vid-feel: context [
 
 ;-- New slider and scroller code:
 
-	drag-off: func [bar drag val /local bmax ax][
+	drag-off: func [bar drag val /local ax bmax old][
 		val: val - bar/clip
 		bmax: bar/size - drag/size - (2 * bar/edge/size) - (2 * bar/clip)
 		val: max 0x0 min val bmax
 		ax: bar/axis
+		old: drag/offset
 		drag/offset: val/:ax + bar/clip/:ax * 0x1
 		if ax = 'x [drag/offset: reverse drag/offset]
 		if positive? bmax/:ax [bar/data: val/:ax / bmax/:ax]
-		do-face bar none
+		old: old <> drag/offset
+		if old [
+			do-face bar none
+		]
+		old
 	]
 
 	drag-action: func [face action event] [
 		if find [over away] action [
-			drag-off face/parent-face face face/offset + event/offset - face/data
-			show face/parent-face
+			if drag-off face/parent-face face face/offset + event/offset - face/data [
+				show face/parent-face
+			]
 		]
 		if find [down alt-down] action [face/data: event/offset]
 	]
@@ -342,7 +348,6 @@ svvf: system/view/vid/vid-feel: context [
 	]
 
 	move-drag: func [face val /local old][
-		; val changes to 'down
 		old: face/parent-face/data
 		face/parent-face/data: min 1 max 0 face/parent-face/data + (face/dir * val)
 		if face/parent-face/data <> old [
