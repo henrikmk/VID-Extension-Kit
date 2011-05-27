@@ -860,21 +860,7 @@ enable-face: func [
 			flag-face face tabbed
 		]
 		restore-feel face
-		restore-font face
-		;either all [
-		;	in face 'access
-		;	in face/access 'enable-face*
-		;] [
-		;	face/access/enable-face* face
-		;][
-;		;	if flag-face? face disabled [
-		;		remove/part
-		;			find/reverse
-		;				tail face/effect
-		;				first disabled-effect
-		;			length? disabled-effect
-;		;	]
-		;]
+;		restore-font face
 		act-face face none 'on-enable
 	]
 	if any [
@@ -909,19 +895,7 @@ disable-face: func [
 		flag-face face disabled
 ;			unless in face 'saved-feel [print dump-obj face]
 		save-feel face make face/feel [over: engage: detect: none] ; don't touch redraw
-		save-font face make face/font []
-		;either all [
-		;	in face 'access
-		;	in face/access 'disable-face*
-		;] [
-		;	face/access/disable-face* face
-		;][
-		;	either block? face/effect [
-		;		append face/effect copy disabled-effect
-		;	][
-		;		face/effect: copy disabled-effect
-		;	]
-		;]
+;		save-font face make face/font [] ; no need anymore
 		act-face face none 'on-disable
 	]
 	;-- Disable any faces in panes
