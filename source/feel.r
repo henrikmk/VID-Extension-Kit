@@ -55,9 +55,6 @@ svvf: system/view/vid/vid-feel: context [
 				]
 				up [
 					if all [not face/rate find [drag-over pressed] face/touch] [
-						; Do face action on button release above face
-						do-face face face/data
-						act-face face event 'on-click
 						; Update face state information
 						if all [block? face/states not empty? head face/states] [
 							face/states: next face/states
@@ -71,6 +68,9 @@ svvf: system/view/vid/vid-feel: context [
 							]
 							face/state: face/states/1
 						]
+						; Do face action on button release above face
+						do-face face face/data
+						act-face face event 'on-click
 					]
 					'released
 				]

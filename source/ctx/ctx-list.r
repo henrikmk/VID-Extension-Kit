@@ -35,13 +35,14 @@ ctx-list: context [
 		adjust: 'left
 		type: string!
 		width: 100
-		visible: true
+		hidden: false
 		tool-tip: none
 	]
 
 	; creates a specification block from a dialect or an object
 	make-list-spec: func [face data /local i] [
 		clear face/specs
+		clear face/columns
 		if object? data [data: words-of data]
 		i: 0
 		parse data [
@@ -52,10 +53,13 @@ ctx-list: context [
 				set adjust opt ['left | 'right | 'center]
 				set width opt integer!
 				set type opt datatype!
-				set visible opt 'visible ; not yet working
+				set hidden opt 'hidden
 				set resizable opt 'resizable
 				(
-					append face/specs make-spec-object word name adjust width type visible
+					append face/specs make-spec-object word name adjust width type hidden
+					append face/columns word
+					append face/columns none ; what is this supposed to be?
+					any [hidden append face/column-order word]
 					if resizable [face/resize-column: i]
 				)
 			]
@@ -63,14 +67,14 @@ ctx-list: context [
 	]
 
 	; creates a single specification object
-	make-spec-object: func [word' name' adjust' width' type' visible'] [
+	make-spec-object: func [word' name' adjust' width' type' hidden'] [
 		make spec-object [
 			word: word'
 			name: any [name' uppercase/part form word 1]
 			adjust: any [adjust' 'left]
 			width: any [width' 100]
 			type: to-datatype any [type' string!]
-			visible: any [to logic! visible' true]
+			hidden: any [to logic! hidden' false]
 		]
 	]
 
@@ -118,6 +122,8 @@ ctx-list: context [
 					i = face/resize-column [[bottom]]
 					i > face/resize-column [[left bottom]]
 				]
+				'sort-column
+				to-lit-word spec/word
 			]
 			; Resizer
 			; this will only work when the list does not have a single adjustable column
@@ -130,7 +136,7 @@ ctx-list: context [
 			;	]
 			;]
 		]
-		append face/header-face [sort-reset-button spring [bottom left]]
+probe		append face/header-face [sort-reset-button spring [bottom left]]
 	]
 
 	; generate sub-face from specs
@@ -187,6 +193,7 @@ ctx-list: context [
 		dsort*:	face/data-sorted		; sorted data
 		soc*:	face/sort-column		; not usable
 		sod*:	face/sort-direction		; not usable
+		cols*:	face/columns			; names of columns (block of words)
 		cor*:	face/column-order		; order and visibility of columns (block of words)
 		dadis*:	face/data-display		; order of columns for display as indexes
 		out*:	face/output				; data outputted to visible list
@@ -228,17 +235,17 @@ ctx-list: context [
 		; sorting appears to be lossy, so first we need to alter the sorting of the index block
 		; so the sorting needs to occur in a way where the index is brought along
 		if all [sod* soc*] [
-			op: get select [asc lesser? desc greater?] sod*
+			op: get select [ascending lesser? asc lesser? descending greater? desc greater?] sod*
 			switch to word! get-list-type [
 				object! [
 					sort/compare dsort* func [a b] [op get in a soc* get in b soc*]
 				]
 				block! [
-					col: index? find face/row soc*
+					col: index? find extract cols* 2 soc*
 					sort/compare dsort* func [a b] [op pick a col pick b col]
 				]
 			][
-				either 'desc = sod* [sort/reverse dsort*][sort dsort*]
+				either find [desc descending] sod* [sort/reverse dsort*][sort dsort*]
 			]
 		]
 		set-columns face
@@ -248,8 +255,8 @@ ctx-list: context [
 	set-columns: func [face /local def] [
 		set-vars face
 		clear dadis*
-		def: extract face/columns 2
-		foreach idx face/column-order [
+		def: extract cols* 2
+		foreach idx cor* [
 			append dadis* index? find def idx
 		]
 		set-output face

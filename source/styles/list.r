@@ -69,7 +69,7 @@ stylize/master [
 		selected:					; block of integers with selected indexes
 		;-- CTX-LIST information
 		filter-spec:				; filter specification
-		sort-direction:				; 'asc or 'desc
+		sort-direction:				; 'asc, 'ascending or 'desc, 'descending
 		sort-column:				; word name of column to sort by
 		;-- Data source information
 		data:						; source data list, always starts at header
@@ -603,7 +603,9 @@ stylize/master [
 				set-scroller face
 			]
 			setup-face*: func [face value] [
-				face/specs: make block! []
+				face/specs: copy
+				face/columns: copy
+				face/column-order: make block! []
 				ctx-list/make-list-spec face value
 				ctx-list/make-header-face face
 				ctx-list/make-sub-face face
@@ -698,16 +700,20 @@ stylize/master [
 		virgin: true ; do not repeat the first state
 		surface: 'sort
 		action: func [face value] [
-			; [ ] - sort parent face by calling the parent action
+			any [
+				face/list
+				face/list: find-style face/parent-face/parent-face 'list
+			]
+probe			face/list/sort-direction: first face/states
+			face/list/sort-column: face/column
+			face/list/update face/list
 			; [ ] - redraw parent face header
-;			probe face/data
 		]
-		append init [
-			;-- Find column position, if not given
-			column
-			;-- Find list face
-			list
-			;-- Find direction
+		words: [
+			sort-column [
+				if block? args [new/column: args/2]
+				next args
+			]
 		]
 	]
 	; [ ] perform reset sort action on parent list
