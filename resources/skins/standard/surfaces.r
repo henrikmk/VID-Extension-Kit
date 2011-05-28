@@ -147,6 +147,13 @@ right-icon: frame [
 choice: right-icon [
 	draw-image (load-stock 'arrow-pop)
 ]
+sort: right-icon [
+	draw-image state [
+		no-sort []
+		ascending (load-stock 'arrow-up)
+		descending (load-stock 'arrow-down)
+	]
+]
 image: base [
 	draw [
 		image image-center draw-image
@@ -205,6 +212,15 @@ arrow: glyph [
 		translate center
 		rotate direction
 		triangle 0x-5 5x5 -5x5
+	]
+]
+sort-reset: glyph [
+	draw [
+		anti-alias off
+		pen none
+		fill-pen colors/value
+		translate center
+		polygon 5x0 0x-5 -5x0 0x5
 	]
 ]
 check-line: check [

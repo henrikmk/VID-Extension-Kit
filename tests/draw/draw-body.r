@@ -31,9 +31,11 @@ m: make-window [
 ;	f: dummy ; shows binding issue
 	button
 	toggle "Disable" [either value [disable-face f][enable-face f]]
-	f: form-text
-	ff: field
-	scroller
+	a: text-area "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+	; [ ] - scroller does not clamp, after resizing, when it's scrolled to the end
+	; [ ] - scroller does not allow clamping, when clicked
+	; [ ] - scroller does not resize down after resizing up, when it has been scrolled to the end
+	; [ ] - so when you scroll to the end, you need to do things to get it going
 ]
 
 view m

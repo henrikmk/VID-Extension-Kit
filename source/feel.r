@@ -272,9 +272,7 @@ svvf: system/view/vid/vid-feel: context [
 		if ax = 'x [drag/offset: reverse drag/offset]
 		if positive? bmax/:ax [bar/data: val/:ax / bmax/:ax]
 		old: old <> drag/offset
-		if old [
-			do-face bar none
-		]
+		if old [do-face bar none]
 		old
 	]
 

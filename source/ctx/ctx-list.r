@@ -25,6 +25,119 @@ REBOL [
 ; bound to places in the data-list
 
 ctx-list: context [
+	;-- List Specifications
+
+	; object for list column specification
+	spec-object: make object! [
+		word: 'default
+		name: "Untitled"
+		adjust: 'left
+		type: string!
+		width: 100
+		visible: true
+		tool-tip: none
+	]
+
+	; creates a specification block from a dialect or an object
+	make-list-spec: func [face data /local i] [
+		clear face/specs
+		if object? data [data: words-of data]
+		i: 0
+		parse data [
+			any [
+				(i: i + 1)
+				set word word!
+				set name opt string!
+				set adjust opt ['left | 'right | 'center]
+				set width opt integer!
+				set type opt datatype!
+				set visible opt 'visible ; not yet working
+				set resizable opt 'resizable
+				(
+					append face/specs make-spec-object word name adjust width type visible
+					if resizable [face/resize-column: i]
+				)
+			]
+		]
+	]
+
+	; creates a single specification object
+	make-spec-object: func [word' name' adjust' width' type' visible'] [
+		make spec-object [
+			word: word'
+			name: any [name' uppercase/part form word 1]
+			adjust: any [adjust' 'left]
+			width: any [width' 100]
+			type: to-datatype any [type' string!]
+			visible: any [to logic! visible' true]
+		]
+	]
+
+	;-- Functions to Apply Specification to List
+
+	; function to generate header face from specs
+	make-header-face: func [face /local i] [
+		face/header-face: if face/specs [copy [across space 0]]
+		any [face/header-face exit]
+		i: 0
+		foreach spec face/specs [
+			i: i + 1
+			; Column Sort Button
+			repend face/header-face [
+				'sort-button
+				spec/name
+				spec/width
+				'spring
+				case [
+					i < face/resize-column [[bottom right]]
+					i = face/resize-column [[bottom]]
+					i > face/resize-column [[left bottom]]
+				]
+			]
+			; Resizer
+			; this will only work when the list does not have a single adjustable column
+			;if all [i < length? face/specs] [
+			;	repend face/header-face [
+			;		; [!] - second resizer does not move properly when resizing window
+			;		'resizer 6x24
+			;		'spring
+			;		either i = 1 [[bottom right]][[bottom left]]
+			;	]
+			;]
+		]
+		append face/header-face [sort-reset-button spring [bottom left] align [right]]
+	]
+
+	; generate sub-face from specs
+	make-sub-face: func [face /local i] [
+		either face/specs [
+			face/sub-face: copy [across space 0]
+		][
+			exit
+		]
+		i: 0
+		foreach spec face/specs [
+			i: i + 1
+			repend face/sub-face [
+				switch/default to-word spec/type [
+					image! ['list-image-cell]
+				][
+					'list-text-cell
+				]
+				spec/adjust
+				spec/width
+				'spring
+				case [
+					i < face/resize-column [[bottom right]]
+					i = face/resize-column [[bottom]]
+					i > face/resize-column [[left bottom]]
+				]
+			]
+		]
+	]
+
+	;-- Sorting, Filtering and Display
+	
 	data*: fspec*: soc*: sod*: dfilt*: didx*: dsort*: dadis*: out*: none
 
 	list-map: [data 0 filtered 0 sorted 0]
@@ -172,4 +285,27 @@ ctx-list: context [
 			]
 		]
 	]
+	
+	; functions for articulate ways of configuring a list face
+	; [ ] - complete articulation of base list:
+	;       [x] - creation of header-face
+	;       [ ] - display sorting in header
+	;       [ ] - creation of list-face
+	;       [ ] - display filtering of rows
+	;       [ ] - display of sorting of rows
+	;       [ ] - set of scrolling
+	;       [ ] - setting of column widths
+	; [o] - apply specs to data-list:
+	;       [x] - build header-face
+	;       [x] - build list-row-face
+	;       [o] - use SETUP to apply specs with DATA-LIST. find anything that collides here.
+	;       [o] - free articulation between using setup or *-face appliance in WITH
+	; [ ] - apply specs directly to list only:
+	;       [o] - build list-row-face
+	; [ ] - need to set default object
+	; [ ] - need to set specs for columns
+	; [x] - require specs block
+	;       [x] - generate list columns and column header from specs block
+	; [ ] - manipulate articulation of list through these functions
+	; [ ] - investigate specs dialect to generate specs object block, using a specs parser
 ]

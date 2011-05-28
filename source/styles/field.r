@@ -185,18 +185,13 @@ stylize/master [
 		old-value: none
 		set-old-value: func [face] [face/old-value: copy get-face face]
 		access: make access [
-			scroll-face*: func [face x y /local sz ssz lh] [
+			origin: none
+			scroll-face*: func [face x y /local dsz lh sz ssz] [
 				ssz: face/text-body/size
 				sz: face/text-body/area
 				dsz: ssz - sz
 				lh: face/text-body/line-height
-				; the face does not update, but the number looks correct
-				; it seems to be updating the wrong face
-				; the show resets the face, which may bebecause of the surface resetting it
-				; we need to manipulate the surface with this way
-				; this is something that already is missing from other parts, such as changing single colors or just values
-				; the problem is described in omnifocus
-				
+				origin: any [origin face/para/origin]
 				face/para/origin:
 					either 1 < abs y [ ; OSX sends only 1 step instead of 3
 						;-- Scroll wheel
@@ -212,10 +207,10 @@ stylize/master [
 					][
 						;-- Scroll bar
 						add
-							face/para/margin
+							origin
 							negate
 								as-pair
-									dsz/x * x
+									dsz/x * x ; zero, as it should be
 									dsz/y * y
 					]
 				;not-equal? index? old index? face/output ; update only for show when the index shows a difference
@@ -270,7 +265,19 @@ stylize/master [
 					resize face/v-scroller as-pair face/v-scroller/size/x sz/y as-pair sz/x 0
 				]
 				;-- Redrag scrollers
+				; this does not work, when the scroller is moved to the end
+				; when moving to the end, then the scroller should be
+				; work on clamp problem
+				; when clamping, the scroller may be used to redrag here inside this function
+				
+				; [ ] - scroller does not clamp, after resizing, when it's scrolled to the end
+				; [ ] - scroller does not allow clamping, when clicked
+				; [ ] - scroller does not resize down after resizing up, when it has been scrolled to the end
+				; [ ] - so when you scroll to the end, you need to do things to get it going
 				set-scroller face
+				; when scroller is set, then do the scroller
+;				probe get-face face/v-scroller
+				; the value is always zero after resizing
 			]
 		]
 		init: [

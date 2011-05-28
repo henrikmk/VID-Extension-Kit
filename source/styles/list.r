@@ -562,9 +562,13 @@ stylize/master [
 ; [ ] - figure out why list sub-face content does not resize properly to the width of the outer faces immediately
 ; [ ] - align
 ; [ ] - does not respond to ON-CLICK actor, due to incorrect mapping
-; [ ] - optional header layout, which will be freely defined
+; [x] - optional header layout, which will be freely defined
 ; [ ] - header button style, which loosely connects to the list by its index in the parent header face
 		select-mode: 'multi
+		specs:					; specification objects
+			none
+		resize-column:			; which single column resizes (integer)
+			1
 		access: make access [
 			; adjusts the scroller ratio and drag (internal)
 			set-scroller: func [face /only] [
@@ -597,6 +601,14 @@ stylize/master [
 				scroll-face face/list x y
 				set-scroller face
 			]
+			setup-face*: func [face value] [
+				if any [block? value object? value] [
+					face/specs: make block! []
+					ctx-list/make-list-spec face value
+					ctx-list/make-header-face face
+					ctx-list/make-sub-face face
+				]
+			]
 		]
 		;-- List functions
 		update: func [face] [
@@ -608,6 +620,8 @@ stylize/master [
 		]
 
 		init: [
+			;-- Setup
+			if setup [access/setup-face* self setup]
 			pane: copy [across space 0]
 			;-- Build Header
 			if header-face [
@@ -657,7 +671,7 @@ stylize/master [
 		]
 	]
 
-	SORT-BUTTON: STATE-BUTTON ctx-colors/colors/manipulator-color with [
+	SORT-BUTTON: BUTTON ctx-colors/colors/manipulator-color with [
 		column: none ; the name or index position of the column that is to be sorted. this is set from the DATA-LIST. no it's not.
 		list: none ; list face to sort
 		direction: none ; direction to sort in
@@ -669,10 +683,9 @@ stylize/master [
 		; [ ] - allow setting the sort using the data-list itself, so the sort button needs to abstract only basic information
 		; [ ] - when clicked, perform sort action on parent list
 		; [ ] - sensibly find the parent using init
-		images: reduce [none load-stock 'arrow-up load-stock 'arrow-down]
 		states: [no-sort ascending descending]
 		virgin: true ; do not repeat the first state
-		font: make face/font [align: 'left]
+		surface: 'sort
 		action: func [face value] [
 			; [ ] - sort parent face by calling the parent action
 			; [ ] - redraw parent face header
@@ -687,8 +700,10 @@ stylize/master [
 		]
 	]
 	; [ ] perform reset sort action on parent list
-	SORT-RESET-BUTTON: BUTTON ctx-colors/colors/action-color with [
-		
+	SORT-RESET-BUTTON: BUTTON 20x24 ctx-colors/colors/action-color with [
+		font: none
+		text: none
+		surface: 'sort-reset
 	]
 	TABLE: LIST
 	TEXT-LIST: LIST
@@ -722,6 +737,11 @@ stylize/master [
 			across space 1x1
 			list-text-cell bold spring [bottom right] right 100 200.200.200
 			list-text-cell 180 spring [bottom]
+		]
+		header-face: [
+			across space 0x0
+			sort-button "Key" 100 spring [bottom right]
+			sort-button "Value" 180 spring [bottom]
 		]
 	]
 
