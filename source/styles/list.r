@@ -700,13 +700,13 @@ stylize/master [
 		virgin: true ; do not repeat the first state
 		surface: 'sort
 		action: func [face value] [
-			;any [
-			;	face/list
-			;	face/list: find-style face/parent-face/parent-face 'list
-			;]
-			;face/list/sort-direction: first face/states
-			;face/list/sort-column: face/column
-			;face/list/update face/list
+			any [
+				face/list
+				face/list: find-style face/parent-face/parent-face 'list
+			]
+			face/list/sort-direction: first face/states
+			face/list/sort-column: face/column
+			face/list/update face/list
 			; this does not show properly
 			; [ ] - redraw parent face header
 		]
