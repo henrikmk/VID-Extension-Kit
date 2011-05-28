@@ -25,28 +25,12 @@ do %../../build/include.r
 
 clear ctx-vid-debug/debug
 
-data: [[1 2 3][a b c][4 5 6][d e f]]
+obj: make object! [a: b: c: none]
+
+list-data: [[1 2 3][a b c][4 5 6][d e f][g 8 h]]
 
 view make-window [
 	h3 "Sorting Test"
 	bar
-	; sorting buttons here for testing sorting
-	; name of header in header-face
-	data-list 424x400 with [
-		data: [[1 2 3][a b c][4 5 6][d e f]]
-		header-face: [
-			across space 0
-			; [ ] - add column word to sort
-			; [ ] - by default it sorts by its own index
-			sort-button "Name" 100 spring [bottom right]
-			sort-button "Age" 200 spring [bottom]
-			sort-button "Weight" 100 spring [left bottom]
-		]
-		sub-face: [
-			across space 0
-			list-text-cell 100 spring [bottom right]
-			list-text-cell 200 spring [bottom]
-			list-text-cell 100 spring [left bottom]
-		]
-	]
+	l-data: data-list 400x400 setup obj data list-data
 ]

@@ -207,7 +207,7 @@ stylize/master [
 	]
 
 	; Normal choice
-	CHOICE: BUTTON 150 with [
+	CHOICE: BUTTON 150 ctx-colors/colors/action-color with [
 		setup: [choice1 "Choice 1" choice2 "Choice 2" choice3 "Choice 3"]
 		surface: 'choice
 		feel: svvf/choice
@@ -350,7 +350,7 @@ stylize/master [
 
 	; Normal rotary
 	; redesign this later
-	;ROTARY: BUTTON with [
+	;ROTARY: BUTTON ctx-colors/colors/action-color with [
 	;	data: copy [choice1 "Choice 1" choice2 "Choice 2" choice3 "Choice 3"]
 	;	edge: [size: 4x2 effect: 'bezel]
 	;	surface: none

@@ -25,6 +25,7 @@ REBOL [
 ; bound to places in the data-list
 
 ctx-list: context [
+
 	;-- List Specifications
 
 	; object for list column specification
@@ -105,7 +106,7 @@ ctx-list: context [
 			;	]
 			;]
 		]
-		append face/header-face [sort-reset-button spring [bottom left] align [right]]
+		append face/header-face [sort-reset-button spring [bottom left]]
 	]
 
 	; generate sub-face from specs

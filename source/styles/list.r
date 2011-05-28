@@ -31,6 +31,7 @@ stylize/master [
 						face/pos/y <= length? lst/data-filtered ; do not run for cells that are outside the list filter
 					] [
 						pos: face/pos
+						; this shows the incorrect item
 						act-face lst event 'on-click
 						face/pos: pos ; maintain position even after list is closed
 						lst/select-func face event
@@ -618,6 +619,13 @@ stylize/master [
 			face/list/follow face/list pos
 			set-face/no-show face/v-scroller face/list/calc-pos face/list
 		]
+		;-- Dialect Words
+		words: [
+			data [
+				if block? args [new/data: args/2]
+				next args
+			]
+		]
 
 		init: [
 			;-- Setup
@@ -625,7 +633,7 @@ stylize/master [
 			pane: copy [across space 0]
 			;-- Build Header
 			if header-face [
-				append pane compose/only [panel fill 1x0 spring [bottom] (header-face) return]
+				append pane compose/only [panel spring [bottom] (header-face) return]
 			]
 			;-- Build Pane
 			append pane [
@@ -652,6 +660,7 @@ stylize/master [
 			set-parent-faces self
 			any [size size: pane/size + any [all [object? edge 2 * edge/size] 0]]
 			panes: reduce ['default pane: pane/pane]
+			ctx-resize/resize pane/1 as-pair size/x - (2 * first edge-size self) 24 0x0
 			;-- Name faces
 			set either header-face [
 				[header-face v-scroller list]

@@ -1,9 +1,9 @@
 REBOL [
-	Title: "Data Handling Test"
-	Short: "Data Handling Test"
+	Title: "List Specs Dialect Test"
+	Short: "List Specs Dialect Test"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2011 - HMK Design"
-	Filename: %data-handling.r
+	Filename: %specs-dialect.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -15,7 +15,7 @@ REBOL [
 		Use at your own risk.
 	}
 	Purpose: {
-		Test data handling in DATA-LIST using plain blocks and objects.
+		Test specification dialect in DATA-LIST.
 	}
 	History: []
 	Keywords: []
@@ -37,5 +37,8 @@ default-object: make object! [
 view make-window [
 	h3 "List Specs Test"
 	bar
-	l-data: data-list 424x400 setup default-object
+	; if width is -1, then the size could be dictated by the contents
+	l-data: data-list 424x400 setup [
+		name age resizable height weight resizable
+	]
 ]
