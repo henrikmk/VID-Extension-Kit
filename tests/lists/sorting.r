@@ -25,12 +25,10 @@ do %../../build/include.r
 
 clear ctx-vid-debug/debug
 
-obj: make object! [a: b: c: none]
-
 list-data: [[1 2 3][a b c][4 5 6][d e f][g 8 h]]
 
 view make-window [
 	h3 "Sorting Test"
 	bar
-	l-data: data-list 400x400 setup obj data list-data
+	l-data: data-list data list-data
 ]

@@ -603,12 +603,10 @@ stylize/master [
 				set-scroller face
 			]
 			setup-face*: func [face value] [
-				if any [block? value object? value] [
-					face/specs: make block! []
-					ctx-list/make-list-spec face value
-					ctx-list/make-header-face face
-					ctx-list/make-sub-face face
-				]
+				face/specs: make block! []
+				ctx-list/make-list-spec face value
+				ctx-list/make-header-face face
+				ctx-list/make-sub-face face
 			]
 		]
 		;-- List functions
@@ -629,7 +627,11 @@ stylize/master [
 
 		init: [
 			;-- Setup
+			unless any [block? setup object? setup] [
+				setup: ctx-list/make-list-object self
+			]
 			if setup [access/setup-face* self setup]
+			; when no data exists, then this fails
 			pane: copy [across space 0]
 			;-- Build Header
 			if header-face [

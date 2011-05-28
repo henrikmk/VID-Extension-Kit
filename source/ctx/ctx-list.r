@@ -74,6 +74,30 @@ ctx-list: context [
 		]
 	]
 
+	; creates a list object, if none is defined
+	make-list-object: func [face /local i sample] [
+		if block? face/data [
+			either empty? face/data [
+				make object! [column-1: none]
+			] [
+				sample: face/data/1
+				case [
+					object? sample [
+						make object! sample
+						set sample none
+						sample
+					]
+					block? sample [
+						i: 0
+						sample: array/initial length? face/data/1 does [i: i + 1 to-set-word rejoin ['column- i]]
+						append sample none
+						make object! sample
+					]
+				]
+			]
+		]
+	]
+
 	;-- Functions to Apply Specification to List
 
 	; function to generate header face from specs
