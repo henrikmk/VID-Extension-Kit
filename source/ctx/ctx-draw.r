@@ -195,6 +195,10 @@ set 'set-draw-body func [face /init /local debug state state-block see touch val
 					]
 				]
 			]
+			draw-image [
+				; In case the image has a different size
+				resize-draw-body face
+			]
 			template [
 				; Establish effect block
 				unless all [

@@ -25,7 +25,8 @@ do %../../build/include.r
 
 clear ctx-vid-debug/debug
 
-list-data: [[1 2 3]["a" "b" "c"][4 5 6]["d" "e" "f"]["g" 8 "h"]]
+list-data: []
+loop 25 [append/only list-data array/initial 4 does [random 100]]
 
 view make-window [
 	h3 "Sorting Test"
