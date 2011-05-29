@@ -31,10 +31,9 @@ stylize/master [
 						face/pos/y <= length? lst/data-filtered ; do not run for cells that are outside the list filter
 					] [
 						pos: face/pos
-						; this shows the incorrect item
+						lst/select-func face event
 						act-face lst event 'on-click
 						face/pos: pos ; maintain position even after list is closed
-						lst/select-func face event
 					]
 				]
 			]
@@ -66,7 +65,7 @@ stylize/master [
 		pane:						; iterated sub-face here
 		v-scroller:					; vertical scroller attached to list face
 		h-scroller:					; horizontal scroller attached to list face
-		selected:					; block of integers with selected indexes
+		selected:					; block of integers with selected indexes in the original data
 		;-- CTX-LIST information
 		filter-spec:				; filter specification
 		sort-direction:				; 'asc, 'ascending or 'desc, 'descending
@@ -219,6 +218,8 @@ stylize/master [
 		]
 		;-- Cell content function
 		cell-func: func [face cell row col render /local fp r] [
+			; this is cell position for visible position in list
+			; cell also requires index position in data
 			cell/pos: as-pair col row - 1 + index? face/output
 			r: either all [render row <= length? face/output] [
 				; call output here instead as it's much faster
@@ -235,7 +236,9 @@ stylize/master [
 		]
 		;-- Cell render function
 		render-func: func [face cell] [
-			either find face/selected cell/pos/y [ ; [!] - this is bound on visible selection?
+			; this should be bound to list selection, rather than visible selection
+			; so cell/pos/y does not work here
+			either find face/selected pick face/data-sorted cell/pos/y [
 				cell/color:
 					either flag-face? face disabled [
 						ctx-colors/colors/select-disabled-color
@@ -272,12 +275,12 @@ stylize/master [
 		select-mode: 'multi
 		start: end: none
 		select-func: func [face event /local old s step] [
-;			if tail? at data face/pos/y [exit] ; [!] - convert this to use the unfiltered position
 			old: copy selected
+			lst: face/parent-face/parent-face
 			switch select-mode [
 				mutex [
 					;-- Single selection
-					append clear selected start: end: face/pos/y ; [!] - convert this to use the unfiltered position
+					append clear selected pick lst/data-sorted start: end: face/pos/y
 				]
 				multi [
 					;-- Select multiple rows
@@ -288,35 +291,35 @@ stylize/master [
 								for i start end step [remove find selected i]
 								step: pick [1 -1] start < end: face/pos/y
 								for i start face/pos/y step [
-									append selected i
+									append selected pick lst/data-sorted i
 								]
 							][
-								append selected start: end: face/pos/y
+								append selected pick lst/data-sorted start: end: face/pos/y
 							]
 						]
 						event/control [
-							alter selected start: end: face/pos/y
+							alter selected pick lst/data-sorted start: end: face/pos/y
 						]
 						true [
-							append clear selected start: end: face/pos/y
+							append clear selected pick lst/data-sorted start: end: face/pos/y
 						]
 					]
 				]
 				persistent [
 					;-- Selection stays
-					alter selected start: end: face/pos/y
+					alter selected pick lst/data-sorted start: end: face/pos/y
 				]
 			]
 			sel: copy selected
 			selected: head insert head clear selected unique sel
 			if sel <> old [
 				old: face/pos
-				do-face self face/pos
+				do-face self selected
 				show self
 				face/pos: old ; otherwise it changes due to SHOW
 			]
 		]
-		;-- Cell selection function for keyboard. FACE is cell that is selected.
+		;-- Cell selection function for keyboard. FACE is the list in focus.
 		key-select-func: func [face event /local old out s step] [
 			if find [up down] event/key [
 				old: copy selected
@@ -325,20 +328,24 @@ stylize/master [
 				if event/control [dir: dir * list-size face]
 				if empty? out [clear selected return false]
 				either empty? selected [
-					append selected start: end: 1
+					append selected pick face/data-sorted start: end: 1
 				][
 					case [
 						all [select-mode <> 'mutex event/shift] [
 							step: pick [1 -1] start < end
-							for i start end step [remove find selected i]
+							for i start end step [remove find selected pick face/data-sorted i]
 							step: pick [1 -1] start < (end: end + dir)
 							end: max 1 min length? out end
-							for i start end step [insert tail selected i]
+							for i start end step [insert tail selected pick face/data-sorted i]
 						]
 						true [
-							start: either start [first append clear selected end + dir][1]
+							either start [
+								append clear selected pick face/data-sorted start: end + dir
+							][
+								start: 1
+							]
 							start: end: max 1 min length? out start
-							selected/1: start
+							selected/1: pick face/data-sorted start
 						]
 					]
 				]
@@ -347,7 +354,7 @@ stylize/master [
 			sel: copy selected
 			selected: head insert head clear selected unique sel
 			if sel <> old [
-				do-face self face/pos
+				do-face self get-face face
 			]
 		]
 		;-- Accessor functions
@@ -384,16 +391,17 @@ stylize/master [
 			]
 			; returns selected rows from the list face
 			get-face*: func [face /local vals] [
+				; done N column times
 				case [
 					none? face/selected [none]
 					empty? face/selected [none]
 					face/select-mode = 'mutex [
-						pick head face/data-filtered first face/selected
+						pick head face/data first face/selected
 					]
 					true [
 						vals: make block! length? face/selected
 						foreach pos face/selected [
-							append/only vals pick head face/data-filtered pos
+							append/only vals pick head face/data pos
 						]
 						vals
 					]
@@ -563,12 +571,9 @@ stylize/master [
 			none
 ; [?] - do not allow focusing of individual items in list sub-face
 ; [ ] - inline field system, realized by having text styles that do inline editing
-; [ ] - figure out why list sub-face content does not resize properly to the width of the outer faces immediately
-; [ ] - align
 ; [ ] - does not respond to ON-CLICK actor, due to incorrect mapping
-; [x] - optional header layout, which will be freely defined
-; [ ] - header button style, which loosely connects to the list by its index in the parent header face
 		select-mode: 'multi
+		selected:				; selected rows in list
 		specs:					; specification objects
 			none
 		resize-column:			; which single column resizes (integer)
@@ -596,6 +601,9 @@ stylize/master [
 			set-face*: func [face data] [
 				set-face/no-show face/list data
 				set-scroller face
+			]
+			get-face*: func [face] [
+				get-face face/list
 			]
 			clear-face*: func [face] [
 				clear-face/no-show face/list data
@@ -707,6 +715,7 @@ stylize/master [
 			ctx-list/set-sorting face/list
 			scroll-face/no-show face/list 0 get-face face/list/v-scroller
 			svvf/reset-related-faces face/parent-face
+			; redo selection
 			show face/list
 		]
 		words: [
@@ -736,6 +745,7 @@ stylize/master [
 				face/list/sort-column: none
 				ctx-list/set-sorting face/list
 				scroll-face/no-show face/list 0 get-face face/list/v-scroller
+				; redo selection
 				show face/list
 			]
 		]

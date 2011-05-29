@@ -170,10 +170,8 @@ ctx-list: context [
 	]
 
 	;-- Sorting, Filtering and Display
-	
-	data*: fspec*: soc*: sod*: dfilt*: didx*: dsort*: dadis*: out*: none
 
-	list-map: [data 0 filtered 0 sorted 0]
+	data*: fspec*: soc*: sod*: fidx*: sidx*: dadis*: out*: none
 
 	; returns the type of the list data, either as an object if empty or the type of the first entry
 	get-list-type: does [
@@ -190,10 +188,9 @@ ctx-list: context [
 	set-vars: func [face] [
 		data*:	face/data				; original data block
 		fspec*:	face/filter-spec		; filter specification
-		didx*:	face/data-index			; source -> output map
-		dfilt*:	face/data-filtered		; filtered data rows
-		dsort*:	face/data-sorted		; sorted data
-		soc*:	face/sort-column		; not usable
+		fidx*:	face/data-filtered		; filtering -> source map
+		sidx*:	face/data-sorted		; sorting -> source map
+		soc*:	face/sort-column		; sorted column as word
 		sod*:	face/sort-direction		; not usable
 		cols*:	face/columns			; names of columns (block of words)
 		cor*:	face/column-order		; order and visibility of columns (block of words)
@@ -204,11 +201,9 @@ ctx-list: context [
 	; filters source from the spec for the given list face
 	set-filtered: func [face /local i j spec-func] [
 		set-vars face
-		clear dfilt*
-		insert clear didx* array/initial length? data* list-map
-		repeat i length? didx* [didx*/:i/data: i]
+		clear fidx*
 		either any [none? fspec* empty? fspec*] [
-			insert dfilt* data*
+			repeat i length? data* [insert tail fidx* i]
 		][
 			spec-func:
 				either object! = get-list-type [
@@ -216,38 +211,31 @@ ctx-list: context [
 				][
 					func [row] any [fspec* [true]]
 				]
-			i: j: 0
-			foreach row data* [
-				i: i + 1
-				if spec-func row [
-					j: j + 1
-					insert/only tail dfilt* row
-					didx*/:i/filtered: j
-				]
+			i: 0
+			repeat i length? data* [
+				if spec-func data*/:i [insert tail fidx* i]
 			]
 		]
 		set-sorting face
 	]
 
 	; sets the sorting for the given list face
-	set-sorting: func [face /local op col] [
+	set-sorting: func [face /local op col idx] [
 		set-vars face
-		insert clear head dsort* dfilt*
-		; somehow fit didx* in here
-		; sorting appears to be lossy, so first we need to alter the sorting of the index block
-		; so the sorting needs to occur in a way where the index is brought along
+		insert clear sidx* fidx*
 		if all [sod* soc*] [
 			op: get select [ascending lesser? asc lesser? descending greater? desc greater?] sod*
 			switch to word! get-list-type [
 				object! [
-					sort/compare dsort* func [a b] [op get in a soc* get in b soc*]
+					sort/compare sidx* func [x y] [op get in a soc* get in b soc*] ; [!] - incorrect source
 				]
 				block! [
 					col: index? find extract cols* 2 soc*
-					sort/compare dsort* func [a b] [op pick a col pick b col]
+					sort/compare sidx* func [x y] [op pick pick data* x col pick pick data* y col]
 				]
 			][
-				either find [desc descending] sod* [sort/reverse dsort*][sort dsort*]
+				sort/compare sidx* func [x y] [op pick data* x pick data* y]
+				if find [desc descending] sod* [reverse sidx*]
 			]
 		]
 		set-columns face
@@ -265,18 +253,13 @@ ctx-list: context [
 	]
 
 	; sets the output data for display and for collection with GET-FACE
-	set-output: func [face /local length pos val] [
+	set-output: func [face /local length pos row val] [
 		set-vars face
-		pos: index? face/output
-		length: length? head face/output
 		face/output: clear head face/output
-		foreach row dsort* [
+		foreach idx sidx* [
+			row: pick data* idx
 			insert/only tail face/output make block! length? dadis*
 			foreach col dadis* [
-				; append cell to row
-				; so if there is only one column...?
-				; output is used by didx* so we should use that as a pick index against data
-				; perhaps we don't need to maintain the other indexes in order to do this
 				set/any 'val either block? row [pick row col][row]
 				insert tail last face/output
 					case [
@@ -298,26 +281,26 @@ ctx-list: context [
 	]
 
 	; returns the contents of a single cell according to filtered and sorted data
-	get-cell: func [face row col /local r] [
+	get-cell: func [face phys-row col /local val] [
 		set-vars face
-		either col <= length? dsort* [
-			r: pick dsort* row
+		either col <= length? sidx* [
+			val: pick data* pick sidx* phys-row
 		][
-			unset 'r
+			unset 'val
 		]
 		col: pick dadis* col
 		case [
-			not value? 'r [
+			not value? 'val [
 				copy ""
 			]
-			object? r [
-				form get in r pick next first r col
+			object? val [
+				form get in val pick next first val col
 			]
-			any-block? r [
-				form pick r col
+			any-block? val [
+				form pick val col
 			]
 			true [
-				r
+				val ; not form?
 			]
 		]
 	]

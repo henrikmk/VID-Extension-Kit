@@ -8,8 +8,8 @@ REBOL [
 	Type: 'script
 	Maturity: 'unstable
 	Release: 'internal
-	Created: 26-Jun-2010
-	Date: 26-Jun-2010
+	Created: 28-May-2011
+	Date: 28-May-2011
 	License: {
 		BSD (www.opensource.org/licenses/bsd-license.php)
 		Use at your own risk.
