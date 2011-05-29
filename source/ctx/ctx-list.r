@@ -47,21 +47,26 @@ ctx-list: context [
 		i: 0
 		parse data [
 			any [
-				(i: i + 1)
-				set word word!
-				set name opt string!
-				set adjust opt ['left | 'right | 'center]
-				set width opt integer!
-				set type opt datatype!
-				set hidden opt 'hidden
-				set resizable opt 'resizable
-				(
-					append face/specs make-spec-object word name adjust width type hidden
-					append face/columns word
-					append face/columns none ; what is this supposed to be?
-					any [hidden append face/column-order word]
-					if resizable [face/resize-column: i]
-				)
+				[
+					'spacer (append face/specs 'spacer)
+				] | [
+					(i: i + 1)
+					set word word!
+					set name opt string!
+					set adjust opt ['left | 'right | 'center]
+					set width opt integer!
+					set type opt datatype!
+					set hidden opt 'hidden
+					set resizable opt 'resizable
+					(
+						append face/specs make-spec-object word name adjust width type hidden
+						append face/columns word
+						append face/columns none ; what is this supposed to be?
+						any [hidden append face/column-order word]
+						if resizable [face/resize-column: i]
+					)
+				]
+				
 			]
 		]
 	]
@@ -110,35 +115,44 @@ ctx-list: context [
 		any [face/header-face exit]
 		i: 0
 		foreach spec face/specs [
-			i: i + 1
-			; Column Sort Button
-			repend face/header-face [
-				'sort-button
-				spec/name
-				spec/width
-				'spring
-				case [
-					i < face/resize-column [[bottom right]]
-					i = face/resize-column [[bottom]]
-					i > face/resize-column [[left bottom]]
+			case [
+				object? spec [
+					i: i + 1
+					; Column Sort Button
+					repend face/header-face [
+						'sort-button
+						spec/name
+						spec/width
+						'spring
+						case [
+							i < face/resize-column [[bottom right]]
+							i = face/resize-column [[bottom]]
+							i > face/resize-column [[left bottom]]
+						]
+						'sort-column
+						to-lit-word spec/word
+						'of
+						to-lit-word 'sorting
+					]
 				]
-				'sort-column
-				to-lit-word spec/word
-				'of
-				to-lit-word 'sorting
+				spec = 'resizer [
+					; Resizer
+					; this will only work when the list does not have a single adjustable column
+					;if all [i < length? face/specs] [
+					;	repend face/header-face [
+					;		; [!] - second resizer does not move properly when resizing window
+					;		'resizer 6x24
+					;		'spring
+					;		either i = 1 [[bottom right]][[bottom left]]
+					;	]
+					;]
+				]
+				spec = 'spacer [
+					append face/header-face [pad 1x0]
+				]
 			]
-			; Resizer
-			; this will only work when the list does not have a single adjustable column
-			;if all [i < length? face/specs] [
-			;	repend face/header-face [
-			;		; [!] - second resizer does not move properly when resizing window
-			;		'resizer 6x24
-			;		'spring
-			;		either i = 1 [[bottom right]][[bottom left]]
-			;	]
-			;]
 		]
-		append face/header-face [sort-reset-button spring [bottom left]]
+		probe append face/header-face [sort-reset-button spring [bottom left]]
 	]
 
 	; generate sub-face from specs
@@ -150,20 +164,29 @@ ctx-list: context [
 		]
 		i: 0
 		foreach spec face/specs [
-			i: i + 1
-			repend face/sub-face [
-				switch/default to-word spec/type [
-					image! ['list-image-cell]
-				][
-					'list-text-cell
+			case [
+				object? spec [
+					i: i + 1
+					repend face/sub-face [
+						switch/default to-word spec/type [
+							image! ['list-image-cell]
+						][
+							'list-text-cell
+						]
+						spec/adjust
+						spec/width
+						'spring
+						case [
+							i < face/resize-column [[bottom right]]
+							i = face/resize-column [[bottom]]
+							i > face/resize-column [[left bottom]]
+						]
+					]
 				]
-				spec/adjust
-				spec/width
-				'spring
-				case [
-					i < face/resize-column [[bottom right]]
-					i = face/resize-column [[bottom]]
-					i > face/resize-column [[left bottom]]
+				spec = 'resizer [
+				]
+				spec = 'spacer [
+					append face/sub-face [pad 1x0]
 				]
 			]
 		]

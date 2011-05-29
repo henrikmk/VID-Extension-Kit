@@ -391,7 +391,6 @@ stylize/master [
 			]
 			; returns selected rows from the list face
 			get-face*: func [face /local vals] [
-				; done N column times
 				case [
 					none? face/selected [none]
 					empty? face/selected [none]
@@ -571,7 +570,6 @@ stylize/master [
 			none
 ; [?] - do not allow focusing of individual items in list sub-face
 ; [ ] - inline field system, realized by having text styles that do inline editing
-; [ ] - does not respond to ON-CLICK actor, due to incorrect mapping
 		select-mode: 'multi
 		selected:				; selected rows in list
 		specs:					; specification objects
@@ -715,7 +713,6 @@ stylize/master [
 			ctx-list/set-sorting face/list
 			scroll-face/no-show face/list 0 get-face face/list/v-scroller
 			svvf/reset-related-faces face/parent-face
-			; redo selection
 			show face/list
 		]
 		words: [
@@ -728,10 +725,10 @@ stylize/master [
 
 	; perform reset sort action on parent list
 	SORT-RESET-BUTTON: BUTTON 20x24 ctx-colors/colors/action-color with [
-		font: none
-		text: none
-		list: none ; list face to unsort
-		surface: 'sort-reset
+		font:		none
+		text:		none
+		list:		none ; list face to unsort
+		surface:	'sort-reset
 		action: func [face value] [
 			any [
 				face/list
@@ -745,7 +742,6 @@ stylize/master [
 				face/list/sort-column: none
 				ctx-list/set-sorting face/list
 				scroll-face/no-show face/list 0 get-face face/list/v-scroller
-				; redo selection
 				show face/list
 			]
 		]
@@ -778,15 +774,9 @@ stylize/master [
 				set-scroller face
 			]
 		]
-		sub-face: [
-			across space 1x1
-			list-text-cell bold spring [bottom right] right 100 200.200.200
-			list-text-cell 180 spring [bottom]
-		]
-		header-face: [
-			across space 0x0
-			sort-button "Key" 100 spring [bottom right]
-			sort-button "Value" 180 spring [bottom]
+		setup: [
+			; need to allow defining bold font
+			key 100 spacer value 200 resizable
 		]
 	]
 
