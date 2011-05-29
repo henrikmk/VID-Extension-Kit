@@ -84,10 +84,10 @@ button: frame [
 highlight-button: frame [
 	font state [
 		init [color: white align: 'center style: 'bold shadow: 1x1]
-		released away drag-away [color: white]
+		released away drag-away [shadow: 1x1 color: white]
 		over [color: white]
 		pressed drag-over [color: 200.200.200]
-		disabled [color: 140.140.140]
+		disabled [shadow: 0x0 color: 140.140.140]
 	]
 ]
 info: recessed [
@@ -104,12 +104,12 @@ field: info [
 	colors state [
 		focused [
 			shine: 240.240.240
-			background: yellow
+			background: ctx-colors/colors/field-select-color
 			shadow: 140.140.140
 		]
 		unfocused [
 			shine: 240.240.240
-			background: 230.230.230
+			background: ctx-colors/colors/field-color
 			shadow: 140.140.140
 		]
 		disabled [
@@ -200,7 +200,7 @@ radio: image [
 glyph: frame [
 	colors state [
 		released away drag-away [
-			value: 0.0.0
+			value: ctx-colors/colors/glyph-color
 		]
 		pressed drag-over [
 			value: white
@@ -209,7 +209,7 @@ glyph: frame [
 			value: blue
 		]
 		disabled [
-			value: 100.100.100
+			value: saturate ctx-colors/colors/glyph-color 50
 		]
 	]
 ]

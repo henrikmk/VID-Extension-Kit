@@ -661,7 +661,6 @@ stylize/master [
 				setup: ctx-list/make-list-object self
 			]
 			if setup [access/setup-face* self setup]
-			; when no data exists, then this fails
 			pane: copy [across space 0]
 			;-- Build Header
 			if header-face [
@@ -671,15 +670,7 @@ stylize/master [
 			append pane [
 				scroller 20x100 fill 0x1 align [right] [
 					scroll-face face/parent-face/list 0 get-face face
-				;	face/parent-face/access/set-scroller/only face/parent-face
 				]
-				; on-resize [
-				;	;-- Do not resize, if scroller is either past end or not at beginning
-				;	any [
-				;		face/parent-face/access/past-end? face/parent-face
-				;		face/parent-face/access/set-scroller face/parent-face
-				;	]
-				;]
 				list fill 1x1 align [left]
 					[do-face face/parent-face none]
 					with [ ; size is ignored, because it's made inside list size

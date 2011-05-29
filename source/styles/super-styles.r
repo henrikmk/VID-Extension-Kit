@@ -128,7 +128,7 @@ LAYOUT-PASS: PANEL [
 ]
 
 LAYOUT-LISTS: COMPOUND [
-	data-list 300x200
+	data-list 300x200 setup [items]
 ] with [
 	access: make access [
 		set-face*: func [face value] [
@@ -147,7 +147,7 @@ LAYOUT-LISTS: COMPOUND [
 ]
 
 LAYOUT-LIST: LAYOUT-LISTS [
-	data-list 300x200 with [select-mode: 'mutex]
+	data-list 300x200 setup [items] with [select-mode: 'mutex]
 ]
 
 LAYOUT-DIR: COMPOUND [

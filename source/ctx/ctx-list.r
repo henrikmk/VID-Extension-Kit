@@ -248,9 +248,9 @@ ctx-list: context [
 		insert clear sidx* fidx*
 		if all [sod* soc*] [
 			op: get select [ascending lesser? asc lesser? descending greater? desc greater?] sod*
-			switch to word! get-list-type [
+			switch/default to word! get-list-type [
 				object! [
-					sort/compare sidx* func [x y] [op get in a soc* get in b soc*] ; [!] - incorrect source
+					sort/compare sidx* func [x y] [op get in pick data* x soc* get in pick data* y soc*]
 				]
 				block! [
 					col: index? find extract cols* 2 soc*
@@ -258,7 +258,6 @@ ctx-list: context [
 				]
 			][
 				sort/compare sidx* func [x y] [op pick data* x pick data* y]
-				if find [desc descending] sod* [reverse sidx*]
 			]
 		]
 		set-columns face

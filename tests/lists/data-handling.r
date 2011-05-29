@@ -40,8 +40,8 @@ specs: make-window [
 	bar
 	panel [
 		across
-		l-columns: data-list spring [right]
-		l-specs: parameter-list
+		l-columns: data-list 100x200 spring [right] setup [columns]
+		l-specs: parameter-list 300x200
 		right-panel [
 			button "Add" [
 				l-specs
@@ -63,7 +63,7 @@ main: make-window [
 	bar
 	panel [
 		across
-		l-data: data-list 424x400 setup default-object with [
+		l-data: data-list 400x400 setup default-object with [
 			data: :list
 		]
 		right-panel [
