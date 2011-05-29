@@ -15,7 +15,7 @@ REBOL [
 		Use at your own risk.
 	}
 	Purpose: {
-		Test sorting in DATA-LIST with a header-face.
+		Test filtering in DATA-LIST using QUERY-FACE.
 	}
 	History: []
 	Keywords: []
@@ -39,6 +39,7 @@ view make-window [
 	bar
 	right-panel [
 		across
-		label "Filter:" f-filter: field on-key [query-face l-data :filter-row]]
+		label "Filter:" f-filter: field on-key [query-face l-data :filter-row]
+	]
 	l-data: data-list data list-data
 ]
