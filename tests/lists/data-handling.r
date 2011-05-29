@@ -67,7 +67,7 @@ main: make-window [
 			data: :list
 		]
 		right-panel [
-			button "Object Specs" [
+			highlight-button "Object Specs" [
 				view/new specs
 			]
 			bar

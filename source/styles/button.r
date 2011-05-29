@@ -340,6 +340,8 @@ stylize/master [
 
 	BOTTOM-BUTTON: BUTTON with [spring: [top right]]
 	CENTER-BUTTON: BUTTON with [align: [left right]]
-	HIGHLIGHT-BUTTON: BUTTON ctx-colors/colors/important-color with [font: make font [colors: ctx-colors/colors/important-font-color shadow: 1x1]]
+	HIGHLIGHT-BUTTON: BUTTON ctx-colors/colors/important-color with [
+		surface: 'highlight-button
+	]
 
 ]

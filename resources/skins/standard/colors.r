@@ -12,7 +12,7 @@ menu-color:					window-background-color + 20
 frame-background-color:		window-background-color - 20
 line-color:					window-background-color - 100
 menu-text-color:			[0.0.0 0.75.150 255.255.255]
-important-color:			150.0.0 ; color for important elements
+important-color:			sky - 100 ; color for important elements
 manipulator-color:			200.200.200 ; arrows, scrollbars
 glyph-color:				black ; popup, arrow
 action-color:				200.200.200 ; action items, like buttons

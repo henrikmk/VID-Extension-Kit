@@ -81,6 +81,15 @@ recessed: frame [
 button: frame [
 	font [align: 'center style: 'bold]
 ]
+highlight-button: frame [
+	font state [
+		init [color: white align: 'center style: 'bold shadow: 1x1]
+		released away drag-away [color: white]
+		over [color: white]
+		pressed drag-over [color: 200.200.200]
+		disabled [color: 140.140.140]
+	]
+]
 info: recessed [
 ]
 dummy: recessed [
