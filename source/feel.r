@@ -648,6 +648,24 @@ search-face: func [
 	face
 ]
 
+query-face: func [
+	"Performs a query on a face to return a reduced result set."
+	face
+	value
+	/no-show "Do not show change yet"
+	/local access
+][
+	if all [
+		access: get in face 'access
+		in access 'query-face*
+	][
+		access/query-face* face :value
+		act-face face none 'on-query
+	]
+	any [no-show show face]
+	face
+]
+
 select-face: func [
 	"Selects a range of data in a face that supports it."
 	face

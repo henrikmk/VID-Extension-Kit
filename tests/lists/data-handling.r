@@ -73,6 +73,7 @@ main: make-window [
 			bar
 			button "Add" [
 				append list make default-object []
+				ctx-list/set-filtered l-data
 				select-face l-data 'last
 			]
 			button "Remove" [

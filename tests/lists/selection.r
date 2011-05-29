@@ -28,12 +28,19 @@ clear ctx-vid-debug/debug
 list-data: []
 loop 25 [append/only list-data array/initial 4 does [random 100]]
 
+set-i-status: does [
+	set-face i-status reform [
+		"Total:" length? l-data/data
+		"Selected:" length? any [get-face l-data []]
+	]
+]
+
 view make-window [
 	h3 "Selection Test"
 	bar
 	across
 	panel [
-		l-data: data-list data list-data on-key [probe value] on-click [probe value]
+		l-data: data-list data list-data on-key [set-i-status] on-click [set-i-status] on-select [set-i-status]
 		i-status: info fill 1x0 spring [top]
 	]
 	right-panel [
@@ -44,7 +51,9 @@ view make-window [
 		button "Select > 90" [select-face l-data func [val] [any [val/1 > 90 val/2 > 90 val/3 > 90 val/4 > 90]]]
 		bar
 		h3 "Select Mode:"
-		rs: radio-selector setup [mutex "Mutex" multi "Multi" persistent "Persistent"] [l-data/select-mode: value select-face l-data none]
-		do [set-face rs 'multi]
+		rs: radio-selector
+			setup [mutex "Mutex" multi "Multi" persistent "Persistent"]
+			[l-data/select-mode: value select-face l-data none]
+		do [set-face rs 'multi set-i-status]
 	]
 ]

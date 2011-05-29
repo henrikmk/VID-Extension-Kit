@@ -194,7 +194,7 @@ ctx-list: context [
 
 	;-- Sorting, Filtering and Display
 
-	data*: fspec*: soc*: sod*: fidx*: sidx*: dadis*: out*: none
+	data*: ffunc*: soc*: sod*: fidx*: sidx*: dadis*: out*: none
 
 	; returns the type of the list data, either as an object if empty or the type of the first entry
 	get-list-type: does [
@@ -209,36 +209,28 @@ ctx-list: context [
 
 	; sets context variables (internal)
 	set-vars: func [face] [
-		data*:	face/data				; original data block
-		fspec*:	face/filter-spec		; filter specification
-		fidx*:	face/data-filtered		; filtering -> source map
-		sidx*:	face/data-sorted		; sorting -> source map
-		soc*:	face/sort-column		; sorted column as word
-		sod*:	face/sort-direction		; not usable
-		cols*:	face/columns			; names of columns (block of words)
-		cor*:	face/column-order		; order and visibility of columns (block of words)
-		dadis*:	face/data-display		; order of columns for display as indexes
-		out*:	face/output				; data outputted to visible list
+		data*:	face/data					; original data block
+		ffunc*:	get in face 'filter-func	; filter function
+		fidx*:	face/data-filtered			; filtering -> source map
+		sidx*:	face/data-sorted			; sorting -> source map
+		soc*:	face/sort-column			; sorted column as word
+		sod*:	face/sort-direction			; not usable
+		cols*:	face/columns				; names of columns (block of words)
+		cor*:	face/column-order			; order and visibility of columns (block of words)
+		dadis*:	face/data-display			; order of columns for display as indexes
+		out*:	face/output					; data outputted to visible list
 	]
 
 	; filters source from the spec for the given list face
 	set-filtered: func [face /local i j spec-func] [
 		set-vars face
 		clear fidx*
-		either any [none? fspec* empty? fspec*] [
-			repeat i length? data* [insert tail fidx* i]
-		][
-			spec-func:
-				either object! = get-list-type [
-					func [row] [do bind fspec* row]
-				][
-					func [row] any [fspec* [true]]
-				]
-			i: 0
-			repeat i length? data* [
-				if spec-func data*/:i [insert tail fidx* i]
+		repeat i length? data*
+			either any-function? :ffunc* [
+				[if ffunc* data*/:i [insert tail fidx* i]]
+			][
+				[insert tail fidx* i]
 			]
-		]
 		set-sorting face
 	]
 

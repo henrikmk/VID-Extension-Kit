@@ -67,7 +67,7 @@ stylize/master [
 		h-scroller:					; horizontal scroller attached to list face
 		selected:					; block of integers with selected indexes in the original data
 		;-- CTX-LIST information
-		filter-spec:				; filter specification
+		filter-func:				; filter function
 		sort-direction:				; 'asc, 'ascending or 'desc, 'descending
 		sort-column:				; word name of column to sort by
 		;-- Data source information
@@ -127,28 +127,6 @@ stylize/master [
 				] to word! type
 				'list-text-cell ; default
 			]
-		]
-		;-- Row selection
-		select-row: func [face indexes] [
-			; select rows
-			; unfinished function
-			;face/select-func face
-			insert clear head face/selected indexes ; indexes should be from the total list, not just visible items
-;			length?
-
-			; [?] - need the selection to occur on unfiltered data, so there is a general problem here
-
-			; [?] - the selection is also necessary to perform on filtered data, so there are two sides to this problem
-
-			; [!] - selection should be mapped to an internal index
-
-			; [!] - also selection should adhere to sorted data
-
-			; finish this function next. it makes sense to have this done prior to any other function
-
-			; [!] - check that highlighting will follow filtered highlighting
-
-			;face/update face ; is this needed?
 		]
 		;-- Row manipulation
 		; CRUD functions?
@@ -470,6 +448,12 @@ stylize/master [
 					]
 				]
 			]
+			; performs filtering in the face
+			query-face*: func [face value] [
+				clear face/selected
+				face/filter-func: :value
+				ctx-list/set-filtered face
+			]
 		]
 		init: [
 			;-- Build sub-face from columns
@@ -655,6 +639,10 @@ stylize/master [
 			]
 			select-face*: func [face values] [
 				select-face/no-show face/list :values
+				set-scroller face
+			]
+			query-face*: func [face value] [
+				query-face/no-show face/list :value
 				set-scroller face
 			]
 		]

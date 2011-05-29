@@ -215,6 +215,7 @@ vid-face/actors: make object! [
 	on-align:
 	on-time:
 	on-search:
+	on-query:
 	on-select:
 	on-validate:
 	on-init-validate:
@@ -367,6 +368,7 @@ facet-words: [ ; Order of these is important to the code
 	on-align			[set-actor new 'on-align second args next args]
 	on-time				[set-actor new 'on-time second args next args]
 	on-search			[set-actor new 'on-search second args next args]
+	on-query			[set-actor new 'on-query second args next args]
 	on-select			[set-actor new 'on-select second args next args]
 	on-validate			[set-actor new 'on-validate second args next args]
 	on-init-validate	[set-actor new 'on-init-validate second args next args]
