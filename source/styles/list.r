@@ -259,7 +259,10 @@ stylize/master [
 		;-- Content update function
 		update: func [face] [
 			ctx-list/set-filtered face
-			;face/scroll/set-redrag face
+			; what is needed here is to keep the place at where it needs to be when sorting
+			; this means that if the length does not change unreasonably, then there is no need to alter the position
+			; perhaps we should then stick to where it is and then clamp
+;			face/scroll/set-redrag face
 			show face
 			;if in face 'scroll [
 			;	show face/scroll/v-scroller-face
@@ -672,7 +675,8 @@ stylize/master [
 				[v-scroller list]
 			] pane
 			selected: list/selected ; shared selection list
-			list/select-mode: select-mode
+			list/v-scroller: v-scroller ; shared scroller
+			list/select-mode: select-mode ; shared selection mode
 			;-- Map actors from DATA-LIST to internal components
 			foreach actor first actors [
 				if find [on-click on-key] actor [
@@ -684,21 +688,15 @@ stylize/master [
 		]
 	]
 
+	; single sort button for the header face
 	SORT-BUTTON: BUTTON ctx-colors/colors/manipulator-color with [
-		column: none ; the name or index position of the column that is to be sorted. this is set from the DATA-LIST. no it's not.
-		list: none ; list face to sort
-		direction: none ; direction to sort in
-		; function to perform the sorting. perhaps this reaches into the context.
-		; based on the column
-		; when sorted, go by first
-		; attach to list face
-		; [ ] - add up/down arrow for sort in redraw
-		; [ ] - allow setting the sort using the data-list itself, so the sort button needs to abstract only basic information
-		; [ ] - when clicked, perform sort action on parent list
-		; [ ] - sensibly find the parent using init
-		states: [no-sort ascending descending]
-		virgin: true ; do not repeat the first state
-		surface: 'sort
+		column:		none ; the name or index position of the column that is to be sorted.
+		list:		none ; list face to sort
+		feel:		svvf/mutex
+		access:		ctx-access/data-state
+		states:		[no-sort ascending descending]
+		virgin:		true ; do not repeat the no-sort state
+		surface:	'sort
 		action: func [face value] [
 			any [
 				face/list
@@ -706,9 +704,10 @@ stylize/master [
 			]
 			face/list/sort-direction: first face/states
 			face/list/sort-column: face/column
-			face/list/update face/list
-			; this does not show properly
-			; [ ] - redraw parent face header
+			ctx-list/set-sorting face/list
+			scroll-face/no-show face/list 0 get-face face/list/v-scroller
+			svvf/reset-related-faces face/parent-face
+			show face/list
 		]
 		words: [
 			sort-column [
@@ -717,11 +716,29 @@ stylize/master [
 			]
 		]
 	]
-	; [ ] perform reset sort action on parent list
+
+	; perform reset sort action on parent list
 	SORT-RESET-BUTTON: BUTTON 20x24 ctx-colors/colors/action-color with [
 		font: none
 		text: none
+		list: none ; list face to unsort
 		surface: 'sort-reset
+		action: func [face value] [
+			any [
+				face/list
+				face/list: find-style face/parent-face/parent-face 'list
+			]
+			if face/list/sort-column [
+				foreach f face/parent-face/pane [
+					any [f = face clear-face f]
+				]
+				face/list/sort-direction: 'ascending
+				face/list/sort-column: none
+				ctx-list/set-sorting face/list
+				scroll-face/no-show face/list 0 get-face face/list/v-scroller
+				show face/list
+			]
+		]
 	]
 	TABLE: LIST
 	TEXT-LIST: LIST

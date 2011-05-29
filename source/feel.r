@@ -25,7 +25,7 @@ svvf: system/view/vid/vid-feel: context [
 
 	; resets related faces in a mutex group
 	reset-related-faces: func [face][
-		if face/related [
+		if probe face/related [
 			foreach item face/parent-face/pane [
 				if all [
 					item <> face

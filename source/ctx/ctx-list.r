@@ -124,6 +124,8 @@ ctx-list: context [
 				]
 				'sort-column
 				to-lit-word spec/word
+				'of
+				to-lit-word 'sorting
 			]
 			; Resizer
 			; this will only work when the list does not have a single adjustable column
@@ -136,7 +138,7 @@ ctx-list: context [
 			;	]
 			;]
 		]
-probe		append face/header-face [sort-reset-button spring [bottom left]]
+		append face/header-face [sort-reset-button spring [bottom left]]
 	]
 
 	; generate sub-face from specs
@@ -263,8 +265,10 @@ probe		append face/header-face [sort-reset-button spring [bottom left]]
 	]
 
 	; sets the output data for display and for collection with GET-FACE
-	set-output: func [face /local val] [
+	set-output: func [face /local length pos val] [
 		set-vars face
+		pos: index? face/output
+		length: length? head face/output
 		face/output: clear head face/output
 		foreach row dsort* [
 			insert/only tail face/output make block! length? dadis*
