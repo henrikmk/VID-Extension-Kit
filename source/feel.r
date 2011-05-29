@@ -558,7 +558,7 @@ setup-face: func [
 		access: get in face 'access
 		in access 'setup-face*
 	][
-		access/setup-face* face value
+		access/setup-face* face :value
 		act-face face none 'on-setup
 	]
 	any [no-show show face]
@@ -576,7 +576,7 @@ set-face: func [
 		access: get in face 'access
 		in access 'set-face*
 	][
-		access/set-face* face value
+		access/set-face* face :value
 		act-face face none 'on-set
 	]
 	any [no-show show face]
@@ -641,7 +641,7 @@ search-face: func [
 		access: get in face 'access
 		in access 'search-face*
 	][
-		access/search-face* face value
+		access/search-face* face :value
 		act-face face none 'on-search
 	]
 	any [no-show show face]
@@ -659,7 +659,7 @@ select-face: func [
 		access: get in face 'access
 		in access 'select-face*
 	][
-		access/select-face* face range
+		access/select-face* face :range
 		act-face face none 'on-select
 	]
 	any [no-show show face]

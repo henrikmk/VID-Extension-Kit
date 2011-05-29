@@ -32,9 +32,19 @@ view make-window [
 	h3 "Selection Test"
 	bar
 	across
-	l-data: data-list data list-data on-key [probe value] on-click [probe value]
+	panel [
+		l-data: data-list data list-data on-key [probe value] on-click [probe value]
+		i-status: info fill 1x0 spring [top]
+	]
 	right-panel [
 		button "Select All" [select-face l-data true]
 		button "Select None" [select-face l-data none]
+		button "Select First" [select-face l-data 'first]
+		button "Select Last" [select-face l-data 'last]
+		button "Select > 90" [select-face l-data func [val] [any [val/1 > 90 val/2 > 90 val/3 > 90 val/4 > 90]]]
+		bar
+		h3 "Select Mode:"
+		rs: radio-selector setup [mutex "Mutex" multi "Multi" persistent "Persistent"] [l-data/select-mode: value select-face l-data none]
+		do [set-face rs 'multi]
 	]
 ]

@@ -441,13 +441,31 @@ stylize/master [
 			; selects rows in the face
 			select-face*: func [face values] [
 				clear face/selected
+				if empty? face/data-sorted [exit]
 				case [
 					;-- Select Range
-					any-block? values [
+					any-block? :values [
 						insert face/selected unique intersect values face/data-sorted
 					]
+					;-- Select by Function
+					any-function? :values [
+						clear face/selected
+						foreach id face/data-sorted [
+							if values pick face/data id [insert tail face/selected id]
+						]
+					]
+					;-- Select First
+					'first = :values [
+						insert clear face/selected first face/data-sorted
+						follow face 1
+					]
+					;-- Select Last
+					'last = :values [
+						insert clear face/selected last face/data-sorted
+						follow face length? face/data-sorted
+					]
 					;-- Select All
-					values = true [
+					true = :values [
 						insert face/selected face/data-sorted
 					]
 				]
@@ -636,7 +654,8 @@ stylize/master [
 				ctx-list/make-sub-face face
 			]
 			select-face*: func [face values] [
-				select-face/no-show face/list values
+				select-face/no-show face/list :values
+				set-scroller face
 			]
 		]
 		;-- List functions
@@ -693,7 +712,7 @@ stylize/master [
 			] pane
 			selected: list/selected ; shared selection list
 			list/v-scroller: v-scroller ; shared scroller
-			list/select-mode: select-mode ; shared selection mode
+			list/select-mode: does [select-mode] ; shared selection mode
 			;-- Map actors from DATA-LIST to internal components
 			foreach actor first actors [
 				if find [on-click on-key] actor [
