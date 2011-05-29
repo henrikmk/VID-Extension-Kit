@@ -321,35 +321,40 @@ stylize/master [
 		]
 		;-- Cell selection function for keyboard. FACE is the list in focus.
 		key-select-func: func [face event /local old out s step] [
-			if find [up down] event/key [
-				old: copy selected
-				out: head output
-				dir: pick [1 -1] event/key = 'down
-				if event/control [dir: dir * list-size face]
-				if empty? out [clear selected return false]
-				either empty? selected [
-					append selected pick face/data-sorted start: end: 1
-				][
-					case [
-						all [select-mode <> 'mutex event/shift] [
-							step: pick [1 -1] start < end
-							for i start end step [remove find selected pick face/data-sorted i]
-							step: pick [1 -1] start < (end: end + dir)
-							end: max 1 min length? out end
-							for i start end step [insert tail selected pick face/data-sorted i]
-						]
-						true [
-							either start [
-								append clear selected pick face/data-sorted start: end + dir
-							][
-								start: 1
+			case [
+				#"^A" = event/key [
+					select-face/no-show face true
+				]
+				find [up down] event/key [
+					old: copy selected
+					out: head output
+					dir: pick [1 -1] event/key = 'down
+					if event/control [dir: dir * list-size face]
+					if empty? out [clear selected return false]
+					either empty? selected [
+						append selected pick face/data-sorted start: end: 1
+					][
+						case [
+							all [select-mode <> 'mutex event/shift] [
+								step: pick [1 -1] start < end
+								for i start end step [remove find selected pick face/data-sorted i]
+								step: pick [1 -1] start < (end: end + dir)
+								end: max 1 min length? out end
+								for i start end step [insert tail selected pick face/data-sorted i]
 							]
-							start: end: max 1 min length? out start
-							selected/1: pick face/data-sorted start
+							true [
+								either start [
+									append clear selected pick face/data-sorted start: end + dir
+								][
+									start: 1
+								]
+								start: end: max 1 min length? out start
+								selected/1: pick face/data-sorted start
+							]
 						]
 					]
+					follow face end
 				]
-				follow face end
 			]
 			sel: copy selected
 			selected: head insert head clear selected unique sel
@@ -421,6 +426,9 @@ stylize/master [
 			; sets the content of face data and re-filters and re-sorts the list
 			set-face*: func [face data] [
 				clear face/selected
+				if object? data [
+					data: ctx-list/object-to-data data
+				]
 				face/data: data
 				ctx-list/set-filtered face
 			]
@@ -429,6 +437,20 @@ stylize/master [
 				clear face/selected
 				clear face/data
 				ctx-list/set-filtered face
+			]
+			; selects rows in the face
+			select-face*: func [face values] [
+				clear face/selected
+				case [
+					;-- Select Range
+					any-block? values [
+						insert face/selected unique intersect values face/data-sorted
+					]
+					;-- Select All
+					values = true [
+						insert face/selected face/data-sorted
+					]
+				]
 			]
 		]
 		init: [
@@ -473,14 +495,6 @@ stylize/master [
 					]
 				]
 			]
-			;if none? size [
-			;	size: 300x200
-			;	size/x: sub-face/size/x + first edge-size? self
-			;] ; size is really set to 100x100
-			; if size is set here, the sub-face will adhere to the size
-			; if size is not set here, the sub-face will determine the size
-			; still a problem, because we don't really determine the size from fill until the outer part has been aligned
-			; this should also work, even if we are not running this through init
 			make-sub-face/init self any [sub-face attempt [second :action] [list-text-cell]] ; empty sub-face = infinite loop
 			if none? size [
 				size: 300x200
@@ -506,6 +520,7 @@ stylize/master [
 			]
 			;-- Attach source data
 			if none? data [data: make block! []]
+			if object? data [data: ctx-list/object-to-data data]
 			output: copy data-sorted: copy data-index: copy data-filtered: copy data-display: make block! length? data
 			ctx-list/set-filtered self
 			any [block? selected selected: make block! []]
@@ -579,6 +594,7 @@ stylize/master [
 		access: make access [
 			; adjusts the scroller ratio and drag (internal)
 			set-scroller: func [face /only] [
+				; this is done on each scroll
 				face/v-scroller/ratio: face/list/calc-ratio face/list face/v-scroller
 				face/v-scroller/redrag face/v-scroller/ratio
 				any [only set-face/no-show face/v-scroller face/list/calc-pos face/list]
@@ -619,6 +635,9 @@ stylize/master [
 				ctx-list/make-header-face face
 				ctx-list/make-sub-face face
 			]
+			select-face*: func [face values] [
+				select-face/no-show face/list values
+			]
 		]
 		;-- List functions
 		update: func [face] [
@@ -652,14 +671,15 @@ stylize/master [
 			append pane [
 				scroller 20x100 fill 0x1 align [right] [
 					scroll-face face/parent-face/list 0 get-face face
-					face/parent-face/access/set-scroller/only face/parent-face
-				] on-resize [
-					;-- Do not resize, if scroller is either past end or not at beginning
-					any [
-						face/parent-face/access/past-end? face/parent-face
-						face/parent-face/access/set-scroller face/parent-face
-					]
+				;	face/parent-face/access/set-scroller/only face/parent-face
 				]
+				; on-resize [
+				;	;-- Do not resize, if scroller is either past end or not at beginning
+				;	any [
+				;		face/parent-face/access/past-end? face/parent-face
+				;		face/parent-face/access/set-scroller face/parent-face
+				;	]
+				;]
 				list fill 1x1 align [left]
 					[do-face face/parent-face none]
 					with [ ; size is ignored, because it's made inside list size
@@ -690,7 +710,7 @@ stylize/master [
 				]
 			]
 			;-- Scroller setup
-			access/set-scroller self
+			insert-actor-func self 'on-resize get in access 'set-scroller
 		]
 	]
 
@@ -749,31 +769,6 @@ stylize/master [
 	TABLE: LIST
 	TEXT-LIST: LIST
 	PARAMETER-LIST: DATA-LIST with [
-		access: make access [
-			; sets the content of face data and re-filters and re-sorts the list
-			set-face*: func [face data /local values] [
-				either object? data [
-					values: make block! length? first data
-					;-- Insert whole object in parameter list
-					foreach [word value] third data [
-						repend/only values [
-							word
-							either all [series? :value greater? index? :value length? head :value] [
-								; dumb solution, I think, but until we get a universal way to mold such a string, we'll use it
-								"Past End"
-							][
-								form :value
-							]
-						]
-					]
-				][
-					;-- Insert as normal block data
-					values: data
-				]
-				set-face/no-show face/list values
-				set-scroller face
-			]
-		]
 		setup: [
 			; need to allow defining bold font
 			key 100 spacer value 200 resizable

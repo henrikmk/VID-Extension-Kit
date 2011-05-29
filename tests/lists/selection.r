@@ -34,7 +34,7 @@ view make-window [
 	across
 	l-data: data-list data list-data on-key [probe value] on-click [probe value]
 	right-panel [
-		button "Select All" [l-data]
-		button "Select None" [l-data]
+		button "Select All" [select-face l-data true]
+		button "Select None" [select-face l-data none]
 	]
 ]

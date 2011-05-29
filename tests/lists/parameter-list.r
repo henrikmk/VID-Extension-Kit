@@ -25,12 +25,11 @@ do %../../build/include.r
 
 clear ctx-vid-debug/debug
 
-list-data: []
-loop 25 [append/only list-data array/initial 4 does [random 100]]
+list-data: system/view
 
 view make-window [
 	h3 "Parameter List Test"
 	bar
 	across
-	l-data: parameter-list
+	l-data: parameter-list data list-data
 ]

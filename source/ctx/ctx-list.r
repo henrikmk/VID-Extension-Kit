@@ -152,7 +152,7 @@ ctx-list: context [
 				]
 			]
 		]
-		probe append face/header-face [sort-reset-button spring [bottom left]]
+		append face/header-face [sort-reset-button spring [bottom left]]
 	]
 
 	; generate sub-face from specs
@@ -327,27 +327,23 @@ ctx-list: context [
 			]
 		]
 	]
-	
-	; functions for articulate ways of configuring a list face
-	; [ ] - complete articulation of base list:
-	;       [x] - creation of header-face
-	;       [ ] - display sorting in header
-	;       [ ] - creation of list-face
-	;       [ ] - display filtering of rows
-	;       [ ] - display of sorting of rows
-	;       [ ] - set of scrolling
-	;       [ ] - setting of column widths
-	; [o] - apply specs to data-list:
-	;       [x] - build header-face
-	;       [x] - build list-row-face
-	;       [o] - use SETUP to apply specs with DATA-LIST. find anything that collides here.
-	;       [o] - free articulation between using setup or *-face appliance in WITH
-	; [ ] - apply specs directly to list only:
-	;       [o] - build list-row-face
-	; [ ] - need to set default object
-	; [ ] - need to set specs for columns
-	; [x] - require specs block
-	;       [x] - generate list columns and column header from specs block
-	; [ ] - manipulate articulation of list through these functions
-	; [ ] - investigate specs dialect to generate specs object block, using a specs parser
+
+	;-- Input Data Conversion
+
+	; object to data
+	object-to-data: func [obj] [
+		values: make block! length? words-of obj
+		foreach [word value] body-of obj [
+			repend/only values [
+				word
+				either all [series? :value greater? index? :value length? head :value] [
+					; dumb solution, I think, but until we get a universal way to mold such a string, we'll use it
+					"Past End"
+				][
+					form :value
+				]
+			]
+		]
+		values
+	]
 ]

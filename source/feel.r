@@ -648,6 +648,24 @@ search-face: func [
 	face
 ]
 
+select-face: func [
+	"Selects a range of data in a face that supports it."
+	face
+	range
+	/no-show "Do not show change yet"
+	/local access
+][
+	if all [
+		access: get in face 'access
+		in access 'select-face*
+	][
+		access/select-face* face range
+		act-face face none 'on-select
+	]
+	any [no-show show face]
+	face
+]
+
 attach-face: func [
 	"Attaches the first face to the second, specifying what to do and when."
 	from-face "Face to act with"
