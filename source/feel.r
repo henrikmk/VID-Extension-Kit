@@ -648,6 +648,25 @@ search-face: func [
 	face
 ]
 
+edit-face: func [
+	"Manipulate the content of the face."
+	face
+	op
+	value
+	/no-show "Do not show change yet"
+	/local access
+][
+	if all [
+		access: get in face 'access
+		in access 'edit-face*
+	][
+		access/edit-face* face :op :value
+		act-face face none 'on-edit
+	]
+	any [no-show show face]
+	face
+]
+
 query-face: func [
 	"Performs a query on a face to return a reduced result set."
 	face
@@ -984,7 +1003,7 @@ ctx-access: context [
 			face/text: value
 			face/line-list: none
 		]
-		get-face*: func [face][face/text]
+		get-face*: func [face][face/data]
 		clear-face*: func [face][
 			if face/para [face/para/scroll: 0x0]
 			if string? face/text [clear face/text]

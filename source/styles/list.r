@@ -13,6 +13,7 @@ stylize/master [
 	; generic cell for LIST
 	LIST-CELL: TEXT with [
 		text: none
+		data: none
 		size: 0x20
 		font: make font [valign: 'middle]
 		para: make para [wrap?: false]
@@ -196,26 +197,15 @@ stylize/master [
 		]
 		;-- Cell content function
 		cell-func: func [face cell row col render /local fp r] [
-			; this is cell position for visible position in list
-			; cell also requires index position in data
 			cell/pos: as-pair col row - 1 + index? face/output
-			r: either all [render row <= length? face/output] [
-				; call output here instead as it's much faster
-				
+			r: if all [render inside: row <= length? face/output] [
 				pick pick face/output row col
-;				ctx-list/get-cell face row col
-			][
-				copy ""
 			]
-			if function? :render-func [
-				render-func face cell
-			]
-			set-face/no-show cell r
+			cell/access/set-face* cell r
+			render-func face cell
 		]
 		;-- Cell render function
 		render-func: func [face cell] [
-			; this should be bound to list selection, rather than visible selection
-			; so cell/pos/y does not work here
 			either find face/selected pick face/data-sorted cell/pos/y [
 				cell/color:
 					either flag-face? face disabled [
@@ -448,11 +438,31 @@ stylize/master [
 					]
 				]
 			]
-			; performs filtering in the face
+			; performs filtering of rows in the list
 			query-face*: func [face value] [
 				clear face/selected
 				face/filter-func: :value
 				ctx-list/set-filtered face
+			]
+			; perform edits on the list
+			edit-face*: func [face op value] [
+				switch :op [
+					add [
+						append/only face/data :value
+						ctx-list/set-filtered face
+						select-face face 'last
+					]
+					edit [
+						repeat i length? face/selected [poke face/data pick face/selected i :value]
+						ctx-list/set-filtered face
+					]
+					delete [
+						repeat i length? face/selected [change at face/data pick face/selected i ()]
+						remove-each row face/data [not value? 'row]
+						clear face/selected
+						ctx-list/set-filtered face
+					]
+				]
 			]
 		]
 		init: [
@@ -645,6 +655,10 @@ stylize/master [
 				query-face/no-show face/list :value
 				set-scroller face
 			]
+			edit-face*: func [face op value] [
+				edit-face/no-show face/list :op :value
+				set-scroller face
+			]
 		]
 		;-- List functions
 		update: func [face] [
@@ -682,13 +696,14 @@ stylize/master [
 					[do-face face/parent-face none]
 					with [ ; size is ignored, because it's made inside list size
 						sub-face: (sub-face)
-						data: (data) ; make sure it's same
-						columns: (columns) ; make sure it's same
-						column-order: (column-order) ; make sure it's same
+						data: (data)
+						columns: (columns)
+						column-order: (column-order)
 					]
 			]
 			pane: layout/tight compose/deep/only pane
 			set-parent-faces self
+			;-- Calculate sizes
 			any [size size: pane/size + any [all [object? edge 2 * edge/size] 0]]
 			panes: reduce ['default pane: pane/pane]
 			ctx-resize/resize pane/1 as-pair size/x - (2 * first edge-size self) 24 0x0
@@ -698,9 +713,11 @@ stylize/master [
 			][
 				[v-scroller list]
 			] pane
-			selected: list/selected ; shared selection list
-			list/v-scroller: v-scroller ; shared scroller
-			list/select-mode: does [select-mode] ; shared selection mode
+			;-- Sharing
+			selected:			list/selected
+			list/v-scroller:	v-scroller
+			list/select-mode:	does [select-mode]
+			list/render-func:	:render-func
 			;-- Map actors from DATA-LIST to internal components
 			foreach actor first actors [
 				if find [on-click on-key] actor [

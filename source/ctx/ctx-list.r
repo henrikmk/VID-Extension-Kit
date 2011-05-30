@@ -226,7 +226,7 @@ ctx-list: context [
 		set-vars face
 		clear fidx*
 		repeat i length? data*
-			either any-function? :ffunc* [
+			either probe any-function? :ffunc* [
 				[if ffunc* data*/:i [insert tail fidx* i]]
 			][
 				[insert tail fidx* i]
@@ -281,13 +281,13 @@ ctx-list: context [
 							copy ""
 						]
 						object? val [
-							form get in val pick next first val col
+							get in val pick next first val col
 						]
 						any-block? val [
-							form pick val col
+							pick val col
 						]
 						true [
-							form val
+							val
 						]
 					]
 			]
@@ -295,6 +295,7 @@ ctx-list: context [
 	]
 
 	; returns the contents of a single cell according to filtered and sorted data
+	; unused
 	get-cell: func [face phys-row col /local val] [
 		set-vars face
 		either col <= length? sidx* [
@@ -308,10 +309,10 @@ ctx-list: context [
 				copy ""
 			]
 			object? val [
-				form get in val pick next first val col
+				get in val pick next first val col
 			]
 			any-block? val [
-				form pick val col
+				pick val col
 			]
 			true [
 				val ; not form?

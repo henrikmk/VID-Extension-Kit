@@ -1,0 +1,216 @@
+VID Extension Kit Lists
+
+===Introduction
+
+Lists are a big topic, and deserve their own document. The VID Extension Kit offers several building blocks for lists.
+
+===List Styles
+
+The list styles are built from several basic components as <em>compound styles</em>. Some are not obvious list styles, but are based on them, like the CHOICE style.
+
+Common of all of these lists are that they are based on iterated faces. This means that one face is used to generate the whole list, usually rendering from top to bottom in one operation. It also means that the rows must be of equal height.
+
+---Components
+
+:LIST - This is the basic list style, which essentially is a list of iterated faces with predefined access possibilities for changing rendering, column/row layout, row manipulation, keyboard navigation and scrolling accessor.
+
+:CARET-LIST - Derivative of LIST, which uses an alternative keyboard selection scheme.
+
+:SCROLLER - Depending on the style,
+
+:LIST-CELL - A text cell optimized for lists. If you want clickable rows and custom render functions in the list, this or one of its derivatives should be used.
+
+:LIST-TEXT-CELL - A derivative of LIST-CELL.
+
+:LIST-IMAGE-CELL - A derivative of LIST-CELL for images.
+
+In the future, there will be more styles to provide direct manipulation of rows, such as buttons or fields.
+
+---Compound Styles
+
+:NAV-LIST - This is a PANEL that holds the basic words for the elements that a data-list consists of.
+
+:DATA-LIST - This uses a LIST, a SCROLLER and a PANEL with SORT-BUTTON and SORT-RESET-BUTTON in it to form a regular list. It is derived from NAV-LIST.
+
+:PARAMETER-LIST - This is derives from DATA-LIST and shows a predefined setup for displaying objects in parameter or key/value form easily.
+
+:CHOICE - This uses a CARET-LIST to show the options list.
+
+===Specifying a List
+
+There are multiple methods for specifying the structure and content of a list. Generally there are three ways: A <strong>Specification dialect</strong>, if you want to specify a list quickly with minimum code, by specifying an object to SETUP and by specifying list elements directly using traditional VID syntax, if you want maximum flexibility.
+
+Specifying a list works the same across DATA-LIST and PARAMETER-LIST.
+
+---Setup
+
+When using SETUP, you can either use an object or a dialect block (the specification dialect) to specify the structure of the list.
+
++++Using an Object
+
+The object can typically be the same as the object used to specify each row in the list.
+
+	my-list-row: make object! [
+		name:
+		age:
+		weight:
+			none
+	]
+
+Then the data-list will
+
++++Specification Dialect
+
+The dialect is specified through setup and you specify columns from left to right.
+
+You can specify each column by simple words:
+
+	data-list setup [name age weight]
+
+You can add specific titles:
+
+	data-list setup [name "Name" age "Age [years]" weight "Weight [kg]"]
+
+You can specify the width of each column in pixels with the condition that the first column is resizable:
+
+	data-list setup [name 100 age 150 weight 50]
+
+You can specify which column is resizable. The condition is that only one column is resizable, as the list resizing model follows that, which the VID Extension Kit uses.
+
+	data-list setup [name 100 age 150 resizable weight 50]
+
+If you specify more than one resizable column, only the last column specified as resizable, will become resizable.
+
+You can add spacers. This is for example used in the PARAMETER-LIST
+
+---Direct specification
+
+When using this method, you are using the traditional WITH syntax to access face words directly. This method is preferable, if the dialect cannot give you enough flexibility to describe the structure of the list.
+
+:SUB-FACE - This is the face that is used to render each row. Note that you are free to specify any kind of layout, including several internal rows. When using the specification dialect or an input object for SETUP, this face is automatically generated.
+
+:HEADER-FACE - This is the header face that is used to control the list. It is placed above the list and takes the entire horizontal width of the face. The HEADER-FACE is only available in DATA-LIST, PARAMETER-LIST. When using the specification dialect or an input object for SETUP, this face is automatically generated.
+
++++Example
+
+	data-list with [
+		header-face: [
+			across space 0
+			sort-button "Name" 100 spring [bottom right] of 'sorting
+			sort-button "Age" 150 spring [bottom] of 'sorting
+			sort-button "Weight" 50 spring [bottom left] of 'sorting
+			sort-reset-button
+		]
+		sub-face: [
+			across space 0
+			list-text-cell 300x30 font-size 16 return
+			list-text-cell 150x20 font-size 11
+			list-text-cell 150x20 font-size 11
+		]
+	]
+
+===Content of a List
+
+The contents of a list is usually one or several columns and rows, where each column has a title specification. DATA-LIST is designed to accept an input directly to display a data-list with contents, so you don't have to spend time generating a specification of the content.
+
+There are generally 3 types of data content allowed:
+
+---1-dimensional blocks
+
+A simple 1-dimensional block of elements that are not objects are allowed, such as:
+
+	[1 2 3 4]
+
+The list will automatically detect that there is only one column, if the first element is not a block.
+
+---2-dimensional blocks
+
+2-dimensional blocks are allowed and may contain various types, including objects:
+
+	[[1 2] [3 4] [5 6] [7 8]]
+
+The list will automatically figure out the number of columns from the length of the first block.
+
+---Object blocks
+
+This is the recommended method for maximum flexibility as the same object can be used both for specifying the list structure and for specifying rows in the list. Each word in the object is designated as a column and will be used as the column name. So if you have an object:
+
+	my-list-row: make object! [
+		name:
+		age:
+		weight:
+			none
+	]
+
+The columns shown in the list will be:
+
+	Name Age Weight
+
+===Sorting
+
+A list with a header can be sorted by the user. When using 
+
+===Filter Function
+
+The QUERY-FACE accessor can filter rows, based on an input function. The input function takes a row as an input argument and when returning TRUE, the row will be included in the list. If FALSE, it will be left out.
+
+This is useful for filtering out data that you don't want to see, such as with a real-time string filtering function.
+
+---Example
+
+Example filtering function, which leaves out a line, if the string in F-FILTER cannot be found in any cell:
+
+	filter-row: func [row /local value] [
+		if empty? value: get-face f-filter [return true]
+		foreach cell row [if find cell value [return true]]
+		false
+	]
+
+And in the list specification the QUERY-FACE accessor uses the filter function to filter in the list per key-press:
+
+	f-filter: field on-key [query-face l-data :filter-row]
+	l-data: data-list data list-data
+
+===Render Function
+
+When the list uses a RENDER-FUNC function, each cell can be evaluated for content and adjusted in appearance accordingly. Any facet of the face can be adjusted. This is used for alternate line coloring in the standard DATA-LIST.
+
+But by setting any facet, including DRAW blocks, you can include images or complex indicators in a cell. The RENDER-FUNC function is run, every time a single cell is rendered, so speed is of importance.
+
+---Cell Information
+
+Each cell contains several bits of information to help you determine rendering:
+
+:POS - This is the physical position of the data in the output. If you are rendering the fourth cell in the third row, the value will be <strong>3x4</strong>. Using POS/X, you can determine which column you are in.
+
+:DATA - This is the raw data input to the cell. Even if there are no more rows with data to render, such as in a table with fewer rows of data than visible rows in the list, the function will still be called, and in that case, the value is NONE.
+
+---Example
+
+This applies
+
+---Random Colors
+
+Another handy use of the render function is to assign a random color to a cell. Since lists are iterated faces, the entire list is always generated with all faces. If you are experiencing slowdowns, due to excessive redraws of the list, you can apply a random background color per cell to detect such excessive redraws.
+
+	data-list data list-data with [
+		render-func: func [face cell] [
+			cell/color: random 255.255.255
+		]
+	]
+
+===Selection Mode
+
+When setting the selection mode in the list, you can determine the behavior of selection:
+
+:MUTEX - This selects only one row at a time, regardless of whether holding down qualifier keys or not.
+
+:MULTI - When clicking a row, it will be highlighted. When clicking other rows using SHIFT or CONTROL keys, those rows will be highlighted, either in sequence (SHIFT) or appended to the current selection (CTRL).
+
+:PERSISTENT - When clicking a row it will be highlighted. When clicking another row without holding down any qualifier keys, that row will also be highlighted.
+
+===Keyboard Navigation
+
+When using a DATA-LIST, it is registered as a compound style and internal components cannot be navigated to directly.
+
+The LIST style offers a KEY-FACE accessor function with the following

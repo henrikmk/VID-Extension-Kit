@@ -25,67 +25,43 @@ do %../../build/include.r
 
 clear ctx-vid-debug/debug
 
-data: [[1 2 3][a b c][4 5 6][d e f]]
-
 ; object for main data list
 default-object: make object! [
 	name:
 	age:
 	height:
+	time:
 		none
 ]
 
-specs: make-window [
-	h3 "Data Table Specifications"
-	bar
-	panel [
-		across
-		l-columns: data-list 100x200 spring [right] setup [columns]
-		l-specs: parameter-list 300x200
-		right-panel [
-			button "Add" [
-				l-specs
-			]
-			button "Remove" [
-				l-specs
-			]
-			button "Edit" [
-				l-specs
-			]
-		]
-	]
-]
+list-data: []
 
-list: []
-
-main: make-window [
+view make-window [
 	h3 "Data Handling Test"
 	bar
 	panel [
 		across
-		l-data: data-list 400x400 setup default-object with [
-			data: :list
-		]
+		l-data: data-list 500x400 data list-data setup [name age height time 200]
 		right-panel [
-			highlight-button "Object Specs" [
-				view/new specs
-			]
-			bar
 			button "Add" [
-				append list make default-object []
-				ctx-list/set-filtered l-data
-				select-face l-data 'last
+				edit-face l-data 'add make default-object [
+					name: random "abc"
+					age: random 50
+					height: random 100
+					time: now/precise
+				]
 			]
 			button "Remove" [
-				remove
-				show l-data
+				either empty? l-data/selected [
+					alert "No rows selected."
+				][
+					edit-face l-data 'delete none
+				]
 			]
 			button "Update" [
-				make default-object []
-				show l-data 
+				; should find a more elegant way to deal with this, which might be with objects
+				edit-face l-data 'edit make default-object [time: now/precise]
 			]
 		]
 	]
 ]
-
-view main

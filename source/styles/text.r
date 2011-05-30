@@ -28,7 +28,6 @@ stylize/master [
 		access: ctx-access/text
 		edge: none
 		flags: [text]
-;		font: [color: black shadow: none colors: [0.0.0 40.40.40]]
 		xy: none
 		doc: [
 			info: "Base text style"
@@ -41,7 +40,6 @@ stylize/master [
 		init: [
 			if all [not flag-face? self as-is string? text] [trim/lines text]
 			if none? text [text: copy ""]
-;			change font/colors font/color
 			if none? size [size: -1x-1]
 			if size/x = -1 [
 				size/x: first face-size-from-text self 'x
@@ -56,7 +54,6 @@ stylize/master [
 
 	VTEXT: BASE-TEXT with [
 		feel: ctx-text/swipe
-;		font: [color: black shadow: 0x0 colors: ctx-colors/colors/font-color]
 		doc: [info: "Video text (light on dark)"]
 		insert init [
 			if :action [feel: svvf/hot saved-area: true]
@@ -108,7 +105,8 @@ stylize/master [
 							]
 						face/text: form face/data
 					][
-						face/text: face/data: either value [form value][copy ""]
+						face/data: value ; big change, but we're losing the original data
+						face/text: either value [form value][copy ""]
 					]
 					face/line-list: none
 				]
