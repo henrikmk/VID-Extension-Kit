@@ -41,5 +41,5 @@ view make-window [
 		across
 		label "Filter:" f-filter: field on-key [query-face l-data :filter-row]
 	]
-	l-data: data-list data list-data
+	l-data: data-list data list-data setup [a b c d persistent]
 ]

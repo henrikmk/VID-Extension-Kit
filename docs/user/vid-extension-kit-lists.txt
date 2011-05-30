@@ -24,6 +24,10 @@ Common of all of these lists are that they are based on iterated faces. This mea
 
 :LIST-IMAGE-CELL - A derivative of LIST-CELL for images.
 
+:SORT-BUTTON - This is the standard sort button, which is used by DATA-LIST and is automatically placed in the header face. It is derived from BUTTON. Clicking this will begin sorting for the column below it. Any other sorted column will be unsorted.
+
+:SORT-RESET-BUTTON - This is the standard sort reset button, which presents a diamond shaped icon in the top right hand corner of the list. Clicking this button resets to use no sorting.
+
 In the future, there will be more styles to provide direct manipulation of rows, such as buttons or fields.
 
 ---Compound Styles
@@ -38,9 +42,25 @@ In the future, there will be more styles to provide direct manipulation of rows,
 
 ===Specifying a List
 
-There are multiple methods for specifying the structure and content of a list. Generally there are three ways: A <strong>Specification dialect</strong>, if you want to specify a list quickly with minimum code, by specifying an object to SETUP and by specifying list elements directly using traditional VID syntax, if you want maximum flexibility.
+There are multiple methods for specifying the structure and content of a list. Generally there are three ways:
+
+# By specifying an object to SETUP, which gives you minimum flexibility, but minimum code.
+
+# A <strong>Specification dialect</strong>, if you want to specify a list quickly with a medium amount of code
+
+# By specifying list elements directly using traditional VID syntax, if you want maximum flexibility.
 
 Specifying a list works the same across DATA-LIST and PARAMETER-LIST.
+
+You can also specify a data source. It can be the list itself, in which case the data is stored at FACE/DATA, or you can assign one like so:
+
+	data-block: []
+
+And then in layout:
+
+	data-list data data-block
+
+DATA-BLOCK is not copied.
 
 ---Setup
 
@@ -57,11 +77,39 @@ The object can typically be the same as the object used to specify each row in t
 			none
 	]
 
-Then the data-list will
+You can then pass the object to the data list like this:
+
+	data-list setup my-list-row
 
 +++Specification Dialect
 
-The dialect is specified through setup and you specify columns from left to right.
+The dialect is specified through setup and you specify columns from left to right and then assign attributes to each column. 
+
+You cannot mix specification methods. If you specify via the dialect, you will both need to define columns and global settings for the list.
+
+The arguments for each column are:
+
+:word - The word that will be assigned to the column. This word must be present and cannot be one of these words: MULTI, MUTEX, PERSISTENT, SPACER, HIDDEN or RESIZABLE.
+
+:name - The string that will be shown for the column. If this is not present, the word will be FORMed for the string.
+
+:adjust - This performs basic LEFT, RIGHT and CENTER adjustment to the column, both in the header and in the column content.
+
+:size - The integer that will be used to determine the width of the column. If not present, a standard width of 100 is used.
+
+:HIDDEN - Whether the column is displayed in the list or not.
+
+:RESIZABLE - Whether the given column should be resizable. There can only be one resizable column. The last column specified with this word will be the one that gets to be resizable. When set as resizable, the size is ignored and the list is made to fill the entire width of the header face.
+
+:SPACER - This adds a one pixel space between two columns. By default, the spacer produces a visible line down the table.
+
+:MUTEX - Sets selection mode to <strong>mutex</strong>. This is a global setting.
+
+:PERSISTENT - Sets selection mode to <strong>persisten</strong>. This is a global setting.
+
+:MULTI - Sets selection mode to <strong>mutli</strong>. This is a global setting.
+
+...Examples
 
 You can specify each column by simple words:
 
@@ -79,17 +127,33 @@ You can specify which column is resizable. The condition is that only one column
 
 	data-list setup [name 100 age 150 resizable weight 50]
 
-If you specify more than one resizable column, only the last column specified as resizable, will become resizable.
+You can add spacers. This is for example used in the PARAMETER-LIST.
 
-You can add spacers. This is for example used in the PARAMETER-LIST
+	data-list setup [name 100 spacer age 150 weight 50]
 
----Direct specification
+Set a selection mode, where only one row can be selected at a time:
 
-When using this method, you are using the traditional WITH syntax to access face words directly. This method is preferable, if the dialect cannot give you enough flexibility to describe the structure of the list.
+	data-list setup [name 100 spacer age 150 weight 50 mutex]
+
+---Direct Specification
+
+Here, the traditional WITH syntax to access face words directly, is used. This method is preferable, if the dialect cannot give you enough flexibility to describe the structure of the list.
+
++++Face Words
 
 :SUB-FACE - This is the face that is used to render each row. Note that you are free to specify any kind of layout, including several internal rows. When using the specification dialect or an input object for SETUP, this face is automatically generated.
 
 :HEADER-FACE - This is the header face that is used to control the list. It is placed above the list and takes the entire horizontal width of the face. The HEADER-FACE is only available in DATA-LIST, PARAMETER-LIST. When using the specification dialect or an input object for SETUP, this face is automatically generated.
+
+:RENDER-FUNC - This specifies a render function. See the Rendering section for more information.
+
+:SELECT-MODE - This is a word with MUTEX, MULTI or PERSISTENT. See the Selection Mode section for more information.
+
+:LIST - The list face, if you wish to access or modify it in some way.
+
+:V-SCROLLER - The scroller face, if you wish to access or modify it in some way.
+
+:HEADER-FACE - The header face, if you wish to access or modify it in some way.
 
 +++Example
 
@@ -148,7 +212,15 @@ The columns shown in the list will be:
 
 ===Sorting
 
-A list with a header can be sorted by the user. When using 
+A list with a header can be sorted by the user, if the header face is specified. The header face usually contains SORT-BUTTONS that handle sorting for you.
+
+If the list does not have a header, sorting can be done, by using QUERY-FACE (not really)
+
+---Caveats
+
+Internally, the sorting mechanism uses SORT/COMPARE and is thus susceptible to the limitations it poses, such as trying to compare two different datatypes. Therefore it's usually not wise to use more than one datatype per column, if you want to sort rows.
+
+You cannot sort multiple columns.
 
 ===Filter Function
 
@@ -181,25 +253,69 @@ But by setting any facet, including DRAW blocks, you can include images or compl
 
 Each cell contains several bits of information to help you determine rendering:
 
-:POS - This is the physical position of the data in the output. If you are rendering the fourth cell in the third row, the value will be <strong>3x4</strong>. Using POS/X, you can determine which column you are in.
+:POS - This is the physical position of the data in the output. If you are rendering the fourth cell in the third row, the value will be <strong>3x4</strong>. Using POS/X, you can determine which column you are in. Using POS/Y, you can determine which row you are in, in the data, if you use it to pick the raw value from FACE/DATA-SORTED.
 
 :DATA - This is the raw data input to the cell. Even if there are no more rows with data to render, such as in a table with fewer rows of data than visible rows in the list, the function will still be called, and in that case, the value is NONE.
 
 ---Example
 
-This applies
+A basic example here uses this method to use bold text for a column with numbers between 0 and 100 that go over the value 90:
+
+	data-list with [
+		render-func: func [face cell] [
+			cell/font/style: if all [cell/data cell/data > 90] ['bold]
+		]
+	]
+
+Notice here that a check of CELL/DATA is done to ensure that the check can only be done on rows that contain output.
+
+---Iterated Faces Caveats
+
+Of other note is that when using iterated faces, you are essentially re-using the same face all the way down in the list, just moved a line height down and "stamped" in the list area. So if you set a facet in a face, say, bold font, the bold setting will continue all the way down the list, until it's changed.
+
+Hence the line:
+
+	if cell/pos/x = 7 [
+		if all [cell/data cell/data > 90] [cell/font/style: 'bold]
+	]
+
+will always produce bold text after the first time this expression is TRUE.
 
 ---Random Colors
 
-Another handy use of the render function is to assign a random color to a cell. Since lists are iterated faces, the entire list is always generated with all faces. If you are experiencing slowdowns, due to excessive redraws of the list, you can apply a random background color per cell to detect such excessive redraws.
+Another handy use of the render function is to assign a random color to a cell. Since lists are iterated faces, the entire list is always generated with all faces in one single draw operation, when calling SHOW.
 
-	data-list data list-data with [
+If you are experiencing slowdowns, due to excessive redraws of the list, you can apply a random background color per cell to detect such excessive redraws.
+
+	data-list with [
 		render-func: func [face cell] [
 			cell/color: random 255.255.255
 		]
 	]
 
-===Selection Mode
+===Data Processing
+
+Internally, the LIST never destroys or modifies the original data. What occurs on every update, is:
+
+# The original data is fed to the list
+
+# The data is passed through the filter function. If none is specified, all rows pass through and an index is generated for the rows that are allowed to pass through.
+
+# Then the indexes of those filtered data passes through the sorting function and the indexes are sorted appropriately to the currently set column for sorting and the direction of sorting.
+
+# Then, the sorted indexes are used to generate the order of output of the data in the original input.
+
+# When showing the list, this output is then used to place the correct values in the correct cells. Also the output block is moved to the current scroll position.
+
+# And finally during this operation, the render function is called to make any modifications necessary to the cell, before it's displayed.
+
+# Finally the face is shown and all cells are displayed.
+
+===Selection
+
+The selected rows can be accessed through FACE/SELECTED and will be the indexes of the items in the original data block.
+
+---Selection Mode
 
 When setting the selection mode in the list, you can determine the behavior of selection:
 
@@ -207,10 +323,40 @@ When setting the selection mode in the list, you can determine the behavior of s
 
 :MULTI - When clicking a row, it will be highlighted. When clicking other rows using SHIFT or CONTROL keys, those rows will be highlighted, either in sequence (SHIFT) or appended to the current selection (CTRL).
 
-:PERSISTENT - When clicking a row it will be highlighted. When clicking another row without holding down any qualifier keys, that row will also be highlighted.
+:PERSISTENT - When clicking a row it will be highlighted. When clicking another row without holding down any qualifier keys, that row will also be highlighted. Clicking a row again will remove the highlight.
+
+When using MULTI or PERSISTENT, selecting multiple rows will be returned in the order they are selected, when using GET-FACE on the list.
+
+---Example
+
+	data-list with [
+		select-mode: 'mutex
+	]
+
+Using the specification dialect:
+
+	data-list setup [name age weight mutex]
 
 ===Keyboard Navigation
 
 When using a DATA-LIST, it is registered as a compound style and internal components cannot be navigated to directly.
 
 The LIST style offers a KEY-FACE accessor function with the following
+
+===Editing
+
+Using the EDIT-FACE accessor, you can do some editing of the data block in the list. If the data block is not copied, it can be used to modify an external block.
+
+The EDIT-FACE accessor takes three arguments:
+
+:FACE - The face to edit
+
+:OP - The operation to carry out, in this case ADD, EDIT or DELETE as a word
+
+:VALUE - The value to pass to the face accessor for the operation.
+
+---Example
+
+Given a data-list L-DATA, we can add a row like this:
+
+	edit-face l-data 'add

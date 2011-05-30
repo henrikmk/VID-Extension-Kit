@@ -578,6 +578,7 @@ stylize/master [
 		columns:				; column description, passed to LIST
 		column-order:			; column order, passed to LIST
 		sub-face:				; sub-face block or layout, passed to LIST
+		render-func:			; cell render function
 		text:					; does not contain focusable text
 			none
 		;-- Basic accessors
@@ -717,7 +718,7 @@ stylize/master [
 			selected:			list/selected
 			list/v-scroller:	v-scroller
 			list/select-mode:	does [select-mode]
-			list/render-func:	:render-func
+			if :render-func [list/render-func: :render-func]
 			;-- Map actors from DATA-LIST to internal components
 			foreach actor first actors [
 				if find [on-click on-key] actor [

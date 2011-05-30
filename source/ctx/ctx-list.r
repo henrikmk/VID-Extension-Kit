@@ -47,9 +47,9 @@ ctx-list: context [
 		i: 0
 		parse data [
 			any [
-				[
-					'spacer (append face/specs 'spacer)
-				] | [
+				['spacer (append face/specs 'spacer)]
+				| [set w ['mutex | 'multi | 'persistent] (face/select-mode: w)]
+				| [
 					(i: i + 1)
 					set word word!
 					set name opt string!
@@ -226,7 +226,7 @@ ctx-list: context [
 		set-vars face
 		clear fidx*
 		repeat i length? data*
-			either probe any-function? :ffunc* [
+			either any-function? :ffunc* [
 				[if ffunc* data*/:i [insert tail fidx* i]]
 			][
 				[insert tail fidx* i]
