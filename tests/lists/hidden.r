@@ -1,9 +1,9 @@
 REBOL [
-	Title: "Filtering Test"
-	Short: "Filtering Test"
+	Title: "Hidden Column Test"
+	Short: "Hidden Column Test"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2011 - HMK Design"
-	Filename: %filtering.r
+	Filename: %hidden.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -15,7 +15,7 @@ REBOL [
 		Use at your own risk.
 	}
 	Purpose: {
-		Test filtering in DATA-LIST using QUERY-FACE.
+		Test alternative column order in DATA-LIST.
 	}
 	History: []
 	Keywords: []
@@ -28,18 +28,8 @@ clear ctx-vid-debug/debug
 list-data: []
 loop 100 [append/only list-data array/initial 4 does [random "abcdef xyz nml"]]
 
-filter-row: func [data /local value] [
-	if empty? value: get-face f-filter [return true]
-	foreach cell data [if find cell value [return true]]
-	false
-]
-
 view make-window [
-	h3 "Sorting Test"
+	h3 "Test Hidden Column (B is hidden)"
 	bar
-	right-panel [
-		across
-		label "Filter:" f-filter: field on-key [query-face l-data :filter-row]
-	]
-	l-data: data-list data list-data setup [input [a b c d] select-mode persistent]
+	l-data: data-list data list-data setup [input [a b c d] output [a c d]]
 ]

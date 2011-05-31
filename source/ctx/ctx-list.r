@@ -28,166 +28,97 @@ ctx-list: context [
 
 	;-- List Specifications
 
-	; object for list column specification
-	spec-object: make object! [
-		word: 'default
-		name: "Untitled"
-		adjust: 'left
-		type: string!
-		width: 100
-		hidden: false
-		tool-tip: none
-	]
-
-	; creates a specification block from a dialect or an object
-	make-list-spec: func [face data /local i] [
-		clear face/specs
-		clear face/columns
-		if object? data [data: words-of data]
+	; creates a list object from a number of columns
+	make-list-object: func [size /words words-list /local i sample] [
 		i: 0
-		parse data [
-			any [
-				['spacer (append face/specs 'spacer)]
-				| [set w ['mutex | 'multi | 'persistent] (face/select-mode: w)]
-				| [
-					(i: i + 1)
-					set word word!
-					set name opt string!
-					set adjust opt ['left | 'right | 'center]
-					set width opt integer!
-					set type opt datatype!
-					set hidden opt 'hidden
-					set resizable opt 'resizable
-					(
-						append face/specs make-spec-object word name adjust width type hidden
-						append face/columns word
-						append face/columns none ; what is this supposed to be?
-						any [hidden append face/column-order word]
-						if resizable [face/resize-column: i]
-					)
-				]
-				
+		sample: array/initial
+			size
+			does [
+				i: i + 1
+				to-set-word either words [words-list/:i][join 'column- i]
 			]
-		]
-	]
-
-	; creates a single specification object
-	make-spec-object: func [word' name' adjust' width' type' hidden'] [
-		make spec-object [
-			word: word'
-			name: any [name' uppercase/part form word 1]
-			adjust: any [adjust' 'left]
-			width: any [width' 100]
-			type: to-datatype any [type' string!]
-			hidden: any [to logic! hidden' false]
-		]
-	]
-
-	; creates a list object, if none is defined
-	make-list-object: func [face /local i sample] [
-		if block? face/data [
-			either empty? face/data [
-				make object! [column-1: none]
-			] [
-				sample: face/data/1
-				case [
-					object? sample [
-						make object! sample
-						set sample none
-						sample
-					]
-					block? sample [
-						i: 0
-						sample: array/initial length? face/data/1 does [i: i + 1 to-set-word rejoin ['column- i]]
-						append sample none
-						make object! sample
-					]
-				]
-			]
-		]
+		append sample none
+		make object! sample
 	]
 
 	;-- Functions to Apply Specification to List
 
 	; function to generate header face from specs
-	make-header-face: func [face /local i] [
-		face/header-face: if face/specs [copy [across space 0]]
-		any [face/header-face exit]
+	make-header-face: func [face /local i resize? resize-column w] [
+		face/header-face: copy [across space 0]
 		i: 0
-		foreach spec face/specs [
-			case [
-				object? spec [
+		resize-column: find face/column-order face/resize-column
+		resize-column: either resize-column [index? resize-column][1]
+		resize?: false
+		parse face/output [
+			any [
+				;-- Spacer
+				'| (append face/header-face [pad 1x0])
+				;-- Resizer
+				| '|| (append face/header-face [resizer] resize=: true)
+				;-- Column Header
+				| set w word! (
 					i: i + 1
-					; Column Sort Button
+					; Column Button Type
+					append face/header-face
+						switch face/modes/:i [
+							sort ['sort-button]
+							no-sort [[sort-button with [feel: none]]] ; static frame here
+							filter ['filter-button]
+						]
+					; Column Button Arguments
 					repend face/header-face [
-						'sort-button
-						spec/name
-						spec/width
+						face/names/:i
+						face/widths/:i
 						'spring
 						case [
-							i < face/resize-column [[bottom right]]
-							i = face/resize-column [[bottom]]
-							i > face/resize-column [[left bottom]]
+							resize? [[bottom right]]
+							i < resize-column [[bottom right]]
+							i = resize-column [[bottom]]
+							i > resize-column [[left bottom]]
 						]
 						'sort-column
-						to-lit-word spec/word
+						to-lit-word w
 						'of
 						to-lit-word 'sorting
 					]
-				]
-				spec = 'resizer [
-					; Resizer
-					; this will only work when the list does not have a single adjustable column
-					;if all [i < length? face/specs] [
-					;	repend face/header-face [
-					;		; [!] - second resizer does not move properly when resizing window
-					;		'resizer 6x24
-					;		'spring
-					;		either i = 1 [[bottom right]][[bottom left]]
-					;	]
-					;]
-				]
-				spec = 'spacer [
-					append face/header-face [pad 1x0]
-				]
+				)
 			]
 		]
 		append face/header-face [sort-reset-button spring [bottom left]]
 	]
 
 	; generate sub-face from specs
-	make-sub-face: func [face /local i] [
-		either face/specs [
-			face/sub-face: copy [across space 0]
-		][
-			exit
-		]
+	make-sub-face: func [face /local i resize? resize-column] [
+		face/sub-face: copy [across space 0]
 		i: 0
-		foreach spec face/specs [
-			case [
-				object? spec [
+		resize-column: find face/column-order face/resize-column
+		resize-column: either resize-column [index? resize-column][1]
+		resize?: false
+		parse face/output [
+			any [
+				;-- Spacer
+				'| (append face/sub-face [pad 1x0])
+				;-- Column Content
+				| word! (
 					i: i + 1
 					repend face/sub-face [
-						switch/default to-word spec/type [
+						switch/default to-word face/types/:i [
 							image! ['list-image-cell]
 						][
 							'list-text-cell
 						]
-						spec/adjust
-						spec/width
+						face/adjust/:i
+						face/widths/:i
 						'spring
 						case [
-							i < face/resize-column [[bottom right]]
-							i = face/resize-column [[bottom]]
-							i > face/resize-column [[left bottom]]
+							resize? [[bottom right]]
+							i < resize-column [[bottom right]]
+							i = resize-column [[bottom]]
+							i > resize-column [[left bottom]]
 						]
 					]
-				]
-				spec = 'resizer [
-				]
-				spec = 'spacer [
-					append face/sub-face [pad 1x0]
-				]
+				)
 			]
 		]
 	]
@@ -245,7 +176,7 @@ ctx-list: context [
 					sort/compare sidx* func [x y] [op get in pick data* x soc* get in pick data* y soc*]
 				]
 				block! [
-					col: index? find extract cols* 2 soc*
+					col: index? find cols* soc*
 					sort/compare sidx* func [x y] [op pick pick data* x col pick pick data* y col]
 				]
 			][
@@ -259,7 +190,7 @@ ctx-list: context [
 	set-columns: func [face /local def] [
 		set-vars face
 		clear dadis*
-		def: extract cols* 2
+		def: cols*
 		foreach idx cor* [
 			append dadis* index? find def idx
 		]

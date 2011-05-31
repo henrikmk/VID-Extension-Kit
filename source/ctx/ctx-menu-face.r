@@ -45,10 +45,10 @@ set 'make-menu-face does [
 			above: func [face] [face/offset/y < 0]
 			below: func [face] [(face/offset/y + face/size/y) > face/parent-face/size/y]
 			;-- scrolls the menu-face into view if it's beyond the top or bottom border of the parent face
-			scroll-face*: func [face x y /local dir step-size move y-size] [
+			scroll-face*: func [face x y /local dir step-size move line-height] [
 				dir: pick [-1 1] positive? y
-				y-size: pop-face/size/y - (2 * second edge-size pop-face)
-				move: does [face/offset/y: y-size * dir + face/offset/y]
+				line-height: pop-face/size/y - (2 * pop-face/draw-body/margin/y)
+				move: does [face/offset/y: line-height * dir + face/offset/y]
 				any [
 					all [above face below face move]
 					case [
@@ -61,7 +61,7 @@ set 'make-menu-face does [
 					]
 				]
 				;-- restrain to pop-face
-				face/offset/y: max face/offset/y (pop-face/win-offset/y + y-size - face/size/y + (2 * second edge-size face))
+				face/offset/y: max face/offset/y (pop-face/win-offset/y + line-height - face/size/y + (2 * second edge-size face))
 				face/offset/y: min face/offset/y pop-face/win-offset/y
 			]
 		]

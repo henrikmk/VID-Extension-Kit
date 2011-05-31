@@ -41,7 +41,7 @@ view make-window [
 	bar
 	panel [
 		across
-		l-data: data-list 500x400 data list-data setup [name age height time 200]
+		l-data: data-list 500x400 data list-data setup [input [name age height time] widths [100 100 100 200]]
 		right-panel [
 			button "Add" [
 				edit-face l-data 'add make default-object [

@@ -212,20 +212,21 @@ stylize/master [
 		surface: 'choice
 		feel: svvf/choice
 		; opens and positions the menu list
-		open-choice-face: func [face /local idx y-size] [
+		open-choice-face: func [face /local edge idx line-height] [
 			if all [not face/choice-face? block? face/setup not empty? face/setup] [
 				set-face face/choice-face/pane/1 extract/index face/setup 2 2
 				idx: divide 1 + index? face/data 2
 				face/choice-face/pane/1/selected: to-block idx
 				face/choice-face/pane/1/over: as-pair 1 idx
 				ctx-resize/align-contents face/choice-face none
-				y-size: face/size/y - (second 2 * edge-size face)
+ 				line-height: face/choice-face/pane/1/sub-face/size/y
+				edge: edge-size get in root-face face 'menu-face
 				set-menu-face
 					face
 					face/choice-face
-					as-pair face/size/x (2 * second edge-size face) + divide y-size * length? head face/data 2
+					as-pair face/size/x add divide line-height * length? head face/data 2 edge/y * 2
 					;-- Using WIN-OFFSET? here, because the parent face may be scrolled
-					add win-offset? face as-pair 0 y-size - (y-size * idx)
+					add win-offset? face as-pair 0 line-height - (line-height * idx)
 				; [!] - set base tab face to menu-face, but this happens inside set-menu-face
 			]
 		]
@@ -312,6 +313,7 @@ stylize/master [
 					with [
 						render-func: func [face cell] [
 							; [ ] - when using keyboard, colors are swapped here, due to the keyboard moving the selected face
+							; unconfirmed that this still happens
 							case [
 								all [face/over face/over/y = cell/pos/y] [
 									cell/color: ctx-colors/colors/line-color
@@ -328,19 +330,19 @@ stylize/master [
 							]
 						]
 						choice-face-offset: func [face pop-face /local y-size] [
-							y-size: pop-face/size/y - (2 * second edge-size pop-face)
+							y-size: pop-face/size/y; - (2 * second edge-size pop-face)
 							second pop-face/offset + as-pair 0 y-size - (y-size * face/selected/1)
 						]
 						select-mode: 'mutex
-						sub-face: [list-text-cell bold 100 fill 1x0 spring [bottom]]
+						sub-face: [list-text-cell right bold 100 fill 1x0 spring [bottom]] ; does not bold and has the wrong size
 					]
 			]
 			flag-face choice-face tabbed
 			; [ ] - tab-panel causes the offset to be incorrect. perhaps it's really a problem with win-offset and the edge
 			sub-face: choice-face/pane/1/sub-face
 			sub-face/pane/1/real-size: sub-face/real-size: none
-			sub-face/pane/1/size: sub-face/size: size - (2 * edge-size face)
-			sub-face/pane/1/font: make self/font [align: 'left]
+;			sub-face/pane/1/size: sub-face/size: size + 10; - (probe 2 * self/draw-body/margin/y); (2 * edge-size face) ; size is now wrong, because the edge is wrong here
+;			sub-face/pane/1/font: make sub-face/pane/1/font [align: 'left]
 			if setup [
 				access/setup-face* self setup
 			]

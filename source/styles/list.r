@@ -73,12 +73,11 @@ stylize/master [
 		sort-column:				; word name of column to sort by
 		;-- Data source information
 		data:						; source data list, always starts at header
-		data-index:					; source index map
-		data-sorted:				; source as sorted indexes
-		data-filtered:				; source as sorted and filtered indexes
-		data-display:				; indexes of column positions
-		columns:					; description of columns
-		column-order:				; block of words describing column output order
+		data-sorted:				; source as sorted indexes (block of integers)
+		data-filtered:				; source as sorted and filtered indexes (block of integers)
+		data-display:				; indexes of column positions (block of integers)
+		columns:					; description of columns (block of words)
+		column-order:				; block of words describing column output order (block of words)
 		output:						; output to list from source. index position describes first visible entry.
 			none
 		;-- Layout information
@@ -533,13 +532,13 @@ stylize/master [
 			;-- Attach source data
 			if none? data [data: make block! []]
 			if object? data [data: ctx-list/object-to-data data]
-			output: copy data-sorted: copy data-index: copy data-filtered: copy data-display: make block! length? data
+			output: copy data-sorted: copy data-filtered: copy data-display: make block! length? data
 			ctx-list/set-filtered self
 			any [block? selected selected: make block! []]
 			pane: :pane-func
 		]
 	]
-	
+
 	; list with keyboard caret selection instead of plain selection
 	CARET-LIST: LIST with [
 		;-- Cell selection function for keyboard. FACE is cell that acts as caret.
@@ -598,12 +597,19 @@ stylize/master [
 			none
 ; [?] - do not allow focusing of individual items in list sub-face
 ; [ ] - inline field system, realized by having text styles that do inline editing
-		select-mode: 'multi
-		selected:				; selected rows in list
-		specs:					; specification objects
+		;-- Specification
+		prototype:				; prototype for list row (object)
+		input:					; input words for data source (block of words)
+		output:					; output words for data display (block of words)
+		select-mode:			; selection mode (MULTI, MUTEX, PERSISTENT) (block of words)
+		widths:					; widths of columns in pixels (block of integers)
+		adjust:					; LEFT, RIGHT or CENTER adjustment of column texts (block of words)
+		modes:					; Column modes (SORT, NO-SORT, FILTER)
+		types:					; Column datatypes (block of datatypes)
+		names:					; Column names (block of strings)
+		selected:				; selected rows in list (block of integers)
+		resize-column:			; which single column resizes (word)
 			none
-		resize-column:			; which single column resizes (integer)
-			1
 		access: make access [
 			; adjusts the scroller ratio and drag (internal)
 			set-scroller: func [face /only] [
@@ -640,13 +646,129 @@ stylize/master [
 				scroll-face face/list x y
 				set-scroller face
 			]
-			setup-face*: func [face value] [
-				face/specs: copy
-				face/columns: copy
-				face/column-order: make block! []
-				ctx-list/make-list-spec face value
-				ctx-list/make-header-face face
-				ctx-list/make-sub-face face
+			setup-face*: func [face values /local output-length] [
+				;-- Reset face values
+				if none? values [face/pane: none exit]
+				if object? values [values: reduce ['input words-of values]]
+				foreach
+					word
+					[input output select-mode widths adjust modes types names resize-column header-face sub-face]
+					[set in face word none]
+				foreach
+					[word value]
+					values
+					[set in face word value]
+				;-- Convert Input and Output, if they are objects
+				if object? face/input [face/input: words-of face/input]
+				if object? face/output [face/output: words-of face/output]
+				;-- Determine prototype from input, output, first row of data or default in that order
+				face/prototype:
+					case [
+						block? face/input		[ctx-list/make-list-object/words length? face/input face/input]
+						block? face/output		[ctx-list/make-list-object/words length? face/output face/output]
+						not block? face/data	[ctx-list/make-list-object 1]
+						empty? face/data		[ctx-list/make-list-object 1]
+						block? face/data/1		[ctx-list/make-list-object length? face/data/1]
+						object? face/data/1		[make face/data/1 []]
+						true					[ctx-list/make-list-object 1]
+					]
+				set face/prototype none
+				;-- Determine Input and Output
+				case [
+					all [face/input not face/output] [face/output: copy face/input]
+					all [not face/input face/output] [face/input: copy face/output]
+					not all [face/input face/output] [face/output: copy face/input: words-of face/prototype]
+				]
+				;-- Determine Output Length
+				face/column-order: copy face/output
+				remove-each val face/column-order [find [| ||] val]
+				output-length: length? face/column-order
+				;-- Names
+				if none? face/names [
+					face/names: make block! length? face/output
+					foreach word face/column-order [
+						append face/names uppercase/part form word 1
+					]
+				]
+				;-- Selection
+				if none? face/select-mode [
+					face/select-mode: 'multi
+				]
+				;-- Widths
+				if none? face/widths [
+					face/widths: array/initial output-length 100
+				]
+				;-- Adjustment
+				if none? face/adjust [
+					face/adjust: array/initial output-length 'left
+				]
+				;-- Types
+				if none? face/types [
+					face/types: array/initial output-length string!
+				]
+				;-- Modes
+				if none? face/modes [
+					face/modes: array/initial output-length 'sort
+				]
+				;-- Resize column
+				if none? face/resize-column [
+					face/resize-column: first face/column-order
+				]
+				;-- Header Face
+				if none? face/header-face [
+					ctx-list/make-header-face face
+				]
+				;-- Sub Face
+				if none? face/sub-face [
+					ctx-list/make-sub-face face
+				]
+				;-- Arrange Layout
+				face/pane: copy [across space 0]
+				;-- Build Header
+				if face/header-face [
+					append face/pane compose/only [panel spring [bottom] (face/header-face) return]
+				]
+				;-- Build Pane
+				append face/pane [
+					scroller 20x100 fill 0x1 align [right] [
+						scroll-face face/parent-face/list 0 get-face face
+					]
+					list fill 1x1 align [left]
+						[do-face face/parent-face none]
+						with [ ; size is ignored, because it's made inside list size
+							sub-face: (face/sub-face)
+							data: (face/data)
+							columns: (face/input)
+							column-order: (face/column-order)
+						]
+				]
+				face/pane: layout/tight compose/deep/only face/pane
+				set-parent-faces face
+				;-- Calculate sizes
+				any [face/size face/size: face/pane/size + any [all [object? face/edge 2 * face/edge/size] 0]]
+				face/panes: reduce ['default face/pane: face/pane/pane]
+				; require face alignment
+				ctx-resize/align face
+				ctx-resize/resize face/pane/1 as-pair face/size/x - (2 * first edge-size face) 24 0x0
+				;-- Name faces
+				set bind either face/header-face [
+					[header-face v-scroller list]
+				][
+					[v-scroller list]
+				] face face/pane
+				;-- Sharing
+				face/selected:			face/list/selected
+				face/list/v-scroller:	face/v-scroller
+				face/list/select-mode:	does [face/select-mode]
+				if get in face 'render-func [face/list/render-func: get in face 'render-func]
+				;-- Map actors from DATA-LIST to internal components
+				foreach actor first face/actors [
+					if find [on-click on-key] actor [
+						face/list/actors/:actor: get in face/actors actor
+					]
+				]
+				;-- Scroller setup
+				insert-actor-func self 'on-resize get in access 'set-scroller
 			]
 			select-face*: func [face values] [
 				select-face/no-show face/list :values
@@ -678,55 +800,7 @@ stylize/master [
 		]
 
 		init: [
-			;-- Setup
-			unless any [block? setup object? setup] [
-				setup: ctx-list/make-list-object self
-			]
-			if setup [access/setup-face* self setup]
-			pane: copy [across space 0]
-			;-- Build Header
-			if header-face [
-				append pane compose/only [panel spring [bottom] (header-face) return]
-			]
-			;-- Build Pane
-			append pane [
-				scroller 20x100 fill 0x1 align [right] [
-					scroll-face face/parent-face/list 0 get-face face
-				]
-				list fill 1x1 align [left]
-					[do-face face/parent-face none]
-					with [ ; size is ignored, because it's made inside list size
-						sub-face: (sub-face)
-						data: (data)
-						columns: (columns)
-						column-order: (column-order)
-					]
-			]
-			pane: layout/tight compose/deep/only pane
-			set-parent-faces self
-			;-- Calculate sizes
-			any [size size: pane/size + any [all [object? edge 2 * edge/size] 0]]
-			panes: reduce ['default pane: pane/pane]
-			ctx-resize/resize pane/1 as-pair size/x - (2 * first edge-size self) 24 0x0
-			;-- Name faces
-			set either header-face [
-				[header-face v-scroller list]
-			][
-				[v-scroller list]
-			] pane
-			;-- Sharing
-			selected:			list/selected
-			list/v-scroller:	v-scroller
-			list/select-mode:	does [select-mode]
-			if :render-func [list/render-func: :render-func]
-			;-- Map actors from DATA-LIST to internal components
-			foreach actor first actors [
-				if find [on-click on-key] actor [
-					list/actors/:actor: get in actors actor
-				]
-			]
-			;-- Scroller setup
-			insert-actor-func self 'on-resize get in access 'set-scroller
+			access/setup-face* self setup
 		]
 	]
 
@@ -782,12 +856,53 @@ stylize/master [
 			]
 		]
 	]
+
+	; column filtering button
+	FILTER-BUTTON: CHOICE with [
+		column:		none
+		list:		none
+		choices:	[all "<All>" none "<None>" not-empty "<Not Empty>" empty "<Empty>"]
+		action: func [face value] [
+			; all
+			; empty
+			; not empty
+			; unique entries
+		]
+		; need to allow changing this every time the contents change
+		; need a method to set this face up, so we might need a new setup-face for this
+		; derive filter-button from choice and then provide a new setup-face
+		access: make access [
+			setup-face*: func [face value] [
+				; get this from parent
+				; but the values must be fed in here from the outside
+				
+				face/setup: value
+				if value [
+					face/data: copy face/setup
+					set-face* face face/data/1
+				]
+			]
+		]
+		append init [
+			access/setup-face* self choices
+		]
+		words: [
+			sort-column [
+				if block? args [new/column: args/2]
+				next args
+			]
+		]
+	]
+
 	TABLE: LIST
 	TEXT-LIST: LIST
 	PARAMETER-LIST: DATA-LIST with [
 		setup: [
 			; need to allow defining bold font
-			key 100 spacer value 200 resizable
+			input [key value]
+			output [key | value]
+			widths [100 200]
+			resize-column value
 		]
 	]
 

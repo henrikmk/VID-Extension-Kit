@@ -16,7 +16,7 @@ Common of all of these lists are that they are based on iterated faces. This mea
 
 :CARET-LIST - Derivative of LIST, which uses an alternative keyboard selection scheme.
 
-:SCROLLER - Depending on the style,
+:SCROLLER - Depending on the style, it may require a scroller to scroll the list horizontally or vertically.
 
 :LIST-CELL - A text cell optimized for lists. If you want clickable rows and custom render functions in the list, this or one of its derivatives should be used.
 
@@ -34,7 +34,7 @@ In the future, there will be more styles to provide direct manipulation of rows,
 
 :NAV-LIST - This is a PANEL that holds the basic words for the elements that a data-list consists of.
 
-:DATA-LIST - This uses a LIST, a SCROLLER and a PANEL with SORT-BUTTON and SORT-RESET-BUTTON in it to form a regular list. It is derived from NAV-LIST.
+:DATA-LIST - This uses a LIST, a vertical SCROLLER and a PANEL with SORT-BUTTON and SORT-RESET-BUTTON in it to form a regular list. It is derived from NAV-LIST.
 
 :PARAMETER-LIST - This is derives from DATA-LIST and shows a predefined setup for displaying objects in parameter or key/value form easily.
 
@@ -81,15 +81,17 @@ You can then pass the object to the data list like this:
 
 	data-list setup my-list-row
 
+The column display order will match that of the object.
+
 +++Specification Dialect
 
-The dialect is specified through setup and you specify columns from left to right and then assign attributes to each column. 
+The dialect is specified through setup and you specify columns from left to right and then assign attributes to each column.
 
 You cannot mix specification methods. If you specify via the dialect, you will both need to define columns and global settings for the list.
 
 The arguments for each column are:
 
-:word - The word that will be assigned to the column. This word must be present and cannot be one of these words: MULTI, MUTEX, PERSISTENT, SPACER, HIDDEN or RESIZABLE.
+:word - The word that will be assigned to the column. This word must be present and cannot be one of these words: MULTI, MUTEX, PERSISTENT, SPACER, HIDDEN or RESIZABLE. When specifying a word, this word will also be used to determine the displayed column order.
 
 :name - The string that will be shown for the column. If this is not present, the word will be FORMed for the string.
 
@@ -141,9 +143,9 @@ Here, the traditional WITH syntax to access face words directly, is used. This m
 
 +++Face Words
 
-:SUB-FACE - This is the face that is used to render each row. Note that you are free to specify any kind of layout, including several internal rows. When using the specification dialect or an input object for SETUP, this face is automatically generated.
+:SUB-FACE - This is the face that is used to render each row. Note that you are free to specify any kind of layout, including several internal rows. When using the specification dialect or an input object for SETUP, this face is automatically generated. Resizing and alignment through the resizing model of the VID Extension Kit is used.
 
-:HEADER-FACE - This is the header face that is used to control the list. It is placed above the list and takes the entire horizontal width of the face. The HEADER-FACE is only available in DATA-LIST, PARAMETER-LIST. When using the specification dialect or an input object for SETUP, this face is automatically generated.
+:HEADER-FACE - This is the header face that is used to control the list. It is placed above the list and takes the entire horizontal width of the face. The HEADER-FACE is only available in DATA-LIST, PARAMETER-LIST. When using the specification dialect or an input object for SETUP, this face is automatically generated. Resizing and alignment through the resizing model of the VID Extension Kit is used.
 
 :RENDER-FUNC - This specifies a render function. See the Rendering section for more information.
 

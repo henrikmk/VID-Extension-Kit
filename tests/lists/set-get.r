@@ -33,7 +33,7 @@ loop 100 [append/only list2 array/initial 4 does [random 100]] ; Numbers
 view make-window [
 	h3 "SET-FACE/GET-FACE Test"
 	bar
-	l-data: data-list setup [a b c d]
+	l-data: data-list setup [input [a b c d]]
 	across
 	button "Chars" [set-face l-data list1]
 	button "Numbers" [set-face l-data list2]

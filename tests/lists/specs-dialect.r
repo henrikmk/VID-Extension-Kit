@@ -25,20 +25,17 @@ do %../../build/include.r
 
 clear ctx-vid-debug/debug
 
-; object for main data list
-default-object: make object! [
-	name:
-	age:
-	height:
-	weight:
-		none
-]
-
 view make-window [
 	h3 "List Specs Test"
 	bar
-	; if width is -1, then the size could be dictated by the contents
-	l-data: data-list 424x400 setup [
-		name age resizable height weight resizable
+	l-data: data-list 624x400 setup [
+		input [a b c]
+		output [c b]
+		names ["C" "B"]
+		resize-column c
+		widths [50 100]
+		modes [sort filter]
+		types [string! image!]
+		adjust [left right]
 	]
 ]
