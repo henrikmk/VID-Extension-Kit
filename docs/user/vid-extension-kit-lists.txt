@@ -28,7 +28,7 @@ Common of all of these lists are that they are based on iterated faces. This mea
 
 :SORT-RESET-BUTTON - This is the standard sort reset button, which presents a diamond shaped icon in the top right hand corner of the list. Clicking this button resets to use no sorting.
 
-In the future, there will be more styles to provide direct manipulation of rows, such as buttons or fields.
+In the future, there will be more styles to provide direct manipulation of rows, such as buttons and inline edit fields.
 
 ---Compound Styles
 
@@ -42,15 +42,13 @@ In the future, there will be more styles to provide direct manipulation of rows,
 
 ===Specifying a List
 
-There are multiple methods for specifying the structure and content of a list. Generally there are three ways:
+There are multiple methods for specifying the structure and content of a list. Generally there are two ways:
 
 # By specifying an object to SETUP, which gives you minimum flexibility, but minimum code.
 
-# A <strong>Specification dialect</strong>, if you want to specify a list quickly with a medium amount of code
+# A <strong>Specification dialect</strong> for SETUP, if you want to specify with greater flexibility.
 
-# By specifying list elements directly using traditional VID syntax, if you want maximum flexibility.
-
-Specifying a list works the same across DATA-LIST and PARAMETER-LIST.
+Specifying a list works the same across DATA-LIST and PARAMETER-LIST. If you want to work with the LIST style, no SETUP is available and you must use the face words directly.
 
 You can also specify a data source. It can be the list itself, in which case the data is stored at FACE/DATA, or you can assign one like so:
 
@@ -64,7 +62,7 @@ DATA-BLOCK is not copied.
 
 ---Setup
 
-When using SETUP, you can either use an object or a dialect block (the specification dialect) to specify the structure of the list.
+When using SETUP, you can either use an object or a dialect block (the specification dialect) to specify the structure of the list. Every time SETUP-FACE is called, the list face is entirely re-done.
 
 +++Using an Object
 
@@ -85,57 +83,71 @@ The column display order will match that of the object.
 
 +++Specification Dialect
 
-The dialect is specified through setup and you specify columns from left to right and then assign attributes to each column.
+The dialect is formed as a word and a value as argument, usually a block or a word. Each word will typically describe what occurs in all columns for a particular facet of the list, such as the column names or the widths.
 
-You cannot mix specification methods. If you specify via the dialect, you will both need to define columns and global settings for the list.
+The words are:
 
-The arguments for each column are:
+:input - This is a block of words, describing the columns as structured for the raw data. If this value is not stated, but output is, then INPUT will be the same as OUTPUT.
 
-:word - The word that will be assigned to the column. This word must be present and cannot be one of these words: MULTI, MUTEX, PERSISTENT, SPACER, HIDDEN or RESIZABLE. When specifying a word, this word will also be used to determine the displayed column order.
+:output - This is a block of words, describing the columns as structured in the output display. If this value is not stated, but input is, then INPUT will be used as OUTPUT. If used with SUB-FACE, the output is mapped to each face in the order they appear in the SUB-FACE. Other keywords, like | (pipe char) can also be used to describe a 1 pixel gray spacer between columns.
 
-:name - The string that will be shown for the column. If this is not present, the word will be FORMed for the string.
+:names - This is a block of strings, which describe the shown names in the header of the list. It must have the same order and length as OUTPUT. If this value is not stated, the words will be FORMed from OUTPUT, uppercasing the first character in the word. It is overridden, when using HEADER-FACE or SUB-FACE directly.
 
-:adjust - This performs basic LEFT, RIGHT and CENTER adjustment to the column, both in the header and in the column content.
+:resize-column - This is a single word which describes which column will be resizable. It is overridden, when using HEADER-FACE or SUB-FACE directly.
 
-:size - The integer that will be used to determine the width of the column. If not present, a standard width of 100 is used.
+:widths - This is a block of integers describing the width of each column in pixels. The resizable column ignores this value. Note also that if you specify a table width that is much narrower than the combined width of the header, some columns will be perfectly hidden. It is overridden, when using HEADER-FACE or SUB-FACE directly.
 
-:HIDDEN - Whether the column is displayed in the list or not.
+:modes - This is a block of words describing the mode of the button that sits in the header face above the column. SORT will use plain ascending/descending sorting. NO-SORT will create an inert sort button, that will do nothing when clicked. Default for all columns is SORT.
 
-:RESIZABLE - Whether the given column should be resizable. There can only be one resizable column. The last column specified with this word will be the one that gets to be resizable. When set as resizable, the size is ignored and the list is made to fill the entire width of the header face.
+:types - This is a block of words or datatypes describing the datatype for the column. This is only used to determine which style will be used to render the column. For now string! is supported. Later image! will be used to directly render images that exist in the raw data.
 
-:SPACER - This adds a one pixel space between two columns. By default, the spacer produces a visible line down the table.
+:adjust - Whether the header and content are LEFT, CENTER or RIGHT adjusted.
 
-:MUTEX - Sets selection mode to <strong>mutex</strong>. This is a global setting.
+:select-mode - This is either MUTEX, which allows only selecting one row, PERSISTENT, which allows selecting multiple rows without using a qualifier key or MULTI (default), which allows selecting multiple rows using CTRL or SHIFT as qualifier keys.
 
-:PERSISTENT - Sets selection mode to <strong>persisten</strong>. This is a global setting.
+:header-face - This is a layout block. When used, it will replace the standard header generated by DATA-LIST. You can use any standard layout
 
-:MULTI - Sets selection mode to <strong>mutli</strong>. This is a global setting.
+:sub-face - This is a layout block for each row used in the layout. When using this, you can create an entirely custom layout, even with multiple lines per data row. Words in OUTPUT are distributed in the same order that the faces are described in the layout. Note that the layout cannot change height, so you cannot use variable height layouts in these types of lists.
+
+:render - This is a function body that uses FACE and CELL as argument. The FACE is the list face inside the data list. The CELL is the cell that is currently being rendered.
 
 ...Examples
 
-You can specify each column by simple words:
+You can specify input:
 
-	data-list setup [name age weight]
+	data-list setup [input [name age weight]]
 
-You can add specific titles:
+You can specify output, which is useful, if you want to hide or rearrange columns:
 
-	data-list setup [name "Name" age "Age [years]" weight "Weight [kg]"]
+	data-list setup [input [name age weight] output [weight age]]
 
-You can specify the width of each column in pixels with the condition that the first column is resizable:
+In OUTPUT, you can add spacers as a | (pipe char), which will produce a one pixel space between columns:
 
-	data-list setup [name 100 age 150 weight 50]
+	data-list setup [input [name age weight] output [weight | age]]
 
-You can specify which column is resizable. The condition is that only one column is resizable, as the list resizing model follows that, which the VID Extension Kit uses.
+You can add specific titles. In cases like these, if you don't need column rearrangement or need to hide columns, you don't have to add the OUTPUT keyword, as INPUT is automatically used as OUTPUT, if nothing else is stated:
 
-	data-list setup [name 100 age 150 resizable weight 50]
+	data-list setup [input [name age weight] names ["Name" Age [years]" "Weight [kg]"]]
 
-You can add spacers. This is for example used in the PARAMETER-LIST.
+You can specify the width of each column in pixels with the condition that the first column is resizable and therefore is ignored:
 
-	data-list setup [name 100 spacer age 150 weight 50]
+	data-list setup [input [name age weight] widths [100 150 50]]
+
+You can specify which column is resizable, when the list is resized when resizing the window in which it sits. The condition is that only one column is resizable, as the list resizing model follows that of the VID Extension Kit.
+
+	data-list setup [input [name age weight] widths [100 150 50] resize-column age]
 
 Set a selection mode, where only one row can be selected at a time:
 
-	data-list setup [name 100 spacer age 150 weight 50 mutex]
+	data-list setup [input [name age weight] select-mode mutex]
+
+Perform adjustment of the text in a column:
+
+	data-list setup [input [name age weight] adjust [left center right]]
+
+Set a column mode for a column, so that sorting is disabled for this column:
+
+	data-list setup [input [name age weight] modes [sort no-sort]]
 
 ---Direct Specification
 

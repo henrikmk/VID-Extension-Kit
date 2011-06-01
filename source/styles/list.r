@@ -44,6 +44,12 @@ stylize/master [
 	; cell text for LIST
 	LIST-TEXT-CELL: LIST-CELL
 
+	; editable cell text for LIST
+	LIST-EDIT-CELL: LIST-CELL with [
+		; a new feel for this type of text editing
+		; need to doubleclick to bring up the cursor
+	]
+
 	; cell text for LIST with offset and icon for tree fold/unfold
 	LIST-TREE-CELL: LIST-CELL with [
 		level: 1
@@ -577,7 +583,7 @@ stylize/master [
 		columns:				; column description, passed to LIST
 		column-order:			; column order, passed to LIST
 		sub-face:				; sub-face block or layout, passed to LIST
-		render-func:			; cell render function
+		render:					; cell render function body
 		text:					; does not contain focusable text
 			none
 		;-- Basic accessors
@@ -652,7 +658,7 @@ stylize/master [
 				if object? values [values: reduce ['input words-of values]]
 				foreach
 					word
-					[input output select-mode widths adjust modes types names resize-column header-face sub-face]
+					[input output select-mode widths adjust modes types names resize-column header-face sub-face render]
 					[set in face word none]
 				foreach
 					[word value]
@@ -690,7 +696,7 @@ stylize/master [
 						append face/names uppercase/part form word 1
 					]
 				]
-				;-- Selection
+				;-- Select Mode
 				if none? face/select-mode [
 					face/select-mode: 'multi
 				]
@@ -747,8 +753,6 @@ stylize/master [
 				;-- Calculate sizes
 				any [face/size face/size: face/pane/size + any [all [object? face/edge 2 * face/edge/size] 0]]
 				face/panes: reduce ['default face/pane: face/pane/pane]
-				; require face alignment
-				ctx-resize/align face
 				ctx-resize/resize face/pane/1 as-pair face/size/x - (2 * first edge-size face) 24 0x0
 				;-- Name faces
 				set bind either face/header-face [
@@ -760,7 +764,7 @@ stylize/master [
 				face/selected:			face/list/selected
 				face/list/v-scroller:	face/v-scroller
 				face/list/select-mode:	does [face/select-mode]
-				if get in face 'render-func [face/list/render-func: get in face 'render-func]
+				if get in face 'render [face/list/render-func: func [face cell] get in face 'render]
 				;-- Map actors from DATA-LIST to internal components
 				foreach actor first face/actors [
 					if find [on-click on-key] actor [
@@ -768,7 +772,8 @@ stylize/master [
 					]
 				]
 				;-- Scroller setup
-				insert-actor-func self 'on-resize get in access 'set-scroller
+				; do this only once
+				insert-actor-func face 'on-resize get in access 'set-scroller
 			]
 			select-face*: func [face values] [
 				select-face/no-show face/list :values

@@ -31,8 +31,8 @@ loop 100 [append/only list-data array/initial 4 does [random 100]]
 view make-window [
 	h3 "Rendering Test"
 	bar
-	l-data: data-list data list-data with [
-		render-func: func [face cell] [
+	l-data: data-list data list-data setup [
+		render [
 			switch cell/pos/x [
 				1 [cell/color: random 255.255.255]
 				2 [cell/color: white cell/font/style: if all [cell/data 50 < cell/data] ['bold]]
