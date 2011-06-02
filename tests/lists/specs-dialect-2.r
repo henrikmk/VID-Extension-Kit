@@ -1,21 +1,21 @@
 REBOL [
-	Title: "Column Mode Test"
-	Short: "Column Mode Test"
+	Title: "List Specs Dialect Test"
+	Short: "List Specs Dialect Test"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2011 - HMK Design"
-	Filename: %column-mode.r
+	Filename: %specs-dialect.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
 	Release: 'internal
-	Created: 29-May-2011
-	Date: 29-May-2011
+	Created: 26-Jun-2010
+	Date: 26-Jun-2010
 	License: {
 		BSD (www.opensource.org/licenses/bsd-license.php)
 		Use at your own risk.
 	}
 	Purpose: {
-		Test column modes in DATA-LIST.
+		Test specification dialect in DATA-LIST using words.
 	}
 	History: []
 	Keywords: []
@@ -25,11 +25,10 @@ do %../../build/include.r
 
 clear ctx-vid-debug/debug
 
-list-data: []
-loop 100 [append/only list-data array/initial 4 does [random "abcdef xyz nml"]]
+in-obj: make object! [a: b: c: none]
 
 view make-window [
-	h3 "Column Mode Test"
+	h3 "List Specs Test"
 	bar
-	l-data: data-list data list-data setup [input [a b c d] modes [no-sort sort filter sort]]
+	l-data: data-list 624x400 setup [input in-obj]
 ]

@@ -78,6 +78,7 @@ stylize/master [
 		sort-direction:				; 'asc, 'ascending or 'desc, 'descending
 		sort-column:				; word name of column to sort by
 		;-- Data source information
+		prototype:					; row prototype
 		data:						; source data list, always starts at header
 		data-sorted:				; source as sorted indexes (block of integers)
 		data-filtered:				; source as sorted and filtered indexes (block of integers)
@@ -97,7 +98,7 @@ stylize/master [
 			fs/size/y: fs/size/y - face/spacing
 			if face/size [fs/size/x: face/size/x]
 			set-parent-faces/parent fs face
-			unless init [ctx-resize/align fs]
+			unless init [ctx-resize/align/no-show fs]
 		]
 		list-size: func [face] [
 			to integer! face/size/y - (any [attempt [2 * face/edge/size/y] 0]) / face/sub-face/size/y
@@ -296,7 +297,7 @@ stylize/master [
 		key-select-func: func [face event /local old out s step] [
 			case [
 				#"^A" = event/key [
-					select-face/no-show face true
+					select-face/no-show face not event/shift
 				]
 				find [up down] event/key [
 					old: copy selected
@@ -387,7 +388,7 @@ stylize/master [
 			; resizes the sub-face of the list
 			resize-face*: func [face size x y] [
 				;-- Resize main list face and sub-face
-				resize;/no-show
+				resize/no-show
 					face/sub-face
 					as-pair
 						face/size/x
@@ -449,22 +450,40 @@ stylize/master [
 				face/filter-func: :value
 				ctx-list/set-filtered face
 			]
-			; perform edits on the list
-			edit-face*: func [face op value] [
+			; perform edits on the list, when the list is object based
+			edit-face*: func [face op value pos /local j] [
+				pos:
+					switch/default pos [
+						last [length? face/data]
+						first [1]
+						all [repeat i length? face/data [append [] i]]
+					][
+						face/selected
+					]
 				switch :op [
 					add [
-						append/only face/data :value
+						append/only face/data make face/prototype :value
 						ctx-list/set-filtered face
 						select-face face 'last
 					]
+					duplicate [
+						j: length? face/data
+						repeat i length? pos [
+							append/only face/data make face/prototype pick face/data pick pos i
+						]
+						ctx-list/set-filtered face
+						select-face face array/initial length? pos does [j: j + 1]
+					]
 					edit [
-						repeat i length? face/selected [poke face/data pick face/selected i :value]
+						repeat i length? pos [
+							change at face/data pick pos i make pick face/data pick pos i :value
+						]
 						ctx-list/set-filtered face
 					]
 					delete [
-						repeat i length? face/selected [change at face/data pick face/selected i ()]
+						repeat i length? pos [change at face/data pick pos i ()]
 						remove-each row face/data [not value? 'row]
-						clear face/selected
+						clear pos
 						ctx-list/set-filtered face
 					]
 				]
@@ -654,7 +673,6 @@ stylize/master [
 			]
 			setup-face*: func [face values /local output-length] [
 				;-- Reset face values
-				if none? values [face/pane: none exit]
 				if object? values [values: reduce ['input words-of values]]
 				foreach
 					word
@@ -662,8 +680,12 @@ stylize/master [
 					[set in face word none]
 				foreach
 					[word value]
-					values
-					[set in face word value]
+					any [values []]
+					[
+						value: either word? value [either value? :value [get :value][value]][:value]
+						if object? value [value: words-of value]
+						set in face word value
+					]
 				;-- Convert Input and Output, if they are objects
 				if object? face/input [face/input: words-of face/input]
 				if object? face/output [face/output: words-of face/output]
@@ -732,7 +754,9 @@ stylize/master [
 				face/pane: copy [across space 0]
 				;-- Build Header
 				if face/header-face [
-					append face/pane compose/only [panel spring [bottom] (face/header-face) return]
+					append face/pane compose/only [
+						panel blue fill 1x0 spring [bottom] (face/header-face) return
+					]
 				]
 				;-- Build Pane
 				append face/pane [
@@ -753,7 +777,11 @@ stylize/master [
 				;-- Calculate sizes
 				any [face/size face/size: face/pane/size + any [all [object? face/edge 2 * face/edge/size] 0]]
 				face/panes: reduce ['default face/pane: face/pane/pane]
-				ctx-resize/resize face/pane/1 as-pair face/size/x - (2 * first edge-size face) 24 0x0
+				either empty? face/init [
+					ctx-resize/align/no-show face
+				][
+					ctx-resize/resize/no-show face/pane/1 as-pair face/size/x - (2 * first edge-size face) 24 0x0
+				]
 				;-- Name faces
 				set bind either face/header-face [
 					[header-face v-scroller list]
@@ -762,6 +790,7 @@ stylize/master [
 				] face face/pane
 				;-- Sharing
 				face/selected:			face/list/selected
+				face/list/prototype:	face/prototype
 				face/list/v-scroller:	face/v-scroller
 				face/list/select-mode:	does [face/select-mode]
 				if get in face 'render [face/list/render-func: func [face cell] get in face 'render]
@@ -771,8 +800,8 @@ stylize/master [
 						face/list/actors/:actor: get in face/actors actor
 					]
 				]
-				;-- Scroller setup
-				; do this only once
+				;-- Setup Scroller
+				insert-actor-func face 'on-align get in access 'set-scroller
 				insert-actor-func face 'on-resize get in access 'set-scroller
 			]
 			select-face*: func [face values] [
@@ -783,8 +812,8 @@ stylize/master [
 				query-face/no-show face/list :value
 				set-scroller face
 			]
-			edit-face*: func [face op value] [
-				edit-face/no-show face/list :op :value
+			edit-face*: func [face op value pos] [
+				edit-face/at/no-show face/list :op :value :pos
 				set-scroller face
 			]
 		]

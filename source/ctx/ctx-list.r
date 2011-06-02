@@ -75,7 +75,7 @@ ctx-list: context [
 							resize? [[bottom right]]
 							i < resize-column [[bottom right]]
 							i = resize-column [[bottom]]
-							i > resize-column [[left bottom]]
+							i > resize-column [[bottom left]]
 						]
 						'sort-column
 						to-lit-word w
@@ -115,7 +115,7 @@ ctx-list: context [
 							resize? [[bottom right]]
 							i < resize-column [[bottom right]]
 							i = resize-column [[bottom]]
-							i > resize-column [[left bottom]]
+							i > resize-column [[bottom left]]
 						]
 					]
 				)

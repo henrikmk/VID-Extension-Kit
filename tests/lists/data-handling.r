@@ -41,7 +41,7 @@ view make-window [
 	bar
 	panel [
 		across
-		l-data: data-list 500x400 data list-data setup [input [name age height time] widths [100 100 100 200]]
+		l-data: data-list 500x400 data list-data setup [input default-object widths [100 100 100 200]]
 		right-panel [
 			button "Add" [
 				edit-face l-data 'add make default-object [
@@ -51,6 +51,9 @@ view make-window [
 					time: now/precise
 				]
 			]
+			button "Duplicate" [
+				edit-face l-data 'duplicate none
+			]
 			button "Remove" [
 				either empty? l-data/selected [
 					alert "No rows selected."
@@ -58,9 +61,14 @@ view make-window [
 					edit-face l-data 'delete none
 				]
 			]
-			button "Update" [
-				; should find a more elegant way to deal with this, which might be with objects
+			button "Update Row" [
 				edit-face l-data 'edit make default-object [time: now/precise]
+			]
+			button "Update Time" [
+				edit-face l-data 'edit make object! [time: now/precise]
+			]
+			button "Update All" [
+				edit-face/at l-data 'edit make object! [age: random 50 time: now/precise] 'all
 			]
 		]
 	]

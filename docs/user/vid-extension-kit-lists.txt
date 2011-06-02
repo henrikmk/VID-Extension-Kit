@@ -4,6 +4,8 @@ VID Extension Kit Lists
 
 Lists are a big topic, and deserve their own document. The VID Extension Kit offers several building blocks for lists.
 
+All examples are available in the <strong>tests/list/</strong> directory in this distribution.
+
 ===List Styles
 
 The list styles are built from several basic components as <em>compound styles</em>. Some are not obvious list styles, but are based on them, like the CHOICE style.
@@ -149,47 +151,21 @@ Set a column mode for a column, so that sorting is disabled for this column:
 
 	data-list setup [input [name age weight] modes [sort no-sort]]
 
----Direct Specification
+See the file <strong>tests/lists/spec-dialect.r</strong> for an example.
 
-Here, the traditional WITH syntax to access face words directly, is used. This method is preferable, if the dialect cannot give you enough flexibility to describe the structure of the list.
+You can also use words, as long as they are set and for objects, their words are used. This allows the use of object prototypes:
 
-+++Face Words
+	my-obj: make object! [a: b: c: none]
 
-:SUB-FACE - This is the face that is used to render each row. Note that you are free to specify any kind of layout, including several internal rows. When using the specification dialect or an input object for SETUP, this face is automatically generated. Resizing and alignment through the resizing model of the VID Extension Kit is used.
+And in the layout:
 
-:HEADER-FACE - This is the header face that is used to control the list. It is placed above the list and takes the entire horizontal width of the face. The HEADER-FACE is only available in DATA-LIST, PARAMETER-LIST. When using the specification dialect or an input object for SETUP, this face is automatically generated. Resizing and alignment through the resizing model of the VID Extension Kit is used.
+	data-list setup [input my-obj]
 
-:RENDER-FUNC - This specifies a render function. See the Rendering section for more information.
-
-:SELECT-MODE - This is a word with MUTEX, MULTI or PERSISTENT. See the Selection Mode section for more information.
-
-:LIST - The list face, if you wish to access or modify it in some way.
-
-:V-SCROLLER - The scroller face, if you wish to access or modify it in some way.
-
-:HEADER-FACE - The header face, if you wish to access or modify it in some way.
-
-+++Example
-
-	data-list with [
-		header-face: [
-			across space 0
-			sort-button "Name" 100 spring [bottom right] of 'sorting
-			sort-button "Age" 150 spring [bottom] of 'sorting
-			sort-button "Weight" 50 spring [bottom left] of 'sorting
-			sort-reset-button
-		]
-		sub-face: [
-			across space 0
-			list-text-cell 300x30 font-size 16 return
-			list-text-cell 150x20 font-size 11
-			list-text-cell 150x20 font-size 11
-		]
-	]
+See the file <strong>tests/lists/spec-dialect-2.r</strong> for an example of this.
 
 ===Content of a List
 
-The contents of a list is usually one or several columns and rows, where each column has a title specification. DATA-LIST is designed to accept an input directly to display a data-list with contents, so you don't have to spend time generating a specification of the content.
+The contents of a list is usually one or several columns and rows, where each column has a title. DATA-LIST is designed to accept an input directly to display contents, so you don't have to spend time generating a specification of the content.
 
 There are generally 3 types of data content allowed:
 
@@ -201,6 +177,8 @@ A simple 1-dimensional block of elements that are not objects are allowed, such 
 
 The list will automatically detect that there is only one column, if the first element is not a block.
 
+You cannot use EDIT-FACE to edit this kind of block. For this, you will need to provide your own custom functions.
+
 ---2-dimensional blocks
 
 2-dimensional blocks are allowed and may contain various types, including objects:
@@ -209,9 +187,11 @@ The list will automatically detect that there is only one column, if the first e
 
 The list will automatically figure out the number of columns from the length of the first block.
 
+You cannot use EDIT-FACE to edit this kind of block. For this, you will need to provide your own custom functions.
+
 ---Object blocks
 
-This is the recommended method for maximum flexibility as the same object can be used both for specifying the list structure and for specifying rows in the list. Each word in the object is designated as a column and will be used as the column name. So if you have an object:
+This is the recommended method for maximum flexibility as the same object can be used both for specifying the list structure and for specifying rows in the list. You can also use EDIT-FACE to edit the list contents this way. Each word in the object is designated as a column and will be used as the column name. So if you have a prototype object:
 
 	my-list-row: make object! [
 		name:
@@ -228,19 +208,23 @@ The columns shown in the list will be:
 
 A list with a header can be sorted by the user, if the header face is specified. The header face usually contains SORT-BUTTONS that handle sorting for you.
 
-If the list does not have a header, sorting can be done, by using QUERY-FACE (not really)
+See the file <strong>tests/lists/sorting.r</strong> for an example.
 
 ---Caveats
 
 Internally, the sorting mechanism uses SORT/COMPARE and is thus susceptible to the limitations it poses, such as trying to compare two different datatypes. Therefore it's usually not wise to use more than one datatype per column, if you want to sort rows.
 
-You cannot sort multiple columns.
+You cannot sort multiple columns at the same time. If you select a new column to sort, the original data is resorted by that column.
+
+You cannot yet programmatically sort.
 
 ===Filter Function
 
 The QUERY-FACE accessor can filter rows, based on an input function. The input function takes a row as an input argument and when returning TRUE, the row will be included in the list. If FALSE, it will be left out.
 
 This is useful for filtering out data that you don't want to see, such as with a real-time string filtering function.
+
+See the file <strong>tests/lists/filtering.r</strong> for an example.
 
 ---Example
 
@@ -262,6 +246,8 @@ And in the list specification the QUERY-FACE accessor uses the filter function t
 When the list uses a RENDER-FUNC function, each cell can be evaluated for content and adjusted in appearance accordingly. Any facet of the face can be adjusted. This is used for alternate line coloring in the standard DATA-LIST.
 
 But by setting any facet, including DRAW blocks, you can include images or complex indicators in a cell. The RENDER-FUNC function is run, every time a single cell is rendered, so speed is of importance.
+
+See the file <strong>tests/lists/rendering.r</strong> for an example.
 
 ---Cell Information
 
@@ -309,7 +295,9 @@ If you are experiencing slowdowns, due to excessive redraws of the list, you can
 
 ===Data Processing
 
-Internally, the LIST never destroys or modifies the original data. What occurs on every update, is:
+Internally, the LIST does not destroy or modify the original data, when sorting or filtering. It only does so, when using the editing functions with EDIT-FACE.
+
+What occurs on every update, is:
 
 # The original data is fed to the list
 
@@ -328,6 +316,8 @@ Internally, the LIST never destroys or modifies the original data. What occurs o
 ===Selection
 
 The selected rows can be accessed through FACE/SELECTED and will be the indexes of the items in the original data block.
+
+See the file <strong>tests/lists/selection.r</strong> for an example.
 
 ---Selection Mode
 
@@ -353,13 +343,55 @@ Using the specification dialect:
 
 ===Keyboard Navigation
 
-When using a DATA-LIST, it is registered as a compound style and internal components cannot be navigated to directly.
+When using a DATA-LIST, it is registered as a compound style and internal components cannot be navigated to directly. To use keyboard navigation, the list must be focused, i.e. be covered with the focus ring.
 
-The LIST style offers a KEY-FACE accessor function with the following
+Any usage of the keyboard results in FACE/SELECTED being manipulated and the ON-KEY actor being run.
+
+The LIST style offers a KEY-FACE accessor function with the following functionality:
+
+:up - Selects the previous row. If no items are selected, the first row is selected. If the previous row is out of view, the list scrolls it into view.
+
+:down - Selects the next row. If no items are selected, the first row is selected. If the next row is out of view, the list scrolls it into view.
+
+:ctrl-up - Selects a row one page up and deselects the previously selected row. One page is the number of visible rows in the list.
+
+:ctrl-down - Selects a row one page down and deselects the previously selected row.
+
+:shift-up - Selects the previous row and does not deselect any previous rows.
+
+:shift-down - Selects the next row and does not deselect any previous rows.
+
+:ctrl-shift-up - Selects the entire previous page and does not deselect any previous rows.
+
+:ctrl-shift-down - Selects the entire next page and does not deselect any previous rows.
+
+:ctrl-A - Selects all rows.
+
+:ctrl-shift-A - Deselects all rows.
+
+See the file <strong>tests/lists/selection.r</strong> for an example use of ON-KEY on a DATA-LIST.
+
+---Caveats
+
+It is currently not possible to sort by keyboard.
+
+===Scrolling
+
+When scrolling, you can use the scroll-wheel on any area inside the list, including the header. When the data-list is resized, the scroller is redragged.
+
+---Following
+
+The internal function FOLLOW, which exists inside the list face allows the list to scroll to a specific position. This is used, when using keyboard navigation and can be used in the future to scroll to a specific location, if one wants to find a specific row.
+
+---Caveats
+
+There is currently no horizontal scroller.
 
 ===Editing
 
 Using the EDIT-FACE accessor, you can do some editing of the data block in the list. If the data block is not copied, it can be used to modify an external block.
+
+<strong>For simplicity, editing is only available, when the data is formed as a block of objects.</strong>
 
 The EDIT-FACE accessor takes three arguments:
 
@@ -369,8 +401,26 @@ The EDIT-FACE accessor takes three arguments:
 
 :VALUE - The value to pass to the face accessor for the operation.
 
+Edits are carried out on the selected rows in the list.
+
 ---Example
 
 Given a data-list L-DATA, we can add a row like this:
 
 	edit-face l-data 'add
+
+Adding always happen at the end of the list.
+
+Edit a row:
+
+	edit-face l-data 'edit
+
+Delete a row:
+
+	edit-face l-data 'delete
+
+---Caveats
+
+# Interactive inline editing is not yet possible. This will be possible, once a text-cell face for this type of editing is made available.
+
+# Single-cell editing using EDIT-FACE is not yet possible.

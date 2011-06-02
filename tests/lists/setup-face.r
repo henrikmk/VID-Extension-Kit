@@ -23,7 +23,7 @@ REBOL [
 
 do %../../build/include.r
 
-clear ctx-vid-debug/debug
+;insert insert insert clear ctx-vid-debug/debug 'align 'face 'resize
 
 list-data: []
 loop 100 [append/only list-data array/initial 3 does [random "abcdef xyz nml"]]
@@ -31,7 +31,7 @@ loop 100 [append/only list-data array/initial 3 does [random "abcdef xyz nml"]]
 view make-window [
 	h3 "SETUP-FACE Test"
 	bar
-	l-data: data-list 400x300 fill 1x0 data list-data
+	l-data: data-list 300x200 fill 1x0 data list-data
 	bottom-panel [
 		across
 		button "Setup 1" [
@@ -51,7 +51,7 @@ view make-window [
 		button "Setup 3" [
 			setup-face l-data [input [a b c d] output [a] select-mode persistent]
 		]
-		button "Blank" [
+		button "No Setup" [
 			setup-face l-data none
 		]
 	]

@@ -653,6 +653,7 @@ edit-face: func [
 	face
 	op
 	value
+	/at pos "Positions"
 	/no-show "Do not show change yet"
 	/local access
 ][
@@ -660,7 +661,7 @@ edit-face: func [
 		access: get in face 'access
 		in access 'edit-face*
 	][
-		access/edit-face* face :op :value
+		access/edit-face* face :op :value :pos
 		act-face face none 'on-edit
 	]
 	any [no-show show face]
@@ -913,7 +914,9 @@ insert-actor-func: func [face actor fn] [
 		if none? get in face/actors actor [
 			face/actors/:actor: make block! []
 		]
-		insert/only tail face/actors/:actor :fn
+		unless find face/actors/:actor :fn [
+			insert/only tail face/actors/:actor :fn
+		]
 	]
 ]
 

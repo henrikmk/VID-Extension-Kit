@@ -40,16 +40,17 @@ ctx-vid-debug: context [
 		debug-face "Aligning" reduce [
 			face-name
 			face-text
-			"to" get in :fc 'align
-			"with fill" get in :fc 'fill
-			"with spring" mold get in :fc 'spring
-			"with size" get in :fc 'size
+			"align:" get in :fc 'align
+			"fill:" get in :fc 'fill
+			"spring:" mold get in :fc 'spring
+			"size:" get in :fc 'size
+			"offset:" get in :fc 'offset
 		]
 	]
 	set 'debug-resize func [face diff] [
 		unless find debug 'resize [exit]
 		fc: :face
-		debug-face "Resizing" reduce [face-name face-text "by" diff]
+		debug-face "Resizing" reduce [face-name face-text "by" diff "offset:" get in :fc 'offset]
 	]
 	set 'debug-vid func [str] [
 		unless find debug 'vid [exit]

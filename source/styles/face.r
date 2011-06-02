@@ -53,7 +53,7 @@ stylize/master [
 			set-parent-faces self								; Set all PARENT-FACE in all faces
 			ctx-resize/add-resize-face* self					; Set the runtime resize-face* (changes access)
 			ctx-resize/align/no-show self none					; Autoalign the window based on the above hints
-			ctx-resize/resize/no-show self size offset			; Autosize the window based on the above hints
+;			ctx-resize/resize/no-show self size offset			; Autosize the window based on the above hints
 			if find ctx-vid-debug/debug 'face [dump-face self]	; Dump window face on init if debugging is enabled
 		]
 	]

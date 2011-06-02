@@ -97,10 +97,13 @@ ctx-resize: context [
 	do-align: func [; "Align a face relative to its parent. Called only during initialization."
 		face ;[object!] "The face to align"
 		parent ;[object! none!] "The parent face (passed because parent-face isn't set until view)"
-		/local fo
+		/local fo diff
 	] [
 		; Align the current face
+		; fill changes the size and therefore should resize the content of the face
+		; consider ramifications
 		set-vars face parent
+		diff: *fs
 		if pair? get in face 'fill [
 			either flag-face? face fixed [
 				if face/fill/x = 1 [*fs/x: *fps/x - *fo/x]
@@ -118,6 +121,8 @@ ctx-resize: context [
 		if *mins [*fs: max *mins *fs]                        ; min-size
 		if *maxs [*fs: min *maxs *fs]                        ; max-size
 		if zero? *fa [*fa: aspect *fs]                       ; aspect ratio
+		; if you have a right aligned item, the item will move
+		; actually any item with springs will move
 		either center [
 			*fo: *fps - *mtl - *mbr - *fs / 2 + *mtl         ; Move to center
 		] [
@@ -136,15 +141,24 @@ ctx-resize: context [
 				right [*fo/x: *fps/x - *mbr/x - *fs/x]       ; Move to right
 			]
 		]
+		diff: *fs - diff
+		; Resize contents (big change)
+		if diff <> 0x0 [
+			set-faces face
+			resize-contents face diff
+			set-vars face parent
+		]
 		; [ ] - win-pos should be set to parent win-pos if we are aligning a sub-face
 		if parent [win-pos: win-pos + (fo: *fo) + edge-size parent]
-		debug-align :face
 		set-faces face
+		debug-align :face
 		face/line-list: none
 		; Align the face contents
 		align-contents face parent
 		; Perform text adjustments to face due to new alignment
 		ctx-text/set-text-body face face/text
+		; Perform draw adjustments to face if it has a new size
+		resize-draw-body face
 		act-face face none 'on-align
 		if parent [win-pos: win-pos - fo - edge-size parent] ; only set win-pos when parent is not screen-face
 	]
@@ -167,49 +181,6 @@ ctx-resize: context [
 		]
 		out-level
 	]
-
-	;do-resize: func [; "Resize a face relative to the size of its parent."
-	;	face ;[object!] "The face to resize"
-	;	diff ;[pair!] "The difference in size"
-	;	/local n-diff fo
-	;] [
-	;	n-diff: 0x0
-	;	; Resize the current face
-	;	set-vars face face/parent-face
-	;	if get in face 'spring [set bind face/spring self true]
-	;	if horizontal [*fs/x: *fs/x + n-diff/x: diff/x]                ; horizontal stretch
-	;	if vertical [*fs/y: *fs/y + n-diff/y: diff/y]                  ; vertical stretch
-	;	if get in face 'fixed-aspect [
-	;		if face/fill/x = 1 [*fs/x: *fpis/x]
-	;		if face/fill/y = 1 [*fs/y: *fpis/y]
-	;		either *fpa > *fa [                                        ; fixed aspect stretch
-	;			*fs/x: *fs/y * *fa
-	;		][
-	;			*fs/y: *fs/x / *fa
-	;		]
-	;	]
-	;	if *mins [*fs: max *mins *fs]                                  ; min-size
-	;	if *maxs [*fs: min *maxs *fs]                                  ; max-size
-	;	if all [left right] [                                          ; horizontal center
-	;		*fo/x: *fps/x - *mtl/x - *mbr/x - *fs/x / 2 + *mtl/x
-	;	]
-	;	if all [top bottom] [                                          ; vertical center
-	;		*fo/y: *fps/y - *mtl/y - *mbr/y - *fs/y / 2 + *mtl/y
-	;	]
-	;	either get in face 'fixed-aspect [
-	;		if all [left not right] [*fo/x: *fpis/x - *fs/x + *mtl/x]  ; stick to right
-	;		if all [top not bottom] [*fo/y: *fpis/y - *fs/y + *mtl/y]  ; stick to bottom
-	;	][
-	;		if all [left not right] [*fo/x: *fo/x + diff/x]            ; stick to right
-	;		if all [top not bottom] [*fo/y: *fo/y + diff/y]            ; stick to bottom
-	;	]
-	;	debug-resize :face diff
-	;	win-pos: win-pos + fo: *fo
-	;	set-faces face
-	;	; Resize the face contents
-	;	resize-contents face n-diff
-	;	win-pos: win-pos - fo
-	;]
 
 	set 'boo false
 	irk: func [face] [if boo [print ['--- face/style face/size face/real-size *fs]]]
@@ -276,8 +247,8 @@ ctx-resize: context [
 		]
 		if face/parent-face [win-pos: win-pos + (fo: *fo) + edge-size face/parent-face]
 		;if face/tab-face? [tab-face?: true set-focus-ring/tab-face/no-show face face]
-		debug-resize :face diff
 		set-faces face ; this remembers the wrong sizes
+		debug-resize :face diff
 		if n-diff <> 0x0 [face/line-list: none]
 		; Resize the face contents
 		resize-contents face n-diff
