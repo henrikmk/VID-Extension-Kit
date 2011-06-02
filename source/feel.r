@@ -70,6 +70,7 @@ svvf: system/view/vid/vid-feel: context [
 						]
 						; Do face action on button release above face
 						do-face face face/data
+						; handle double-click here
 						act-face face event 'on-click
 					]
 					'released
@@ -698,7 +699,7 @@ select-face: func [
 		in access 'select-face*
 	][
 		access/select-face* face :range
-		act-face face none 'on-select
+		act-face face none either :range ['on-select]['on-unselect]
 	]
 	any [no-show show face]
 	face

@@ -1,0 +1,168 @@
+VID Extension Kit Actors
+
+===Introduction
+
+Actors are an easy-access way to perform a task on a specific event, such as doing something on a button click or when a list face refreshes its content.
+
+Basically there is just a list of actors and each one does something differently at different times.
+
+Actors are primarily used in FEEL objects and in styles, but you can call any actor in any face at any time.
+
+There are no fixed rules on when to call an actor, so this document also serves as a list of rules on when to use particular actors as a style writer.
+
+===Actors
+
+---Calling Actors
+
+When creating your own styles or when using actors, you call actors by the ACT-FACE function:
+
+	act-face face 'on-click
+
+---Attach Actor Functions
+
+Each face has an actor object in FACE/ACTORS. This provides a complete list of functions that are attached to this face.
+
+Each actor in the object contains a block, where all functions reside. When ACT-FACE is called on this actor, all functions in that block are run in sequence. Any actor can contain any number of functions.
+
+To insert a new actor function for a face, you use the INSERT-ACTOR-FUNC function:
+
+	my-func: func [face value event actor] [now]
+	insert-actor-func face 'on-click :my-func
+
+The function can support up to 4 arguments. You don't have to use them all, but the arguments will be served in the following order:
+
+:face - The face for which the actor is called.
+
+:value - The value passed to the function via GET-FACE.
+
+:event - The event object that was present, when ACT-FACE was called. Sometimes, there can be no event object, if ACT-FACE is run outside a FEEL object, so the value will then be NONE.
+
+:actor - The name of the actor that is called by ACT-FACE.
+
+When attempting to insert the same function multiple times, INSERT-ACTOR-FUNC first investigates if the function already exists in the block. If it does, the insertion is skipped.
+
+---Remove Actor Functions
+
+You can remove actor functions by using the REMOVE-ACTOR-FUNC function:
+
+	remove-actor-func face 'on-click :my-func
+
+---Debugging Actors
+
+Actors can be debugged, as in you can see which actors are called in the console, if inserting the 'actors flag in CTX-VID-DEBUG:
+
+	insert ctx-vid-debug/debug 'actors
+
+---Reference
+
++++ON-SETUP
+
+This actor is called during SETUP-FACE.
+
++++ON-KEY
+
+This actor is called whenever you press a key, when the face is focused.
+
++++ON-TAB
+
+This actor is called whenever you press the TAB key, when the face is focused.
+
++++ON-RETURN
+
+This actor is called whenever you press the RETURN key, when the face is focused.
+
++++ON-CLICK
+
+This is run when left clicking on a button, a field or other item.
+
++++ON-ALT-CLICK
+
+This is run when right clicking on a button, a field
+
++++ON-DOUBLE-CLICK
+
+This is run when double clicking a button or a list item.
+
++++ON-SET
+
+This is run on SET-FACE.
+
++++ON-CLEAR
+
+This is run on CLEAR-FACE.
+
++++ON-RESET
+
+This is run on RESET-FACE.
+
++++ON-ESCAPE
+
+This actor is called whenever you press the ESCAPE key, when the face is focused.
+
++++ON-FOCUS
+
+This actor is called whenever a face goes into focus, i.e. gets the focus ring.
+
++++ON-UNFOCUS
+
+This actor is called whenever a face loses its focus, i.e. has the focus ring removed, such as when pressing the TAB key.
+
++++ON-SCROLL
+
+This actor is called, whenever
+
++++ON-RESIZE
+
+This actor is called, whenever the window resizes.
+
++++ON-ALIGN
+
+This actor is called, whenever the window is aligned, which usually only is directly after layout.
+
++++ON-TIME
+
+This actor is called when a FACE/RATE event has occurred.
+
++++ON-SEARCH
+
+This is run on SEARCH-FACE.
+
++++ON-QUERY
+
+This is run on QUERY-FACE.
+
++++ON-EDIT
+
+This is run on EDIT-FACE.
+
++++ON-SELECT
+
+This is run on SELECT-FACE, when a range is specified.
+
++++ON-UNSELECT
+
+This is run on SELECT-FACE, when the specified range is NONE.
+
++++ON-VALIDATE
+
+This is run on validation.
+
++++ON-INIT-VALIDATE
+
+This is run on initial validation.
+
++++ON-ENABLE
+
+This is run on ENABLE-FACE.
+
++++ON-DISABLE
+
+This is run on DISABLE-FACE.
+
++++ON-FREEZE
+
+This is run on FREEZE-FACE.
+
++++ON-THAW
+
+This is run on THAW-FACE.

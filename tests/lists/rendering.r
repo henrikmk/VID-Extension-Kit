@@ -15,7 +15,7 @@ REBOL [
 		Use at your own risk.
 	}
 	Purpose: {
-		Test custom cell rendering in DATA-LIST using RENDER-FUNC.
+		Test custom cell rendering in DATA-LIST using RENDER.
 	}
 	History: []
 	Keywords: []

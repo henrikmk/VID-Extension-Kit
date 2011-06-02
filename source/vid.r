@@ -204,6 +204,7 @@ vid-face/actors: make object! [
 	on-return:
 	on-click:
 	on-alt-click:
+	on-double-click:
 	on-set:
 	on-clear:
 	on-reset:
@@ -218,6 +219,7 @@ vid-face/actors: make object! [
 	on-query:
 	on-edit:
 	on-select:
+	on-unselect:
 	on-validate:
 	on-init-validate:
 	on-change:
@@ -358,6 +360,7 @@ facet-words: [ ; Order of these is important to the code
 	on-return			[set-actor new 'on-return second args next args]
 	on-click			[set-actor new 'on-click second args next args]
 	on-alt-click		[set-actor new 'on-alt-click second args next args]
+	on-double-click		[set-actor new 'on-double-click second args next args]
 	on-set				[set-actor new 'on-set second args next args]
 	on-clear			[set-actor new 'on-clear second args next args]
 	on-reset			[set-actor new 'on-reset second args next args]
@@ -372,6 +375,7 @@ facet-words: [ ; Order of these is important to the code
 	on-query			[set-actor new 'on-query second args next args]
 	on-edit				[set-actor new 'on-edit second args next args]
 	on-select			[set-actor new 'on-select second args next args]
+	on-unselect			[set-actor new 'on-unselect second args next args]
 	on-validate			[set-actor new 'on-validate second args next args]
 	on-init-validate	[set-actor new 'on-init-validate second args next args]
 	on-change			[set-actor new 'on-change second args next args] ; not formally available for use
@@ -379,10 +383,6 @@ facet-words: [ ; Order of these is important to the code
 	on-disable			[set-actor new 'on-disable second args next args]
 	on-freeze			[set-actor new 'on-freeze second args next args]
 	on-thaw				[set-actor new 'on-thaw second args next args]
-	; Lists
-	on-insert			[set-actor new 'on-insert second args next args]
-	on-delete			[set-actor new 'on-delete second args next args]
-	on-edit				[set-actor new 'on-edit second args next args]
 ]
 
 fw-with: find facet-words 'with

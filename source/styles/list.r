@@ -34,7 +34,7 @@ stylize/master [
 					] [
 						pos: face/pos
 						lst/select-func face event
-						act-face lst event 'on-click
+						act-face lst event pick [on-double-click on-click] event/double-click
 						face/pos: pos ; maintain position even after list is closed
 					]
 				]
@@ -135,52 +135,6 @@ stylize/master [
 				] to word! type
 				'list-text-cell ; default
 			]
-		]
-		;-- Row manipulation
-		; CRUD functions?
-		; insert, delete, update
-		; actors for each function
-		; on-edit
-		; on-insert
-		; on-delete
-		edit-cell: func [x y data] [
-			; the problem to fix is that this will essentially edit the data that we promised to separate out
-			; list-view handles the data as well as the editing
-			; we want to allow editing the data and then performing a simple update
-			; perhaps this should be done in here
-			; when editing this cell, we are updating the single value in the block/element/object
-			; this causes many testing scenarios
-			; this may be possible to use with in-line editing, but not sure
-			; [!] - inline editing would use inline versions of the cell styles, so this should be done by the cell styles themselves
-			; and then you do a get-face on the data in the sub-face
-			; [!] - and the cells close up again
-			; [!] - this is only useful for editing a single item very quickly
-			act-face face event 'on-edit
-			; update the face or the single row
-			face/update face
-		]
-		edit-row: func [idx data] [
-			; as used by inline editing
-			change at face/data idx data
-			act-face face event 'on-change
-			; put the row selection here
-			face/update face
-		]
-		insert-row: func [idx data] [
-			; when inserting the row, use the proper location
-			; what good is on-insert for?
-			insert at face/data idx data
-			act-face face event 'on-change
-			; put the row selection here
-			face/update face
-		]
-		append-row: func [data] [
-			insert-row length? face/data data
-		]
-		delete-row: func [idx] [
-			act-face face event 'on-change
-			; update selection
-			face/update face
 		]
 		;-- Pane rendering function
 		pane-func: func [face [object!] id [integer! pair!] /local count fs spane sz] [

@@ -276,6 +276,7 @@ stylize/master [
 	] [
 		tool-color get-face face func [value] [
 			set-face face value
+			; [!] - not sure this actor is needed
 			act-face face event 'on-change ; why not ON-SET instead?
 		]
 	]

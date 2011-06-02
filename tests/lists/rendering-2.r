@@ -1,5 +1,3 @@
-
-
 REBOL [
 	Title: "Rendering Test"
 	Short: "Rendering Test"
@@ -10,14 +8,14 @@ REBOL [
 	Type: 'script
 	Maturity: 'unstable
 	Release: 'internal
-	Created: 29-May-2011
-	Date: 29-May-2011
+	Created: 02-Jun-2011
+	Date: 02-Jun-2011
 	License: {
 		BSD (www.opensource.org/licenses/bsd-license.php)
 		Use at your own risk.
 	}
 	Purpose: {
-		Test custom cell rendering in DATA-LIST using RENDER-FUNC.
+		Test custom cell rendering in DATA-LIST using RENDER with CELL/NAME.
 	}
 	History: []
 	Keywords: []
