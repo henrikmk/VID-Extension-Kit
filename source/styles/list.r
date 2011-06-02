@@ -18,6 +18,7 @@ stylize/master [
 		font: make font [valign: 'middle]
 		para: make para [wrap?: false]
 		pos: 0x0
+		name: none
 		feel: make face/feel [
 			over: func [face act pos] [
 				face/parent-face/parent-face/over: all [act face/pos]
@@ -204,6 +205,7 @@ stylize/master [
 		;-- Cell content function
 		cell-func: func [face cell row col render /local fp r] [
 			cell/pos: as-pair col row - 1 + index? face/output
+			cell/name: pick face/column-order col
 			r: if all [render inside: row <= length? face/output] [
 				pick pick face/output row col
 			]
