@@ -29,12 +29,6 @@ view make-window [
 	h3 "Resize Test"
 	bar 300
 	panel red fill 1x0 [
-		; this button cannot resize beyond the intended size,
-		; because the difference between the default size and the fill for panel
-		; is not registered. if it were, the size would change beyond the default
-		; but this may pose a problem for unintended resizes, as the user cannot
-		; know what the default size of a face is
-		; therefore the result is correct and we may not provide a fill for the panel
 		button spring [bottom]
 	]
 ]
