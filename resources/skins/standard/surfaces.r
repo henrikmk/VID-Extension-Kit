@@ -78,6 +78,29 @@ recessed: frame [
 		box inner/1 inner/5 1
 	]
 ]
+led: base [
+	colors state [
+		init [
+			shine: 240.240.240
+			shadow: 140.140.140
+			value: black
+		]
+		on [value: green]
+		off [value: black]
+		error [value: red]
+		warning [value: yellow]
+	]
+	template [
+		anti-alias off
+		pen none
+		fill-pen colors/shadow
+		polygon outer/1 outer/3 inner/3 inner/7 outer/7 outer/1
+		fill-pen colors/shine
+		polygon outer/3 outer/5 outer/7 inner/7 inner/3 outer/3
+		fill-pen colors/value
+		box inner/1 inner/5 1
+	]
+]
 button: frame [
 	font [align: 'center style: 'bold]
 ]

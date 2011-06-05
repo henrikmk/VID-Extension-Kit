@@ -53,8 +53,10 @@ stylize/master [
 	]
 
 	LED: CHECK 12x12 with [
-		feel: svvf/led
+		feel: svvf/indicator
+		access: ctx-access/data-state
+		surface: 'led
+		states: [off on error warning]
 		set [font para] none
-		colors: reduce [green red]
 	]
 ]

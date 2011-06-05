@@ -195,7 +195,7 @@ stylize/master [
 		definition: reduce [
 			'state make column [width: 24 cell-type: 'menu-text]
 			'name make column [cell-type: 'menu-text]
-			'shortcut make column [width: 60 cell-type: 'menu-text font: [align: 'right]] ; this can actually switch between two cell-types, but we might keep it at text for now
+			'shortcut make column [width: 60 cell-type: 'menu-text font: [align: 'left]] ; this can actually switch between two cell-types, but we might keep it at text for now
 		]
 		resize-column: 'name
 		access: make access [

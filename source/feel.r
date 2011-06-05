@@ -126,13 +126,17 @@ svvf: system/view/vid/vid-feel: context [
 			show face
 		]
 	]
-
-	hot: make sensor [
+	
+	indicator: make sensor [
 		redraw: func [face act pos][
 			if all [not svv/resizing? act = 'draw] [
 				set-draw-body face
+				act-face face none 'on-redraw
 			]
 		]
+	]
+
+	hot: make indicator [
 		over: func [face action event][
 			set-face-state face pick [over away] to-logic action
 			show face
@@ -160,16 +164,16 @@ svvf: system/view/vid/vid-feel: context [
 		]
 	]
 
-	led: make sensor [
-		over: none
-		redraw: func [face act pos][
-;			face/color: either face/data [face/colors/1][face/colors/2]
-		]
-		engage: func [face action event][
-			if any [action = 'time all [action = 'down get in face 'action]][do-face face face/data: not face/data]
-			show face
-		]
-	]
+	;led: make sensor [
+	;	over: none
+	;	redraw: func [face act pos][
+;	;		face/color: either face/data [face/colors/1][face/colors/2]
+	;	]
+	;	engage: func [face action event][
+	;		if any [action = 'time all [action = 'down get in face 'action]][do-face face face/data: not face/data]
+	;		show face
+	;	]
+	;]
 
 	icon: button: :hot
 
@@ -297,6 +301,7 @@ svvf: system/view/vid/vid-feel: context [
 		redraw: func [face act pos][
 			if all [not svv/resizing? act = 'draw] [
 				set-draw-body face
+				act-face face none 'on-redraw
 			]
 		]
 		engage: :drag-action
@@ -321,6 +326,7 @@ svvf: system/view/vid/vid-feel: context [
 				]
 			if all [not svv/resizing? act = 'draw] [
 				set-draw-body face
+				act-face face none 'on-redraw
 			]
 		]
 		engage: func [face action event][
@@ -968,8 +974,15 @@ ctx-access: context [
 	data-state: make data [ ; e.g. toggle
 		set-face*: func [face value][
 			face/data: value
-			face/state: pick head face/states not value
-			face/states: find head face/states face/state
+			either word? value [
+				; Word
+				face/state: value
+				face/states: find head face/states value
+			][
+				; True/False
+				face/state: pick head face/states not value
+				face/states: find head face/states face/state
+			]
 		]
 	]
 
@@ -1529,6 +1542,10 @@ ctx-access: context [
 					][
 						click-face face
 					]
+					if event/key = #"^M" [
+						act-face face none 'on-return
+					]
+					act-face face none 'on-select
 				]
 			]
 ;			if tab-face [set-tab-face tab-face focus tab-face]

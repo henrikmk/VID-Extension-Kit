@@ -276,7 +276,6 @@ stylize/master [
 						use [fp pop-face] [
 							fp: face/parent-face ; is this choice-face?
 							pop-face: fp/pop-face
-							probe event/key
 							case [
 								find [up down] event/key [
 									; [ ] - adjustment needs to adhere to current selection rather than it's own up/down scheme
@@ -342,7 +341,8 @@ stylize/master [
 			sub-face: choice-face/pane/1/sub-face
 			sub-face/pane/1/real-size: sub-face/real-size: none
 ;			sub-face/pane/1/size: sub-face/size: size + 10; - (probe 2 * self/draw-body/margin/y); (2 * edge-size face) ; size is now wrong, because the edge is wrong here
-;			sub-face/pane/1/font: make sub-face/pane/1/font [align: 'left]
+; [ ] - when not present, this face is right aligned
+			sub-face/pane/1/font: make sub-face/pane/1/font [align: 'left]
 			if setup [
 				access/setup-face* self setup
 			]

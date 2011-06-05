@@ -227,6 +227,7 @@ vid-face/actors: make object! [
 	on-disable:
 	on-freeze:
 	on-thaw:
+	on-redraw:
 		none
 ]
 
@@ -383,6 +384,7 @@ facet-words: [ ; Order of these is important to the code
 	on-disable			[set-actor new 'on-disable second args next args]
 	on-freeze			[set-actor new 'on-freeze second args next args]
 	on-thaw				[set-actor new 'on-thaw second args next args]
+	on-redraw			[set-actor new 'on-redraw second args next args]
 ]
 
 fw-with: find facet-words 'with

@@ -14,6 +14,7 @@ stylize/master [
 	LIST-CELL: TEXT with [
 		text: none
 		data: none
+		row: none
 		size: 0x20
 		font: make font [valign: 'middle]
 		para: make para [wrap?: false]
@@ -92,6 +93,13 @@ stylize/master [
 		spacing: 0					; spacing between rows in pixels
 		over:						; face position currently hovering over
 		spring: none
+		feel: make feel [
+			redraw: func [face act pos][
+				if all [not svv/resizing? act = 'draw] [
+					act-face face none 'on-redraw
+				]
+			]
+		]
 		;-- Sub-face creation function
 		make-sub-face: func [face lo /init /local fs] [
 			fs: face/sub-face: layout/parent/origin lo iterated-face 0x0; copy face/styles ; this only works during init
@@ -157,17 +165,25 @@ stylize/master [
 			fs
 		]
 		;-- Cell content function
-		cell-func: func [face cell row col render /local fp r] [
+		cell-func: func [face cell row col render /local fp inside r] [
 			cell/pos: as-pair col row - 1 + index? face/output
 			cell/name: pick face/column-order col
-			r: if all [render inside: row <= length? face/output] [
+			r: all [
+				render
+				inside: row <= length? face/output
 				pick pick face/output row col
 			]
 			cell/access/set-face* cell r
-			render-func face cell
+			back-render-func face cell
+			either inside [
+				cell/row: pick face/data pick face/data-sorted cell/pos/y
+				render-func face cell
+			][
+				empty-render-func face cell
+			]
 		]
-		;-- Cell render function
-		render-func: func [face cell] [
+		;-- Cell background render function
+		back-render-func: func [face cell] [
 			either find face/selected pick face/data-sorted cell/pos/y [
 				cell/color:
 					either flag-face? face disabled [
@@ -189,6 +205,10 @@ stylize/master [
 				cell/color: cell/color - 10
 			]
 		]
+		;-- Cell foreground render function
+		render-func: none
+		;-- Empty Cell foreground render function
+		empty-render-func: none
 		;-- Content update function
 		update: func [face] [
 			ctx-list/set-filtered face
@@ -248,12 +268,19 @@ stylize/master [
 				show self
 				face/pos: old ; otherwise it changes due to SHOW
 			]
+			act-face self none 'on-select
 		]
 		;-- Cell selection function for keyboard. FACE is the list in focus.
 		key-select-func: func [face event /local old out s step] [
 			case [
 				#"^A" = event/key [
 					select-face/no-show face not event/shift
+				]
+				#"^/" = event/key [
+					act-face face none 'on-return
+				]
+				#"^/" = event/key [
+					act-face face none 'on-escape
 				]
 				find [up down] event/key [
 					old: copy selected
@@ -290,6 +317,7 @@ stylize/master [
 			selected: head insert head clear selected unique sel
 			if sel <> old [
 				do-face self get-face face
+				act-face face none 'on-select
 			]
 		]
 		;-- Accessor functions
@@ -328,7 +356,7 @@ stylize/master [
 			get-face*: func [face /local vals] [
 				case [
 					none? face/selected [none]
-					empty? face/selected [none]
+					empty? face/selected [make block! []]
 					face/select-mode = 'mutex [
 						pick head face/data first face/selected
 					]
@@ -418,7 +446,7 @@ stylize/master [
 					]
 				switch :op [
 					add [
-						append/only face/data make face/prototype :value
+						append/only face/data make face/prototype any [:value []]
 						ctx-list/set-filtered face
 						select-face face 'last
 					]
@@ -430,16 +458,17 @@ stylize/master [
 						ctx-list/set-filtered face
 						select-face face array/initial length? pos does [j: j + 1]
 					]
-					edit [
+					edit update [
 						repeat i length? pos [
 							change at face/data pick pos i make pick face/data pick pos i :value
 						]
 						ctx-list/set-filtered face
 					]
-					delete [
+					delete remove [
 						repeat i length? pos [change at face/data pick pos i ()]
 						remove-each row face/data [not value? 'row]
 						clear pos
+						select-face/no-show face none
 						ctx-list/set-filtered face
 					]
 				]
@@ -558,6 +587,8 @@ stylize/master [
 		columns:				; column description, passed to LIST
 		column-order:			; column order, passed to LIST
 		sub-face:				; sub-face block or layout, passed to LIST
+		back-render:			; background cell render function body
+		empty-render:			; empty row render function body
 		render:					; cell render function body
 		text:					; does not contain focusable text
 			none
@@ -614,6 +645,7 @@ stylize/master [
 			]
 			set-face*: func [face data] [
 				set-face/no-show face/list data
+				face/data: face/list/data
 				set-scroller face
 			]
 			get-face*: func [face] [
@@ -621,6 +653,7 @@ stylize/master [
 			]
 			clear-face*: func [face] [
 				clear-face/no-show face/list data
+				face/data: face/list/data
 				set-scroller face
 			]
 			scroll-face*: func [face x y] [
@@ -638,8 +671,13 @@ stylize/master [
 					[word value]
 					any [values []]
 					[
-						value: either word? value [either value? :value [get :value][value]][:value]
-						if object? value [value: words-of value]
+						value:
+							case [
+								word? value [either value? :value [get :value][:value]]
+								path? value [either value? :value [do :value][:value]]
+								object? value [words-of :value]
+								true [:value]
+							]
 						set in face word value
 					]
 				;-- Convert Input and Output, if they are objects
@@ -745,14 +783,17 @@ stylize/master [
 					[v-scroller list]
 				] face face/pane
 				;-- Sharing
+				face/data:				face/list/data
 				face/selected:			face/list/selected
 				face/list/prototype:	face/prototype
 				face/list/v-scroller:	face/v-scroller
 				face/list/select-mode:	does [face/select-mode]
+				if get in face 'back-render [face/list/back-render-func: func [face cell] get in face 'back-render]
+				if get in face 'empty-render [face/list/empty-render-func: func [face cell] get in face 'empty-render]
 				if get in face 'render [face/list/render-func: func [face cell] get in face 'render]
 				;-- Map actors from DATA-LIST to internal components
 				foreach actor first face/actors [
-					if find [on-click on-key] actor [
+					if find [on-click on-key on-select on-unselect on-double-click] actor [
 						face/list/actors/:actor: get in face/actors actor
 					]
 				]

@@ -166,25 +166,50 @@ ctx-list: context [
 	]
 
 	; sets the sorting for the given list face
-	set-sorting: func [face /local op col idx] [
+	set-sorting: func [face /local col values obtain] [
 		set-vars face
-		insert clear sidx* fidx*
-		if all [sod* soc*] [
-			op: get select [ascending lesser? asc lesser? descending greater? desc greater?] sod*
-			switch/default to word! get-list-type [
-				object! [
-					sort/compare sidx* func [x y] [op get in pick data* x soc* get in pick data* y soc*]
+		insert clear sidx*
+			either all [sod* soc*] [
+				values: clear []
+				col: index? find cor* soc*
+				obtain: func [row]
+					case [
+						object? data*/1 [[get in row soc*]]
+						block? data*/1 [[pick row col]]
+						true [[:row]]
+					]
+				foreach id fidx* [
+					insert insert/only tail values obtain pick data* id id
 				]
-				block! [
-					col: index? find cols* soc*
-					sort/compare sidx* func [x y] [op pick pick data* x col pick pick data* y col]
-				]
+				either find [ascending asc] sod* [sort/skip values 2][sort/skip/reverse values 2]
+				extract/index values 2 2
 			][
-				sort/compare sidx* func [x y] [op pick data* x pick data* y]
+				fidx*
 			]
-		]
 		set-columns face
 	]
+
+	; sets the sorting for the given list face
+	;set-sorting: func [face /local op col idx] [
+	;	set-vars face
+	;	insert clear sidx* fidx*
+	;	if all [sod* soc*] [
+	;		op: get select [ascending lesser? asc lesser? descending greater? desc greater?] sod*
+	;		; op can be improved to handle any datatype
+	;		switch/default to word! get-list-type [
+	;			object! [
+	;				sort/compare sidx* func [x y] [op get in pick data* x soc* get in pick data* y soc*]
+	;			]
+	;			block! [
+	;				col: index? find cols* soc*
+	;				sort/compare sidx* func [x y] [op pick pick data* x col pick pick data* y col]
+	;			]
+	;		][
+	;			sort/compare sidx* func [x y] [op pick data* x pick data* y]
+	;		]
+	;	]
+	;	set-columns face
+	;]
 
 	; sets the indexes for the columns to be displayed in the list face in the correct order
 	set-columns: func [face /local def] [
@@ -197,7 +222,7 @@ ctx-list: context [
 		set-output face
 	]
 
-	; sets the output data for display and for collection with GET-FACE
+	; sets the output data index for display and for collection with GET-FACE
 	set-output: func [face /local length pos row val] [
 		set-vars face
 		face/output: clear head face/output
@@ -206,7 +231,7 @@ ctx-list: context [
 			insert/only tail face/output make block! length? dadis*
 			foreach col dadis* [
 				set/any 'val either block? row [pick row col][row]
-				insert tail last face/output
+				insert/only tail last face/output
 					case [
 						not value? 'val [
 							copy ""
