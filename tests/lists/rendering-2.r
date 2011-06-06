@@ -3,7 +3,7 @@ REBOL [
 	Short: "Rendering Test"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2011 - HMK Design"
-	Filename: %filtering.r
+	Filename: %rendering-2.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable

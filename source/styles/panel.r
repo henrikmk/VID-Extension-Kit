@@ -285,6 +285,21 @@ stylize/master [
 	; PANEL with visible frame
 	FRAME: PANEL; 100x100 ; see vid-styles.r for style
 
+	; Oriented Frames
+	LEFT-FRAME:				FRAME spring [right] align [left] fill 0x1
+	LEFT-TOP-FRAME:			FRAME spring [right bottom] align [left top]
+	LEFT-BOTTOM-FRAME:		FRAME spring [right top] align [left bottom]
+	RIGHT-FRAME:			FRAME spring [left] align [right] fill 0x1
+	RIGHT-TOP-FRAME:		FRAME spring [left bottom] align [right top]
+	RIGHT-BOTTOM-FRAME:		FRAME spring [left top] align [right bottom]
+	BOTTOM-FRAME:			FRAME spring [top] align [bottom] fill 1x0
+	TOP-FRAME:				FRAME spring [bottom] align [top] fill 1x0
+	CENTER-FRAME:			FRAME spring [left right bottom top] align [center]
+	CENTER-TOP-FRAME:		FRAME spring [left right bottom] align [left right top]
+	CENTER-BOTTOM-FRAME:	FRAME spring [left right top] align [left right bottom]
+	CENTER-LEFT-FRAME:		FRAME spring [right bottom top] align [left top bottom]
+	CENTER-RIGHT-FRAME:		FRAME spring [left bottom top] align [right top bottom]
+
 	; SCROLL-PANEL with a FRAME style frame
 	SCROLL-FRAME: SCROLL-PANEL
 
@@ -338,8 +353,8 @@ stylize/master [
 		panes: none				; word/pane block set
 		;-- Adds a single tab and its pane to the tab panel
 		add-tab: func [face data] [
-			face/tab-selector/add-item face/tab-selector copy/part data 3 ; data is word/string/tuple/content set
-			face/pane/1/add-pane face/pane/1 data/1 data/4
+			face/tab-selector/add-item face/tab-selector copy/part data 2 ; data is word/string/tuple/content set
+			face/pane/1/add-pane face/pane/1 data/1 data/3
 			; new size? I'm not sure that's a good idea
 			; select new tab here? not sure
 		]

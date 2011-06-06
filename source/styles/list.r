@@ -389,21 +389,27 @@ stylize/master [
 				]
 				face/data: data
 				ctx-list/set-filtered face
+				act-face face none 'on-unselect
 			]
 			; clears the face data block
 			clear-face*: func [face] [
 				clear face/selected
 				clear face/data
 				ctx-list/set-filtered face
+				act-face face none 'on-unselect
 			]
 			; selects rows in the face
 			select-face*: func [face values] [
 				clear face/selected
-				if empty? face/data-sorted [exit]
 				case [
+					;-- Select Nothing
+					empty? face/data-sorted [
+						act-face face none 'on-unselect
+					]
 					;-- Select Range
 					any-block? :values [
 						insert face/selected unique intersect values face/data-sorted
+						act-face face none 'on-select
 					]
 					;-- Select by Function
 					any-function? :values [
@@ -411,20 +417,24 @@ stylize/master [
 						foreach id face/data-sorted [
 							if values pick face/data id [insert tail face/selected id]
 						]
+						act-face face none either empty? face/selected ['on-unselect]['on-select]
 					]
 					;-- Select First
 					'first = :values [
 						insert clear face/selected first face/data-sorted
 						follow face 1
+						act-face face none 'on-select
 					]
 					;-- Select Last
 					'last = :values [
 						insert clear face/selected last face/data-sorted
 						follow face length? face/data-sorted
+						act-face face none 'on-select
 					]
 					;-- Select All
 					true = :values [
 						insert face/selected face/data-sorted
+						act-face face none 'on-select
 					]
 				]
 			]
@@ -433,6 +443,7 @@ stylize/master [
 				clear face/selected
 				face/filter-func: :value
 				ctx-list/set-filtered face
+				act-face face none 'on-unselect
 			]
 			; perform edits on the list, when the list is object based
 			edit-face*: func [face op value pos /local j] [
@@ -558,13 +569,20 @@ stylize/master [
 				out: head output
 				dir: pick [1 -1] event/key = 'down
 				if event/control [dir: dir * list-size face]
-				if empty? out [face/over: none clear face/selected return false]
+				if empty? out [
+					face/over: none
+					clear face/selected
+					act-face face none 'on-unselect
+					return false
+				]
 				face/over: either face/over [0x1 * dir + face/over][1x1]
 				face/over: min max 1x1 face/over to pair! length? out
 				follow face face/over/y
+				act-face face none 'on-select
 			]
 			if find [#" " #"^M"] event/key [
 				append clear face/selected face/over/y
+				act-face face none 'on-select
 			]
 		]
 	]
@@ -800,6 +818,8 @@ stylize/master [
 				;-- Setup Scroller
 				insert-actor-func face 'on-align get in access 'set-scroller
 				insert-actor-func face 'on-resize get in access 'set-scroller
+				;-- Actions
+				;if empty? face/selected [act-face face none 'on-unselect]
 			]
 			select-face*: func [face values] [
 				select-face/no-show face/list :values

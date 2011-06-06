@@ -153,7 +153,7 @@ stylize/master [
 		size: 24x24
 		feel: svvf/mutex
 		surface: 'check
-		access: ctx-access/data
+		access: ctx-access/data-state
 		states: [off on]
 		access: make access ctx-access/selector-nav
 		append init [if none? data [data: false] text: none]
@@ -162,7 +162,7 @@ stylize/master [
 	CHECK-MARK: CHECK
 
 	CHECK-LINE: BUTTON middle with [
-		feel: svvf/toggle
+		feel: svvf/mutex
 		access: ctx-access/data-state
 		states: [off on]
 		surface: 'check-line
@@ -182,8 +182,8 @@ stylize/master [
 
 	; the radio could be the tri-state radio button, but we won't deal with that right now
 	RADIO: CHECK with [
-		feel: svvf/mutex
 		surface: 'radio
+		access: ctx-access/data-state
 		virgin: true
 		related: 'default ; radios are related, unless OF is used
 		saved-area: true

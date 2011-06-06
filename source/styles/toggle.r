@@ -25,14 +25,25 @@ stylize/master [
 	; Standard TOGGLE
 	TOGGLE: BUTTON ctx-colors/colors/action-color with [
 		text: "Toggle"
-		feel: svvf/toggle
+		; this does not reset related as it should
+		; it means that svvf/toggle and svvf/mutex must be unified
+		; the problem is that when mutex is used, it still toggles, which it should not do
+		; the toggle should always be a mutex, so that it can detect selections
+		; but when selecting, it does not work properly
+		; when toggle is related, virgin must be true
+		feel: svvf/mutex; svvf/toggle
 		surface: 'toggle
 		states: [off on]
 		access: ctx-access/data-state
+		append init [
+			if related [virgin: true]
+			if none? data [data: false]
+		]
 	]
 
 	; Tab selector button
 	TAB-BUTTON: TOGGLE with [
+		color: none
 		text: "Tab"
 		feel: svvf/mutex
 		virgin: true

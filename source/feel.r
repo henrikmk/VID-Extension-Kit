@@ -126,7 +126,7 @@ svvf: system/view/vid/vid-feel: context [
 			show face
 		]
 	]
-	
+
 	indicator: make sensor [
 		redraw: func [face act pos][
 			if all [not svv/resizing? act = 'draw] [
@@ -142,22 +142,25 @@ svvf: system/view/vid/vid-feel: context [
 			show face
 		]
 	]
-	
-	toggle: make hot [
-		engage: func [face action event] [
-			if releasing? face action [face/data: not face/data]
-			set-face-state face action
-			show face
-		]
-	]
 
-	; Used in check, radio groups and selectors
-	mutex: make toggle [
+	;toggle: make hot [
+	;	engage: func [face action event] [
+	;		if releasing? face action [face/data: not face/data]
+	;		set-face-state face action
+	;		show face
+	;	]
+	;]
+
+	mutex: make hot [
 		; mutual exclusion, if there is a relation
 		engage: func [face action event][
 			if releasing? face action [
-				face/data: true
-				reset-related-faces face
+				either face/related [
+					face/data: true
+					reset-related-faces face
+				][
+					face/data: not face/data
+				]
 			]
 			set-face-state face action
 			show face
@@ -1337,15 +1340,13 @@ ctx-access: context [
 						make block! []
 					]
 			]
-			use [b s t w] [
-				t: none
+			use [b s w] [
 				parse face/setup [
 					any [
 						set w word!
 						set s string!
-						opt [set t tuple!]
 						[set b block! | set b word! (b: get b)] (
-							repend tabs [w s t]
+							repend tabs [w s]
 							append/only append panes w b
 						)
 					]

@@ -1,9 +1,9 @@
 REBOL [
-	Title: "SUB-FACE Test"
-	Short: "SUB-FACE Test"
+	Title: "Actors Test"
+	Short: "Actors Test"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2011 - HMK Design"
-	Filename: %sub-face.r
+	Filename: %actors.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -15,7 +15,7 @@ REBOL [
 		Use at your own risk.
 	}
 	Purpose: {
-		Test SUB-FACE in DATA-LIST.
+		Test various actors for DATA-LIST.
 	}
 	History: []
 	Keywords: []

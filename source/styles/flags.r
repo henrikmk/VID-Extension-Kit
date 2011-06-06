@@ -134,7 +134,7 @@ RADIO-LINE				[tabbed action flags input radio font changes] ; radio instead of 
 LED						[input]
 ARROW					[action]
 TAB-BUTTON				[tabbed action toggle]
-TOGGLE					[tabbed action toggle changes]
+TOGGLE					[tabbed action toggle changes input]
 ;MENU-BUTTON				[toggle action]
 ;STATE					[tabbed action toggle changes]
 ;ROTARY					[tabbed action input changes]

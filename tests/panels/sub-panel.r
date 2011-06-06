@@ -1,9 +1,9 @@
 REBOL [
-	Title: "Rendering Test"
-	Short: "Rendering Test"
+	Title: "Sub-Panel Test"
+	Short: "Sub-Panel Test"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2011 - HMK Design"
-	Filename: %rendering.r
+	Filename: %sub-panel.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -25,19 +25,21 @@ do %../../build/include.r
 
 clear ctx-vid-debug/debug
 
-list-data: []
-loop 100 [append/only list-data array/initial 4 does [random 100]]
+panels: [
+	a [button]
+	b [field]
+	c [data-list fill 1x1]
+]
+
+panel-words: extract panels 2
 
 view make-window [
-	h3 "Rendering Test"
+	h3 "Sub-Panels"
 	bar
-	l-data: data-list data list-data setup [
-		render [
-			switch cell/pos/x [
-				1 [cell/color: random 255.255.255]
-				2 [cell/color: white cell/font/style: if all [cell/data 50 < cell/data] ['bold]]
-				3 [cell/color: white * (cell/pos/y / length? face/data)]
-			]
-		]
-	]
+	across
+	d: data-list fill 0x1 spring [right] data panel-words setup [input [panels]]
+		on-click [set-face p value/1]
+	balancer
+	p: frame 300x300 setup panels
+	do [select-face d 1]
 ]

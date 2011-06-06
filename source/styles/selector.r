@@ -228,6 +228,7 @@ stylize/master [
 					;-- Using WIN-OFFSET? here, because the parent face may be scrolled
 					add win-offset? face as-pair 0 line-height - (line-height * idx)
 				; [!] - set base tab face to menu-face, but this happens inside set-menu-face
+				svvf/set-face-state face none
 			]
 		]
 		; need a common resize face here
@@ -371,15 +372,14 @@ stylize/master [
 	; Tab buttons for panel selection
 	TAB-SELECTOR: SELECTOR with [
 		color: none
-		setup: [choice1 "Choice 1" 160.128.128 choice2 "Choice 2" 128.160.128 choice3 "Choice 3" 128.128.160]
+		setup: [choice1 "Choice 1" choice2 "Choice 2" choice3 "Choice 3"]
 		do-setup: func [face input-value /local i][
 			i: 0
 			face/emit [across space 0]
-			foreach [pane text color] input-value [
+			foreach [pane text] input-value [
 				i: i + 1
-				; does not perform selection properly
 				face/emit compose/deep [
-				 	tab-button (text) (any [color ctx-colors/colors/menu-color]) of 'selection [
+				 	tab-button (text) of 'selection [
 						set-face/no-show face/parent-face (to-lit-word pane)
 						do-face face/parent-face none
 					] with [
