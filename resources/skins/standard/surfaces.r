@@ -26,7 +26,24 @@ form-text: text [
 		box inner/1 inner/5
 	]
 ]
-frame: base [
+edge: base [
+	colors [
+		background: any [color 200.200.200]
+		shine: background + 40
+		shadow: background - 60
+	]
+	template [
+		anti-alias off
+		pen none
+		fill-pen colors/shine
+		polygon outer/1 outer/3 inner/3 inner/7 outer/7 outer/1
+		fill-pen colors/shadow
+		polygon outer/3 outer/5 outer/7 inner/7 inner/3 outer/3
+		fill-pen colors/background
+		box inner/1 inner/5 1
+	]
+]
+frame: edge [
 	colors state [
 		released away drag-away [
 			background: any [color 200.200.200]
@@ -48,16 +65,6 @@ frame: base [
 			shine: background + 20
 			shadow: background - 30
 		]
-	]
-	template [
-		anti-alias off
-		pen none
-		fill-pen colors/shine
-		polygon outer/1 outer/3 inner/3 inner/7 outer/7 outer/1
-		fill-pen colors/shadow
-		polygon outer/3 outer/5 outer/7 inner/7 inner/3 outer/3
-		fill-pen colors/background
-		box inner/1 inner/5 1
 	]
 	font state [
 		released away drag-away [color: black]

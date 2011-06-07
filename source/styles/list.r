@@ -271,7 +271,7 @@ stylize/master [
 			act-face self none 'on-select
 		]
 		;-- Cell selection function for keyboard. FACE is the list in focus.
-		key-select-func: func [face event /local old out s step] [
+		key-select-func: func [face event /local dir keys old out s step] [
 			case [
 				#"^A" = event/key [
 					select-face/no-show face not event/shift
@@ -282,42 +282,42 @@ stylize/master [
 				#"^/" = event/key [
 					act-face face none 'on-escape
 				]
-				find [up down] event/key [
-					old: copy selected
-					out: head output
+				keys: find [up down] event/key [
+					old: copy face/selected
+					out: head face/output
 					dir: pick [1 -1] event/key = 'down
 					if event/control [dir: dir * list-size face]
-					if empty? out [clear selected return false]
-					either empty? selected [
-						append selected pick face/data-sorted start: end: 1
+					if empty? out [clear face/selected return false]
+					either empty? face/selected [
+						append face/selected pick face/data-sorted face/start: face/end: 1
 					][
 						case [
 							all [select-mode <> 'mutex event/shift] [
-								step: pick [1 -1] start < end
-								for i start end step [remove find selected pick face/data-sorted i]
-								step: pick [1 -1] start < (end: end + dir)
-								end: max 1 min length? out end
-								for i start end step [insert tail selected pick face/data-sorted i]
+								step: pick [1 -1] face/start < face/end
+								for i face/start face/end step [remove find face/selected pick face/data-sorted i]
+								step: pick [1 -1] face/start < (face/end: face/end + dir)
+								face/end: max 1 min length? out face/end
+								for i face/start face/end step [insert tail face/selected pick face/data-sorted i]
 							]
 							true [
-								either start [
-									append clear selected pick face/data-sorted start: end + dir
+								either face/start [
+									append clear face/selected pick face/data-sorted face/start: face/end + dir
 								][
-									start: 1
+									face/start: 1
 								]
-								start: end: max 1 min length? out start
-								selected/1: pick face/data-sorted start
+								face/start: face/end: max 1 min length? out face/start
+								face/selected/1: pick face/data-sorted face/start
 							]
 						]
 					]
-					follow face end
+					follow face face/end
 				]
 			]
-			sel: copy selected
-			selected: head insert head clear selected unique sel
+			sel: copy face/selected
+			face/selected: head insert head clear face/selected unique sel
 			if sel <> old [
 				do-face self get-face face
-				act-face face none 'on-select
+				if keys [act-face face none 'on-select]
 			]
 		]
 		;-- Accessor functions
@@ -437,6 +437,8 @@ stylize/master [
 						act-face face none 'on-select
 					]
 				]
+				face/start: face/selected/1
+				face/end: all [not empty? face/selected last face/selected]
 			]
 			; performs filtering of rows in the list
 			query-face*: func [face value] [

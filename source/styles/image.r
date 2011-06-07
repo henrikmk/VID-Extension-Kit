@@ -54,6 +54,7 @@ stylize/master [
 	]
 
 	BACKDROP: IMAGE with [
+		access: none
 		doc: [info: "image scaled to fill pane" pair: block: none]; fill 1x1 ; [ ] - need an origin 0x0 here
 		;init: append copy init [size: pane-size]
 	]

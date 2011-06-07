@@ -63,7 +63,8 @@ stylize/master [
 		; need to find a way to use add-pane outside of init, as face/styles is not available there
 		add-pane: func [[catch] face word pane /local out] [
 			if error? set/any 'err try [
-				out: either face/styles [layout/styles/tight pane copy face/styles][layout/tight pane] ; face/styles only works if add-pane is used during init
+				; face/styles only works if add-pane is used during init
+				out: either face/styles [layout/styles/tight pane copy face/styles][layout/tight pane]
 				out/color:			none
 				out/spring:			face/spring
 				out/align:			face/align

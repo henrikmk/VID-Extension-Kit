@@ -29,9 +29,9 @@ view make-window [
 	h3 "Panel"
 	bar
 	frame [
-		top-panel [button button button]
-		left-panel [button button button]
-		right-panel [button button button]
-		bottom-panel [button button button]
+		top-frame [button button button]
+		left-frame [button button button]
+		right-frame [button button button]
+		bottom-frame [button button button]
 	]
 ]
