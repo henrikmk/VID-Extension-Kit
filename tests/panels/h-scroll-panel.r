@@ -1,9 +1,9 @@
 REBOL [
-	Title: "Scroll Panel Test"
-	Short: "Scroll Panel Test"
+	Title: "Horizontal Scroll Panel Test"
+	Short: "Horizontal Scroll Panel Test"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2011 - HMK Design"
-	Filename: %scroll-panel.r
+	Filename: %h-scroll-panel.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -15,7 +15,7 @@ REBOL [
 		Use at your own risk.
 	}
 	Purpose: {
-		Test basic SCROLL-PANEL.
+		Test basic H-SCROLL-PANEL.
 	}
 	History: []
 	Keywords: []
@@ -32,10 +32,10 @@ pane: [
 ]
 
 view make-window [
-	h3 "Scroll Panel"
+	h3 "Horizontal Scroll Panel"
 	bar
 	panel [
 		across
-		s: scroll-panel 300x300 pane
+		s: h-scroll-panel 300x300 pane
 	]
 ]

@@ -1101,7 +1101,7 @@ ctx-access: context [
 	image: context [
 		set-face*: func [face value][
 			if any [image? value none? value][
-				; [s!] - this will be a problem with surface overriding this
+				; [s] - this will be a problem with surface overriding this
 				face/draw-body/draw-image: value
 				set-draw-body face
 			]

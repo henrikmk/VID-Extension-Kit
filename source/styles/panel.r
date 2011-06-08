@@ -65,6 +65,7 @@ stylize/master [
 			if error? set/any 'err try [
 				; face/styles only works if add-pane is used during init
 				out: either face/styles [layout/styles/tight pane copy face/styles][layout/tight pane]
+				; [!] - this does not preserve pane-fill and pane-spring
 				out/color:			none
 				out/spring:			face/spring
 				out/align:			face/align
@@ -113,7 +114,7 @@ stylize/master [
 				]
 			]
 			;-- Append origin
-			pane/real-size: pane/size: pane/size + faces/1/origin
+			pane/real-size: pane/size ;: pane/size + faces/1/origin ; origin is a problem
 		]
 		init: [
 			if all [
@@ -127,6 +128,8 @@ stylize/master [
 			action: none
 			word: any [default first setup]
 			access/set-panel-pane self word
+			; does not redrag scroller here
+			; not until resize
 		]
 	]
 
@@ -213,21 +216,57 @@ stylize/master [
 			]
 			setup-face*: func [face value] [
 				face/panel-face/access/setup-face* face/panel-face value
-				face/adjust-scrollers face
+				face/size: any [
+					face/size							; user sets size
+					add add add face/panel-face/size	; panel content sets size
+						any [all [face/v-scroller as-pair face/v-scroller/size/x 0] 0]
+						any [all [face/h-scroller as-pair 0 face/h-scroller/size/y] 0]
+						(2 * edge-size face)
+				]
+				face/pane: face/pane/pane
 			]
-			scroll-face*: func [face x y /local content sz ssz] [
+			scroll-face*: func [face x y /local content dsz old sz ssz x-value y-value update wheel] [
 				content: face/panel-face/pane
 				sz: face-size face/panel-face
 				ssz: content/size
+				dsz: ssz - sz
+				old: content/offset
 				if x [ ; scroll horizontally
-					content/offset/x: min 0 negate ssz/x - sz/x * x
+					x-value:
+						either any [x > 1 x < -1] [
+							; Scroll Wheel
+							wheel: min 1 (abs content/offset/x / dsz/x) + min 0.1 max -0.1 x
+						][
+							; Scroll Bar
+							x
+						]
+					content/offset/x: min 0 negate dsz/x * x-value
 				]
 				if y [ ; scroll vertically
-					content/offset/y: min 0 negate ssz/y - sz/y * y
+					y-value:
+						either any [y > 1 y < -1] [
+							; Scroll Wheel
+							wheel: min 1 (abs content/offset/y / dsz/y) + min 0.1 max -0.1 y
+						][
+							; Scroll Bar
+							y
+						]
+					content/offset/y: min 0 negate dsz/y * y-value
 				]
 				if tab-face: get in root-face face 'tab-face [ ; should not be necessary as tab-face should always be there
 					set-tab-face tab-face
 				]
+				; Adjust scroll bars if wheel was used
+				if all [update: not-equal? old content/offset wheel] [
+					if face/h-scroller [
+						set-face face/h-scroller x-value
+					]
+					if face/v-scroller [
+						set-face face/v-scroller y-value
+					]
+					act-face face event 'on-scroll
+				]
+				update
 			]
 		]
 		init: [
@@ -242,20 +281,14 @@ stylize/master [
 			]
 			set-parent-faces self
 			panel-face/size: none ; do not determine size
-			setup-face panel-face setup
-			size: any [
-				size							; user sets size
-				add add add panel-face/size		; panel content sets size
-					any [all [v-scroller as-pair v-scroller/size/x 0] 0]
-					any [all [h-scroller as-pair 0 h-scroller/size/y] 0]
-					(2 * edge-size self)
-			]
-			pane: pane/pane
+			access/setup-face* self setup
 			action: none
 			insert-actor-func self 'on-resize :resize-pane
+			insert-actor-func self 'on-align :resize-pane
 			word: any [default all [setup first setup]]
 			panel-face/access/set-panel-pane panel-face word
 			panel-face/pane/fill: pane-fill
+			panel-face/pane/spring: pane-spring
 		]
 	]
 

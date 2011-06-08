@@ -27,7 +27,7 @@ stylize/master [
 		size: color: image: none
 		surface: none
 		feel: svvf/sensor
-		access: ctx-access/image
+		access: ctx-access/image ; crashes when clicked
 		effect: [fit]
 ;		edge: [size: 0x0 color: black]
 ;		font: [size: 16 align: 'center valign: 'middle style: 'bold shadow: 2x2]

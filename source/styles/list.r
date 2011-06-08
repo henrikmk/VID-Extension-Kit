@@ -276,10 +276,10 @@ stylize/master [
 				#"^A" = event/key [
 					select-face/no-show face not event/shift
 				]
-				#"^/" = event/key [
+				#"^M" = event/key [
 					act-face face none 'on-return
 				]
-				#"^/" = event/key [
+				#"^[" = event/key [
 					act-face face none 'on-escape
 				]
 				keys: find [up down] event/key [
@@ -813,7 +813,7 @@ stylize/master [
 				if get in face 'render [face/list/render-func: func [face cell] get in face 'render]
 				;-- Map actors from DATA-LIST to internal components
 				foreach actor first face/actors [
-					if find [on-click on-key on-select on-unselect on-double-click] actor [
+					if find [on-click on-key on-select on-unselect on-return on-escape on-double-click] actor [
 						face/list/actors/:actor: get in face/actors actor
 					]
 				]

@@ -64,7 +64,7 @@ ctx-text: [
 
 	set 'focus func [
 		"Focuses key events on a specific face."
-		face 
+		face
 		/no-show
 		/local tmp-face
 	][

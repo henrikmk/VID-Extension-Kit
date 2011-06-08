@@ -412,9 +412,10 @@ hide-popup: func [/timeout /local focal-win-face win-face] bind [
 	if all [focal-win-face = system/view/screen-face not empty? focal-win-face/pane] [
 		focal-win-face: focal-win-face/pane/1
 	]
-	describe-face fff: focal-win-face
-	if all [focal-win-face <> system/view/screen-face focal-win-face/focal-face] [
+	either all [focal-win-face <> system/view/screen-face focal-win-face/focal-face] [
 		focus/keep focal-win-face/focal-face
+	][
+		unfocus
 	]
 	show win-face
 ] system/view
