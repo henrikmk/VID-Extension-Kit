@@ -219,7 +219,7 @@ stylize/master [
 				face/choice-face/pane/1/selected: to-block idx
 				face/choice-face/pane/1/over: as-pair 1 idx
 				ctx-resize/align-contents face/choice-face none
- 				line-height: face/choice-face/pane/1/sub-face/size/y
+				line-height: face/choice-face/pane/1/sub-face/size/y
 				edge: edge-size get in root-face face 'menu-face
 				set-menu-face
 					face

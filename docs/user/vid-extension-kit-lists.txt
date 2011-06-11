@@ -137,11 +137,13 @@ You can specify the width of each column in pixels with the condition that the f
 
 You can specify which column is resizable, when the list is resized when resizing the window in which it sits. The condition is that only one column is resizable, as the list resizing model follows that of the VID Extension Kit.
 
-	data-list setup [input [name age weight] widths [100 150 50] resize-column age]
+	data-list setup [input [name age weight] widths [100 150 50] resize-column 'age]
+
+If you use a plain word for <strong>age</strong> as input for resize-column, the style will try to see if the word 'age is set with a value. If not, an error is created. This counts for any keyword that requires a single value as argument.
 
 Set a selection mode, where only one row can be selected at a time:
 
-	data-list setup [input [name age weight] select-mode mutex]
+	data-list setup [input [name age weight] select-mode 'mutex]
 
 Perform adjustment of the text in a column:
 
@@ -333,13 +335,9 @@ When using MULTI or PERSISTENT, selecting multiple rows will be returned in the 
 
 ---Example
 
-	data-list with [
-		select-mode: 'mutex
-	]
-
 Using the specification dialect:
 
-	data-list setup [name age weight mutex]
+	data-list setup [select-mode 'mutex]
 
 ===Keyboard Navigation
 
