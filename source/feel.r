@@ -127,7 +127,7 @@ svvf: system/view/vid/vid-feel: context [
 		]
 	]
 
-	indicator: make sensor [
+	indicator: make face/feel [
 		redraw: func [face act pos][
 			if all [not svv/resizing? act = 'draw] [
 				set-draw-body face
@@ -136,7 +136,13 @@ svvf: system/view/vid/vid-feel: context [
 		]
 	]
 
-	hot: make indicator [
+	hot: make sensor [
+		redraw: func [face act pos][
+			if all [not svv/resizing? act = 'draw] [
+				set-draw-body face
+				act-face face none 'on-redraw
+			]
+		]
 		over: func [face action event][
 			set-face-state face pick [over away] to-logic action
 			show face

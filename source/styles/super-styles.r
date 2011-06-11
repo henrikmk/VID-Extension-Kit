@@ -147,7 +147,7 @@ LAYOUT-LISTS: COMPOUND [
 ]
 
 LAYOUT-LIST: LAYOUT-LISTS [
-	data-list 300x200 setup [input [items] select-mode mutex]
+	data-list 300x200 setup [input [items] select-mode 'mutex]
 ]
 
 LAYOUT-DIR: COMPOUND [
@@ -160,10 +160,33 @@ LAYOUT-DIR: COMPOUND [
 		set-face face/parent-face value
 		face/parent-face/set-history face/parent-face
 	] return
-	data-list 304x204 [
-		set-face face/parent-face first value
-		face/parent-face/set-history face/parent-face
-	] return
+	data-list 304x204
+		setup [names ["Directories"] select-mode 'mutex]
+		on-click [
+			set-face face/parent-face value
+			face/parent-face/set-history face/parent-face
+		]
+		on-key [
+			switch event/key [
+				left [
+					if face/parent-face/data = %/ [exit]
+					use [old] [
+						old: last split-path face/parent-face/data
+						set-face face/parent-face %../
+						face/parent-face/set-history face/parent-face
+						select-face face func [data] [data = old]
+						face/follow face face/selected/1
+					]
+				]
+				right [
+					act-face face event 'on-click
+				]
+			]
+		]
+		on-return [
+			act-face face event 'on-click
+		]
+		return
 	bottom-button "New Directory" [
 		use [val] [
 			if val: request-value/title none "New Directory Name" [
@@ -185,27 +208,38 @@ LAYOUT-DIR: COMPOUND [
 		]
 	]
 ] with [
-	crumb: file-list: history: none
-	;-- Move to the next history path
+	last-dir: next-dir: crumb: file-list: history: none
+	;-- Move to the previous history path
 	back-history: func [face] [
 		face/history: back face/history
 		set-face face first face/history
+		face/set-arrows face
 	]
-	;-- Move to the previous history path
+	;-- Move to the next history path
 	next-history: func [face] [
-		unless tail? next face/history [
-			face/history: next face/history
-			set-face face first face/history
-		]
+		face/history: next face/history
+		set-face face first face/history
+		face/set-arrows face
 	]
 	;-- Updates history path
 	set-history: func [face] [
 		; history clears anything after it, once it's set
 		face/history: back insert clear next face/history face/data
+		face/set-arrows face
+	]
+	;-- Enables/Disables history arrows
+	set-arrows: func [face] [
+		enable-face/no-show face/next-dir
+		enable-face/no-show face/last-dir
+		if head? face/history [disable-face/no-show face/last-dir]
+		if tail? next face/history [disable-face/no-show face/next-dir]
+		show face/next-dir
+		show face/last-dir
 	]
 	access: make access [
-		set-face*: func [face value] [
+		set-face*: func [face value /local old files] [
 			value: attempt [to-file value]
+			old: face/data
 			if value [
 				face/data: dirize clean-path
 					either #"/" = first value [
@@ -213,8 +247,13 @@ LAYOUT-DIR: COMPOUND [
 					][
 						join face/data value ; change to current path
 					]
-				set-face/no-show face/crumb face/data
-				set-face/no-show face/file-list remove-each file read face/data [#"/" <> last file]
+				either files: attempt [read face/data] [
+					set-face/no-show face/file-list remove-each file files [#"/" <> last file]
+					set-face/no-show face/crumb face/data
+				][
+					alert rejoin ["Cannot read path '" face/data "'."]
+					face/data: old
+				]
 			]
 		]
 		get-face*: func [face] [
@@ -368,23 +407,22 @@ LAYOUT-NOTIFY: LAYOUT-QUESTION [
 LAYOUT-ABOUT: PANEL [
 	across
 	frame 300x200 [
-		vh2 white 300 center spring [left right bottom]
-		v-scroll-panel fill 1x1 [body -1x0 fill 1x1 center]
+		vh2 white 300 center spring [left right bottom] align [left right]
+		doc fill 1x1
 	]
 ] with [
 	vh2: body: v-panel: none
 	append init [
 		header: system/script/header
 		vh2: find-style self 'vh2
-		v-panel: find-style self 'v-scroll-panel
-		body: find-style self 'body
+		doc: find-style self 'doc
 		set-face/no-show vh2 header/title
-		set-face/no-show body trim to-string reduce [
-			"Version: " header/version newline
-			"Copyright: " header/copyright newline
-			"License: " trim header/license newline
-			"Date: " header/date newline
-			"Author: " header/author/1 newline
+		set-face/no-show doc trim to-string reduce [
+			"Version: "		header/version newline
+			"Copyright: "	header/copyright newline
+			"License: "		trim header/license newline
+			"Date: "		header/date newline
+			"Author: "		header/author/1 newline
 			newline
 			trim reverse trim reverse header/purpose
 		]

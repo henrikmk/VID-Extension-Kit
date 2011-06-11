@@ -1,0 +1,51 @@
+VID Extension Kit - Panels
+
+===Introduction
+
+The VID Extension Kit supports various types of panels. All of them are derived through the PANEL style.
+
+A panel is typically a <strong>loose grouping of faces</strong> for the purpose of allowing the use of SET-FACE and GET-FACE on all the faces combined, such as for forms.
+
+Some types use a <strong>tight grouping of faces</strong>, meaning the intent is for the panel to appear as one single item in the layout, such as a date field. Those are known as <strong>compound styles</strong>.
+
+Some panels allow scrolling their contents, while others allow easy replacement of the contents or switching between multiple sub-panels of contents.
+
+---Standard Panel
+
+The standard panel is the PANEL type. A panel may contain several sub-panels in the FACE/PANELS block. This is useful for switching between different types of content in the same area, which can be done in one line of code.
+
+For example, if you connect the panel to a list, you may display a boiler plate, asking you to select an item in the list, when nothing is selected. When something is selected, the panel switches to a sub-panel with detail items from the list.
+
++++Defining Sub-Panels
+
+Multiple sub-panels are defined using SETUP:
+
+	panel setup [
+		
+	]
+
++++Switching Sub-Panels
+
+To switch to a different sub-panel, use:
+
+	set-face my-panel 'panel2
+
+As an example, you can use the states or the actors of a face to switch between panels.
+
+---Scroll Panels
+
+There are three variants of the scroll-panel: A vertically, a horizontally and a both vertically and horizontally scrolling panel.
+
+Inside each type of scroll panel, is embedded a standard PANEL.
+
+---Tab Panel
+
+The tab panel consists of a row of tabs and a standard PANEL below it.
+
++++Defining a Tab Panel
+
+
+
+---Compound Styles
+
+Compound styles are <strong>tightly grouped faces</strong> inside a panel.

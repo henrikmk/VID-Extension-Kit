@@ -309,6 +309,8 @@ stylize/master [
 						; happens before ON-CLICK
 						set-face face/parent-face/pop-face pick face/parent-face/pop-face/setup 2 * face/selected/1 - 1
 						do-face face/parent-face/pop-face none
+						act-face face/parent-face/pop-face none 'on-click
+						act-face face/parent-face/pop-face none 'on-select
 					]
 					with [
 						render-func: func [face cell] [

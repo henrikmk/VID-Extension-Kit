@@ -64,8 +64,6 @@ foreach file read %../resources/skins/ [
 ]
 
 load-skin 'standard
-;probe ctx-surface/surfaces
-;halt
 
 ;-- Styles
 foreach file [
@@ -81,6 +79,7 @@ foreach file [
 	panel				; panel styles
 	dialog-buttons		; buttons for dialogs
 	field				; field and area styles
+	doc					; document style
 	label				; labelling styles
 	construct			; construct style
 	selector			; selectors and multiselectors

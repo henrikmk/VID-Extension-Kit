@@ -28,10 +28,10 @@ skins: []
 
 ; standard skin object
 skin-object: make object! [
-	surfaces:
-	images:
 	colors:
+	images:
 	materials:
+	surfaces:
 		none
 ]
 
@@ -52,24 +52,46 @@ set 'load-skin func [name] [
 	make-skin select skins name
 ]
 
-; reads a skin from disk and appends it to the skin stock. Input is the skin directory.
-set 'read-skin func [file /local item skin p paren-rule] [
+; reads a skin from disk or memory and appends it to the skin stock. Input is the skin directory.
+set 'read-skin func [file [word! file!] /local item skin p paren-rule word] [
 	skin: make skin-object []
+	; Retrieve colors, images, materials and surfaces from files
 	foreach type [colors images materials surfaces] [
-		if exists? item: to-file rejoin [dirize file join type '.r] [
-			set in skin type load item
+		case [
+			; Attempt to retrieve from memory
+			word? file [
+				word: to-word join type '.r
+				set in skin type load as-string get word
+				unset word
+			]
+			; Then attempt to load from disk
+			if exists? item: to-file rejoin [dirize file join type '.r] [
+				set in skin type load item
+			]
 		]
 		; Process parenthesis blocks, except for template and draw
 		switch type [
 			surfaces [
 				; [!] - this executes code in the skin, which is not secure
 				; so the dialect should be extended with specific image loading
-				paren-rule: [any [p: paren! (change p do p/1) | ['template | 'draw] opt 'state skip | into paren-rule | skip]]
+				paren-rule: [
+					any [
+						p: paren! (change p do p/1)
+						| ['template | 'draw] opt 'state skip
+						| into paren-rule
+						| skip
+					]
+				]
 				parse skin/surfaces paren-rule
 			]
 		]
 	]
-	append skins to-word trim/with form last split-path file "/"
+	; Append loaded skin to skin stock
+	append skins either word? file [
+		file
+	][
+		to-word trim/with form last split-path file "/"
+	]
 	append skins skin
 ]
 

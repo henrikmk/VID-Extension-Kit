@@ -47,6 +47,7 @@ add-binary: func [file /local data fl] [
 
 append code [---: func [s][]]
 
+;-- Image Stock
 foreach image read %../resources/images/ [
 	unless #"." = first image [
 		add-binary join %../resources/images/ image
@@ -85,6 +86,18 @@ foreach file [
 	]
 ]
 
+;-- Skin Stock
+foreach file read %../resources/skins/standard/ [
+	unless #"." = first file [
+		add-binary join %../resources/skins/standard/ file
+	]
+]
+
+append code [
+	read-skin 'standard
+	load-skin 'standard
+]
+
 ;-- Styles
 foreach file [
 	;-- Styles
@@ -99,6 +112,7 @@ foreach file [
 	panel				; panel styles
 	dialog-buttons		; buttons for dialogs
 	field				; field and area styles
+	doc					; document style
 	label				; labelling styles
 	construct			; construct style
 	selector			; selectors and multiselectors
@@ -125,11 +139,6 @@ foreach file [
 		add-file to-file join %../source/styles/ join file '.r
 	]
 ]
-
-;-- Skins
-; need to load all skins as static files. They don't take up much memory.
-; we have a SKINS block for this
-
 
 make-dir/deep %../release/
 

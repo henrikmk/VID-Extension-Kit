@@ -46,10 +46,10 @@ view make-window [
 			]
 		]
 		button "Setup 2" [
-			setup-face l-data [input [a b c] select-mode mutex]
+			setup-face l-data [input [a b c] select-mode 'mutex]
 		]
 		button "Setup 3" [
-			setup-face l-data [input [a b c d] output [a] select-mode persistent]
+			setup-face l-data [input [a b c d] output [a] select-mode 'persistent]
 		]
 		button "No Setup" [
 			setup-face l-data none

@@ -2,14 +2,14 @@ REBOL [
 	Title: "Style Browser"
 	Short: "Style Browser"
 	Author: ["Henrik Mikael Kristensen"]
-	Copyright: "2009, 2010 - HMK Design"
+	Copyright: "2009 - 2011 - HMK Design"
 	Filename: %style-browser.r
-	Version: 0.0.1
+	Version: 0.0.2
 	Type: 'script
 	Maturity: 'unstable
 	Release: 'internal
 	Created: 02-Jul-2009
-	Date: 02-Jul-2009
+	Date: 11-Jun-2011
 	License: {
 		BSD (www.opensource.org/licenses/bsd-license.php)
 		Use at your own risk.
@@ -121,13 +121,17 @@ view main: make-window [
 	across
 	a1: left-panel fill 0x1 [
 		across
-		l-styles: data-list 250x0 fill 0x1 with [
-			select-mode: 'mutex
-			header-face: [
+		l-styles: data-list 250x0 data alpha-style-list fill 0x1 setup [
+			select-mode 'mutex
+			header-face [
 				choice fill 1x0
 					spring [bottom]
-					setup [alphabetic "Styles by alphabetic" creation "Styles by creation" tree "Styles by tree"]
-					[
+					setup [
+						alphabetic "Styles by alphabetic"
+						creation "Styles by creation"
+						tree "Styles by tree"
+					]
+					on-select [
 						use [current-list old idx] [
 							old: get-face l-styles
 
@@ -139,19 +143,16 @@ view main: make-window [
 								tree tree-style-list
 							] get-face face
 
-							; set up the sub-face for each type
-
 							if old [
-								l-styles/list/select-row l-styles/list index? find current-list old
-								l-styles/follow l-styles first l-styles/list/selected
+								select-face/no-show l-styles func [row] [row = old]
+								l-styles/follow l-styles first l-styles/selected
 							]
 							show l-styles
 						]
 					]
 			]
-			sub-face: list-types/alphabetic ; initialize using the choice selector in header-face instead
-			data: :alpha-style-list ; initialize using the choice selector in header-face instead
-		] [
+			sub-face list-types/alphabetic ; initialize using the choice selector in header-face instead
+		] on-select [
 			style-word: to-word get-face face
 			style: select vid-styles style-word
 			set-face/no-show p-details 'selection

@@ -67,9 +67,9 @@ stylize/master [
 				out: either face/styles [layout/styles/tight pane copy face/styles][layout/tight pane]
 				; [!] - this does not preserve pane-fill and pane-spring
 				out/color:			none
-				out/spring:			face/spring
-				out/align:			face/align
-				out/fill:			face/fill
+				out/spring:			none;face/spring
+				out/align:			none;face/align
+				out/fill:			1x1;face/fill
 				out/parent-face:	face
 				out/style:			'pane
 				set-parent-faces/parent out face

@@ -121,8 +121,6 @@ ctx-resize: context [
 		if *mins [*fs: max *mins *fs]                        ; min-size
 		if *maxs [*fs: min *maxs *fs]                        ; max-size
 		if zero? *fa [*fa: aspect *fs]                       ; aspect ratio
-		; if you have a right aligned item, the item will move
-		; actually any item with springs will move
 		either center [
 			*fo: *fps - *mtl - *mbr - *fs / 2 + *mtl         ; Move to center
 		] [
@@ -142,7 +140,7 @@ ctx-resize: context [
 			]
 		]
 		diff: *fs - diff
-		; Resize contents (big change)
+		; Resize contents if the fill causes a size change
 		if diff <> 0x0 [
 			set-faces face
 			resize-contents face diff
