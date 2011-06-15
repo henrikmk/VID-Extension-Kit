@@ -213,7 +213,7 @@ stylize/master [
 		feel: svvf/choice
 		; opens and positions the menu list
 		open-choice-face: func [face /local edge idx line-height] [
-			if all [not face/choice-face? block? face/setup not empty? face/setup] [
+			if all [face <> get-opener-face face block? face/setup not empty? face/setup] [
 				set-face face/choice-face/pane/1 extract/index face/setup 2 2
 				idx: divide 1 + index? face/data 2
 				face/choice-face/pane/1/selected: to-block idx
@@ -221,13 +221,15 @@ stylize/master [
 				ctx-resize/align-contents face/choice-face none
 				line-height: face/choice-face/pane/1/sub-face/size/y
 				edge: edge-size get in root-face face 'menu-face
-				set-menu-face
+				; should actually focus the menu face here
+				; but the focus ring is not set around the menu
+				show-menu-face/size/offset
 					face
 					face/choice-face
 					as-pair face/size/x add divide line-height * length? head face/data 2 edge/y * 2
 					;-- Using WIN-OFFSET? here, because the parent face may be scrolled
 					add win-offset? face as-pair 0 line-height - (line-height * idx)
-				; [!] - set base tab face to menu-face, but this happens inside set-menu-face
+				; [!] - set base tab face to menu-face, but this happens inside show-menu-face
 				svvf/set-face-state face none
 			]
 		]
@@ -261,22 +263,23 @@ stylize/master [
 						open-choice-face face
 					]
 					#"^[" [ ; escape
-						
+						; close choice face
+						act-face face/choice-face/pane/1 event 'on-click
 					]
 				]
 				event
 			]
 		]
 		choice-face: none ; cache of choice layout
-		choice-face?: false ; whether the choice face is open
 		init: [
 			; the choice face should appear in a separate layout
 			choice-face: layout/tight [
 				space 0 origin 0 caret-list 100x100 fill 1x1
+					; this does not work as it's never focused
 					on-key [ ; key-face is done before this
-						use [fp pop-face] [
+						use [fp opener-face] [
 							fp: face/parent-face ; is this choice-face?
-							pop-face: fp/pop-face
+							opener-face: fp/opener-face
 							case [
 								find [up down] event/key [
 									; [ ] - adjustment needs to adhere to current selection rather than it's own up/down scheme
@@ -285,32 +288,34 @@ stylize/master [
 											all [fp/offset/y < 0 event/key = 'up]
 											all [fp/offset/y + fp/size/y > fp/parent-face/size/y event/key = 'down]
 										] [
-											fp/offset/y: face/choice-face-offset face pop-face
+											fp/offset/y: face/choice-face-offset face opener-face
 										]
 									]
 								]
 								find [#"^M" #" "] event/key [ ; enter, space
-									set-face pop-face pick pop-face/setup 2 * face/selected/1 - 1
-									do-face pop-face none
-									unset-menu-face pop-face
+									set-face opener-face pick opener-face/setup 2 * face/selected/1 - 1
+									do-face opener-face none
+									hide-menu-face face
 								]
 								#"^[" = event/key [ ; escape
-									unset-menu-face pop-face
+									hide-menu-face face
 								]
 							]
 						]
 					]
 					on-click [
 						; perform this action every time the mouse is clicked
-						unset-menu-face face/parent-face/pop-face
-						face/parent-face/pop-face/choice-face?: false
+						hide-menu-face face
 					] [
 						; perform this action only when the click happens on a different entry than the current one
 						; happens before ON-CLICK
-						set-face face/parent-face/pop-face pick face/parent-face/pop-face/setup 2 * face/selected/1 - 1
-						do-face face/parent-face/pop-face none
-						act-face face/parent-face/pop-face none 'on-click
-						act-face face/parent-face/pop-face none 'on-select
+						use [opener-face] [
+							opener-face: get-opener-face face
+							set-face opener-face pick opener-face/setup 2 * face/selected/1 - 1
+							do-face opener-face none
+							act-face opener-face none 'on-click
+							act-face opener-face none 'on-select
+						]
 					]
 					with [
 						render-func: func [face cell] [
@@ -331,9 +336,9 @@ stylize/master [
 								]
 							]
 						]
-						choice-face-offset: func [face pop-face /local y-size] [
-							y-size: pop-face/size/y; - (2 * second edge-size pop-face)
-							second pop-face/offset + as-pair 0 y-size - (y-size * face/selected/1)
+						choice-face-offset: func [face opener-face /local y-size] [
+							y-size: opener-face/size/y; - (2 * second edge-size pop-face)
+							second opener-face/offset + as-pair 0 y-size - (y-size * face/selected/1)
 						]
 						select-mode: 'mutex
 						sub-face: [list-text-cell right bold 100 fill 1x0 spring [bottom]] ; does not bold and has the wrong size

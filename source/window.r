@@ -171,7 +171,7 @@ detect-func: func [face event /local cf] [
 			cf: event/face/menu-face
 			if cf/pane [
 				unless within? event/offset win-offset? cf cf/size [
-					unset-menu-face event/face
+					hide-menu-face event/face
 				]
 			]
 		]

@@ -526,6 +526,7 @@ focus-default-input: func [
 ] [
 	traverse-face face [
 		all [
+			not flag-face? face disabled
 			flag-face? face default
 			flag-face? face input
 			flag-face? face tabbed
@@ -546,6 +547,7 @@ focus-first-input: func [
 ] [
 	traverse-face face [
 		all [
+			not flag-face? face disabled
 			flag-face? face input
 			flag-face? face tabbed
 			input-face: face

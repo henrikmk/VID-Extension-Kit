@@ -1,0 +1,55 @@
+VID Extension Kit - Extra Functions
+
+===Introduction
+
+Some functions work as helpers when creating styles. These are listed in this document.
+
+===Functions
+
+---HINGE
+
+This function "hinges" one face to another by corner. This is useful, when aligning corners of faces, such as a face which opens a menu and the opened menu face. Hinging occurs only once and does not provide new resize information that would allow the hinge to be persistent.
+
+A hinge may occur at one of the four corners of each face and is described by two words in a block out of four:
+
+:left - Describes the left edge of the face
+
+:right - Describes the right edge of the face
+
+:top - Describes the top edge of the face
+
+:bottom - Describes the bottom edge of the face
+
+So, if you specify a corner as [top right], the top right corner will be used as a hinging point.
+
+When hinging the first face never moves. Only the second face is moved into the desired position.
+
+Both faces must exist in a layout and must have a size and an offset.
+
+HINGE works best, if alignment and resizing has already occurred.
+
++++Example
+
+Hinge the bottom right corner of face 1 to the top right corner of face 2
+
+	hinge face1 [bottom right] face2 [top right]
+
+---FACE-SIZE-TEXT
+
+Provides the size of a text when taking the face edge and origin into account.
+
++++Example
+
+	face-size-text my-face
+
+---FACE-SIZE-FROM-TEXT
+
+Is used to determine the horizontal or the vertical size of a face from it's text. This is useful for body text faces, that layout large amounts of text according to a specified width of a document.
+
+The direction is determined if one direction of the size of a face is -1.
+
+At this time, the maximum size that is used for calculation is 1000 pixels.
+
++++Example
+
+	face-size-from-text

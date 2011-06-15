@@ -1,9 +1,9 @@
 REBOL [
-	Title: "Toggle Test"
-	Short: "Toggle Test"
+	Title: "Check Mark Test"
+	Short: "Check Mark Test"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2010, 2011 - HMK Design"
-	Filename: %toggle.r
+	Filename: %check.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -15,7 +15,7 @@ REBOL [
 		Use at your own risk.
 	}
 	Purpose: {
-		Test of TOGGLE and its variants.
+		Test of CHECK and its variants.
 	}
 	History: []
 	Keywords: []

@@ -62,39 +62,39 @@ ctx-text: [
 
 ;-- Text focus functions:
 
-	set 'focus func [
-		"Focuses key events on a specific face."
-		face
-		/no-show
-		/local tmp-face
-	][
-		unfocus
-		any [face exit]
-		focal-face: face
-		if not string? face/text [
-			face/text: either face/text [form face/text][copy ""]
-			face/line-list: none
-		]
-		if not caret [caret: tail face/text]
-		if none? face/line-list [
-			if face/para [face/para/scroll: 0x0]
-			caret: tail face/text
-		]
-		if flag-face? face field [hilight-all face]
-		any [no-show show face]
-	]
+	;set 'focus func [
+	;	"Focuses key events on a specific face."
+	;	face
+	;	/no-show
+	;	/local tmp-face
+	;][
+	;	unfocus
+	;	any [face exit]
+	;	focal-face: face
+	;	if not string? face/text [
+	;		face/text: either face/text [form face/text][copy ""]
+	;		face/line-list: none
+	;	]
+	;	if not caret [caret: tail face/text]
+	;	if none? face/line-list [
+	;		if face/para [face/para/scroll: 0x0]
+	;		caret: tail face/text
+	;	]
+	;	if flag-face? face field [hilight-all face]
+	;	any [no-show show face]
+	;]
 
-	set 'unfocus func [
-		"Removes the current key event focus."
-		/local tmp-face
-	][
-		; (Clears related globals, even if no focal-face.)
-		tmp-face: focal-face
-		focal-face: none
-		caret: none
-		unlight-text
-		if tmp-face [show tmp-face]
-	]
+	;set 'unfocus func [
+	;	"Removes the current key event focus."
+	;	/local tmp-face
+	;][
+	;	; (Clears related globals, even if no focal-face.)
+	;	tmp-face: focal-face
+	;	focal-face: none
+	;	caret: none
+	;	unlight-text
+	;	if tmp-face [show tmp-face]
+	;]
 
 ;-- Copy and delete functions:
 

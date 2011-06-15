@@ -264,7 +264,7 @@ sort-reset: glyph [
 ]
 check-line: check [
 	; provide disabled bitmap somehow or put an alpha box over it
-	draw [image image-outer/1 draw-image]
+	draw [image image-outer/8 draw-image]
 	para [origin: 26x2]
 	font state [
 		released away drag-away [align: 'left style: none color: black]

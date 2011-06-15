@@ -44,7 +44,18 @@ The tab panel consists of a row of tabs and a standard PANEL below it.
 
 +++Defining a Tab Panel
 
+The tab panel uses a word, a name and a layout block:
 
+	view make-window [
+		tab-panel setup [
+			tab1 "Tab 1" [origin 4 text-area fill 1x1]
+			tab2 "Tab 2" [origin 4 data-list fill 1x1]
+		]
+	]
+
++++Caveats
+
+The tab panel can currently only support a number of tabs that are visible within the width of the tab panel.
 
 ---Compound Styles
 

@@ -391,7 +391,7 @@ stylize/master [
 				if object? data [
 					data: ctx-list/object-to-data data
 				]
-				face/data: data
+				face/data: any [data make block! []]
 				ctx-list/set-filtered face
 				act-face face/actor-face none 'on-unselect
 			]

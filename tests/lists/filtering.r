@@ -35,7 +35,7 @@ filter-row: func [data /local value] [
 ]
 
 view make-window [
-	h3 "Sorting Test"
+	h3 "Real-Time Filtering Test"
 	bar
 	right-panel [
 		across

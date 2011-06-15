@@ -107,3 +107,18 @@ set-image: func [face image] [
 	face/effect/draw/2: pos ; set position
 	face/effect/draw/3: face/image ; set image
 ]
+
+; hinges a face to another face, by specified hinge points
+hinge: func [face1 points1 face2 points2 /local offset] [
+	offset: 0x0
+	; Find hinge point for face 1
+	if find points1 'left	[offset/x: face1/offset/x]
+	if find points1 'right	[offset/x: face1/offset/x + face1/size/x]
+	if find points1 'top	[offset/y: face1/offset/y]
+	if find points1 'bottom	[offset/y: face1/offset/y + face1/size/y]
+	; Find offset for face 2
+	face2/offset: offset
+	if find points2 'right	[face2/offset/x: face2/offset/x - face2/size/x]
+	if find points2 'bottom	[face2/offset/y: face2/offset/y - face2/size/y]
+	face2/offset
+]

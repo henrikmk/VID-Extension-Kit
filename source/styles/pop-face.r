@@ -93,7 +93,7 @@ REBOL [
 ; if not a layout, then a single object
 
 stylize/master [
-	; this face produces an INFO and a BUTTON which when clicked reveals a layout or window
+	; this face produces an INFO and a BUTTON which when clicked reveals a layout inside the current window or a new borderless window
 	POP-FACE: FACE 200x24 spring [horizontal] with [
 		color: none
 		btn-action: [do-face face/parent-face none]
