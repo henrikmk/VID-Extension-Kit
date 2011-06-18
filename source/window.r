@@ -27,12 +27,9 @@ make-window: func [pane /options opts] [
 		if find ctx-vid-debug/debug 'face [dump-face pane]
 		return pane
 	]
-	; somehow the pane-size is wrong
 	layout/parent
 		pane
 		make
-		; this has a size 100x100, which is not usable in this manner
-		; so perhaps we need some way to use the pane-size differently
 			get-style 'resizable-window
 			[
 				color: ctx-colors/colors/window-background-color
@@ -80,19 +77,39 @@ window-open?: func [face /local win] [
 ]
 
 ; performs a method on the window, such as activate, maximize, etc.
-do-window: func [face changes /local win] [
+do-window: func [face changes /local word win] [
 	if win: window-open? face [
 		set in first win 'changes changes
+		foreach word changes [
+			word: select [
+				text		on-text
+				minimize	on-minimize
+				maximize	on-maximize
+				activate	on-activate
+				offset		on-offset
+				restore		on-restore
+			] word
+			if word [act-face face none word]
+		]
 		show win
 		true
 	]
 ]
 
-activate-window: func [face] [do-window face [activate]]
+; activates a window
+activate-window: func [face] [
+	do-window face [activate]
+	; perform ON-DEACTIVATE actor for all other windows in screen-face
+	foreach window system/view/screen-face/pane [
+		act-face window none 'on-deactivate
+	]
+]
 
+; maximizes a window
 maximize-window: func [face] [do-window face [maximize]]
 
 ; displays a face as a window and manages the face in the window list
+; unused
 display-window: func [face title /event fnc] [
 	unless activate-window face [
 		view/new/title center-face face title
@@ -155,6 +172,20 @@ detect-func: func [face event /local cf] [
 				face/tool-tip-show-delay < difference now/precise face/then
 				face/then: now/precise
 				set-tool-tip mouse-over-face event/offset ; View bug: event/offset is 0x0 in OSX
+				; on-time actor here, but could be costly
+			]
+		]
+		event/type = 'inactive [
+			if ctx-menu/menu-face = find-window event/face [
+				hide-menu-face
+			]
+		]
+		event/type = 'close [
+			if all [
+				get-opener-face
+				same? find-window get-opener-face find-window event/face
+			] [
+				hide-menu-face
 			]
 		]
 		event/type = 'move [
@@ -166,15 +197,15 @@ detect-func: func [face event /local cf] [
 			;]
 			unset-tool-tip get-tool-tip face
 		]
-		event/type = 'down [
-			;-- if we are not over the menu face, then we need to close the menu-face
-			cf: event/face/menu-face
-			if cf/pane [
-				unless within? event/offset win-offset? cf cf/size [
-					hide-menu-face event/face
-				]
-			]
-		]
+		;event/type = 'down [
+		;	;-- if we are not over the menu face, then we need to close the menu-face
+		;	cf: event/face/menu-face
+		;	if cf/pane [
+		;		unless within? event/offset win-offset? cf cf/size [
+		;			hide-menu-face event/face
+		;		]
+		;	]
+		;]
 		;-- handle scroll wheel for the face we are over
 		find [scroll-page scroll-line] event/type [
 			all [
@@ -253,15 +284,6 @@ system/view/wake-event: func [port] bind bind [
 		if in pop-face/feel 'pop-detect [event: pop-face/feel/pop-detect pop-face event]
 		do event
 		if nav-event [key-navigate nav-event]
-		; might do validation here, but we need to be sure that it will work on all faces
-		; problem is that we probably can't capture the face in question
-		; perhaps it should work inside key-navigate
-		; then we ask if tab-face has the input flag
-		; that would at least cover it for keyboard navigation
-		; but then we need the same thing for mouse driven validation
-		; I would like this to work on all levels in one place
-		; but maybe this is too much to ask
-		; at least the validation function would have to be done
 		found? all [
 			pop-face <> pick pop-list length? pop-list
 			(pop-face: pick pop-list length? pop-list true)
@@ -297,18 +319,20 @@ init-window: func [
 ] [
 	if all [
 		in face 'style
-		face/style = 'window
+		find [menu window] face/style
 	] [
 		err-face: none
 		init-enablers face
+		traverse-face face [act-face face none 'on-init-window]
 		validate-init-face face
 		any [
 			err-face
 			all [focus-face system/words/focus focus-face true]
 			;-- find a default focus face here in the layout
-			focus-default-input face
-			focus-first-input face
-			focus-first-false face
+			(probe 'focus-default-input focus-default-input face)
+			(probe 'focus-first-input focus-first-input face)
+			(probe 'focus-first-false focus-first-false face)
+			(probe 'nothing)
 		]
 	]
 	face
@@ -335,7 +359,9 @@ view: func [
 		]
 		new: all [not new empty? scr-face/pane]
 		append scr-face/pane view-face
-	] [change scr-face/pane view-face]
+	] [
+		change scr-face/pane view-face
+	]
 	if all [
 		system/view/vid
 		view-face/feel = system/view/vid/vid-face/feel
@@ -360,7 +386,9 @@ unview: func [
 	/local pane
 ] bind [
 	pane: head system/view/screen-face/pane
-	either only [remove find pane face][
+	either only [
+		remove find pane face
+	][
 		either all [clear pane][remove back tail pane]
 	]
 	;-- refocus the current screen-face pane
@@ -375,10 +403,15 @@ unview: func [
 ; [!] - to be patched into view-object.r
 set 'show-popup func [face [object!] /window window-face [object!] /away /local no-btn feelname] bind [
 	if find pop-list face [exit]
-	window: either window [feelname: copy "popface-feel-win" window-face][
+	window: either window [
+		; open inside an existing window
+		feelname: copy "popface-feel-win"
+		window-face
+	][
+		; open in a new window
 		feelname: copy "popface-feel"
 		if none? face/options [face/options: copy []]
-		if not find face/options 'parent [
+		unless find face/options 'parent [
 			repend face/options ['parent none]
 		]
 		system/view/screen-face
@@ -402,7 +435,7 @@ set 'show-popup func [face [object!] /window window-face [object!] /away /local 
 ; HIDE-POPUP with rule set
 ; [!] - to be patched into view-object.r
 hide-popup: func [/timeout /local focal-win-face win-face] bind [
-	if not find pop-list pop-face [exit]
+	unless find pop-list pop-face [exit]
 	win-face: any [pop-face/parent-face system/view/screen-face]
 	remove find win-face/pane pop-face
 	remove back tail pop-list
@@ -427,6 +460,7 @@ inform: func [
 	panel [object!]
 	/offset where [pair!] "Offset of panel"
 	/title ttl [string!] "Dialog window title"
+	/options opts "Window display options"
 	/timeout time
 	/event evt-func "Event Function"
 	/local sv old-focus
@@ -435,7 +469,8 @@ inform: func [
 	panel/text: copy any [ttl "Dialog"]
 	panel/offset: either offset [where] [sv/screen-face/size - panel/size / 2]
 	panel/feel: sv/popface-feel
-	show-popup panel
+	if opts [panel/options: opts]
+	show-popup/away panel
 	if event [insert sv/popface-feel/event-funcs :evt-func] ; must be done after showing the face
 	either time [if none? wait time [hide-popup/timeout]] [do-events]
 	if event [remove find sv/popface-feel/event-funcs :evt-func] ; will this work with multiple informs on top of eachother?

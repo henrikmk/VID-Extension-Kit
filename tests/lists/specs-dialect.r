@@ -32,7 +32,7 @@ view make-window [
 		input [a b c]
 		output [c b]
 		names ["C" "B"]
-		resize-column c
+		resize-column 'c
 		widths [50 100]
 		modes [sort filter]
 		types [string! image!]

@@ -70,47 +70,49 @@ set 'get-default-face func [face] [
 nav-event: none
 
 set 'key-face func [
-	"Performs a keyboard action on a face. Returns face object (for show)."
+	"Performs a keyboard action on a face. Returns result to filter to parent window."
 	face
 	event
 	/no-show "Do not show change yet"
-	/local access
+	/local access value
 ] [
+	value: event
 	if all [
 		access: get in face 'access
 		in access 'key-face*
 	] [
-		access/key-face* face event
+		value: access/key-face* face event
 	]
 	; [ ] - possibility for throttling performance here on show
 	;       [ ] - fps per face
 	any [no-show show face]
-	face
+	face ; big change
+	value
 ]
 
 ; need a good standard map for how faces must behave under key-navigate, so all that is
 ; standardized here instead of inside vid-ctx-text or inside the styles themselves
 
 ; Standard function for keyboard operations in a window
-key-navigate: func [event /local tab-face] [
-	nav-event: none                      ; to avoid passing the event again to KEY-NAVIGATE
-	if event/type <> 'key [return event] ; pass through if not a key
-	any [event/face return event]        ; pass through if no face
-	tab-face: get-tab-face event/face    ; get tab face for the window in which event/face exists
-	; here we are receiving key events
-	; and the map of key events is handled in a way that we filter them through a switch for certain cases
-	; while we filter them through a key-face
-	; possibly by using a simple keymap
-	; consider an elegant and flexible way to do this
-
-	; we provide a filter block: if the key is in the filter, the switch and key-face is not performed
-	; if the key is not in the filter, the switch and key-face is performed
-	if key-filter [
-		switch
-		key-face
-	]
-	event
-]
+;key-navigate: func [event /local tab-face] [
+;	nav-event: none                      ; to avoid passing the event again to KEY-NAVIGATE
+;	if event/type <> 'key [return event] ; pass through if not a key
+;	any [event/face return event]        ; pass through if no face
+;	tab-face: get-tab-face event/face    ; get tab face for the window in which event/face exists
+;	; here we are receiving key events
+;	; and the map of key events is handled in a way that we filter them through a switch for certain cases
+;	; while we filter them through a key-face
+;	; possibly by using a simple keymap
+;	; consider an elegant and flexible way to do this
+;
+;	; we provide a filter block: if the key is in the filter, the switch and key-face is not performed
+;	; if the key is not in the filter, the switch and key-face is performed
+;	if key-filter [
+;		switch
+;		key-face
+;	]
+;	event
+;]
 
 ; Standard function for keyboard operations in a window
 key-navigate: func [event /local default-face f hidden? tab-face] [
@@ -216,7 +218,10 @@ key-navigate: func [event /local default-face f hidden? tab-face] [
 			;]
 		]
 	] [
-		key-face tab-face event
+		all [
+			event? key-face tab-face event
+			key-face find-window tab-face event
+		]
 	]
 	event ; really?
 ]

@@ -39,8 +39,41 @@ svvf: system/view/vid/vid-feel: context [
 		]
 	]
 
+	; act on the face data state and UI feedback state using an UP method
+	act-face-state: func [face event] [
+		switch event [
+			up [
+				if all [not face/rate find [drag-over pressed] face/touch] [
+					; Update face state information
+					if all [block? face/states not empty? head face/states] [
+						face/states: next face/states
+						if tail? face/states [
+							face/states:
+								either face/virgin [
+									next head face/states
+								][
+									head face/states
+								]
+						]
+						face/state: face/states/1
+					]
+					; Do face action on button release above face
+					do-face face face/data
+					; handle double-click here
+					act-face face event 'on-click
+				]
+			]
+			alt-up [
+				if find [drag-over pressed] face/touch [
+					do-face-alt face face/data
+					act-face face event 'on-alt-click
+				]
+			]
+		]
+	]
+
 	; set face data state and UI feedback state
-	set-face-state: func [face [object!] event [none! word!] /local new-state] [
+	set-face-state: func [face [object!] event [none! word!]] [
 		; Update touch/feedback information
 		face/see:
 			case [
@@ -54,35 +87,15 @@ svvf: system/view/vid/vid-feel: context [
 					face/touch
 				]
 				up [
-					if all [not face/rate find [drag-over pressed] face/touch] [
-						; Update face state information
-						if all [block? face/states not empty? head face/states] [
-							face/states: next face/states
-							if tail? face/states [
-								face/states:
-									either face/virgin [
-										next head face/states
-									][
-										head face/states
-									]
-							]
-							face/state: face/states/1
-						]
-						; Do face action on button release above face
-						do-face face face/data
-						; handle double-click here
-						act-face face event 'on-click
-					]
 					'released
 				]
 				alt-up [
-					if find [drag-over pressed] face/touch [
-						do-face-alt face face/text
-						act-face face event 'on-alt-click
-					]
 					'released
 				]
 				down alt-down [
+					; possible event bug: the face that we leave for another window
+					; means that when we click in the main face again, we get a down for the wrong face
+					; we have no way of checking this, so perhaps the face that is passed here is wrong
 					'pressed
 				]
 				over [
@@ -122,6 +135,7 @@ svvf: system/view/vid/vid-feel: context [
 	sensor: make face/feel [
 		cue: blink: none
 		engage: func [face action event][
+			act-face-state face action
 			set-face-state face action
 			show face
 		]
@@ -168,6 +182,7 @@ svvf: system/view/vid/vid-feel: context [
 					face/data: not face/data
 				]
 			]
+			act-face-state face action
 			set-face-state face action
 			show face
 		]
@@ -185,6 +200,22 @@ svvf: system/view/vid/vid-feel: context [
 	;]
 
 	icon: button: :hot
+	
+	choice: make hot [
+		engage: func [face action event][
+			if action = 'down [
+				act-face face event 'on-click
+			]
+			if any [
+				action <> 'down
+				not event
+				all [action = 'down event/face = face]
+			][
+				set-face-state face action
+			]
+			show face
+		]
+	]
 
 	subicon: make hot [
 		over: func [f a e] [f/parent-face/feel/over f/parent-face a e]
@@ -246,14 +277,6 @@ svvf: system/view/vid/vid-feel: context [
 				away [if face/state [back-face face] face/state: off]
 			]
 			show face
-		]
-	]
-
-	choice: make hot [
-		engage: func [face action event] [
-			if action = 'down [
-				face/open-choice-face face
-			]
 		]
 	]
 
@@ -1317,6 +1340,22 @@ ctx-access: context [
 		]
 	]
 	
+	window: make compound [
+		key-face*: func [face event] [
+			; is sometimes never reached
+			switch event/key [
+				#"^[" [ ; escape
+					act-face face event probe 'on-escape
+				]
+				#"^M" [ ; return
+					act-face face event 'on-return
+				]
+			]
+			act-face face event 'on-key
+			event
+		]
+	]
+	
 	tab-panel: make panel [
 		set-face*: func [face value] [
 			either word? value [
@@ -1505,13 +1544,16 @@ ctx-access: context [
 					; tab to previous
 					tab-face: find-flag/reverse tab-face tabbed
 					if tab-face [set-tab-face tab-face]
+					event: none
 				]
 				find [right down] event/key [
 					; tab to next
 					tab-face: find-flag tab-face tabbed
 					if tab-face [set-tab-face tab-face]
+					event: none
 				]
 			]
+			event
 		]
 		clear-face*: func [face /local i] [
 			foreach f face/pane [set-face/no-show f false]
@@ -1533,6 +1575,7 @@ ctx-access: context [
 						][
 							find-flag/reverse get-tab-face face tabbed
 						]
+					event: none
 				]
 				find [right down] event/key [
 					; tab to next
@@ -1542,6 +1585,7 @@ ctx-access: context [
 						][
 							find-flag get-tab-face face tabbed
 						]
+					event: none
 				]
 				find [#" " #"^M"] event/key [ ; enter or space
 					either event/shift [
@@ -1553,11 +1597,13 @@ ctx-access: context [
 						act-face face none 'on-return
 					]
 					act-face face none 'on-select
+					event: none
 				]
 			]
 ;			if tab-face [set-tab-face tab-face focus tab-face]
 			if tab-face [set-tab-face tab-face]
 			;set-focus-ring event/face ; not sure
+			event
 		]
 	]
 

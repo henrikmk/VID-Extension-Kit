@@ -25,8 +25,9 @@ stylize/master [
 	; Prototype for regular window
 	WINDOW: FACE 100x100 with [ ; Fields for align and resize hints - can be changed later
 		font: none
-		access: ctx-access/compound								; Accessor for windows are like COMPOUND
+		access: ctx-access/window								; Accessor for windows
 		origin: ctx-resize/window-origin						; Set since this affects contents
+		opener-face: none										; The face that opened this face
 	]
 	; Prototype for resizable window with some defaults set
 	RESIZABLE-WINDOW: WINDOW with [
@@ -36,7 +37,7 @@ stylize/master [
 		result: none
 		align: [center]
 		tool-tip-face: none										; Face for tool-tip
-		menu-face: none											; Face for menu
+;		menu-face: none											; Face for menu
 		sheet-face: none										; Face for sheet
 		focus-ring-faces: none									; Faces for focus rings
 		tool-tip-hide-delay: 0:0:0.2							; Delay of tool-tip hiding
@@ -47,7 +48,7 @@ stylize/master [
 			tab-face: any [tab-face self]						; Set the tab face
 			unless pane [pane: make block! []]					; Create an empty pane if none exists
 			append pane focus-ring-faces: make-focus-ring self	; Append faces for focus ring
-			append pane menu-face: make-menu-face self			; Append faces for menu
+;			append pane menu-face: make-menu-face self			; Append faces for menu, deprecated
 			; sheet face here
 			append pane tool-tip-face: make-tool-tip			; Append face for tool-tip
 			set-parent-faces self								; Set all PARENT-FACE in all faces

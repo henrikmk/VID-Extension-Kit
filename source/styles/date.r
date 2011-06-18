@@ -106,15 +106,44 @@ stylize/master [
 			if 30 on-tab hour-act on-set hour-act
 			if 30 on-tab minute-act on-set minute-act
 			if 30 on-tab second-act on-set second-act
-			button 24x0 fill 0x1 "..." [
-				use [fp d] [
-					all [
-						fp: face/parent-face
-						d: request-date/date any [attempt [to date! get-face fp] now]
-						set-face fp d
-						do-face fp none
+			button 24x0 fill 0x1 "..." on-click [
+				show-menu-face/hinge
+					face
+					[
+						layout-date
+							on-init-window [
+								use [d] [
+									d: get-face get in get-opener-face 'parent-face
+									set-face face d/date
+								]
+							]
+							on-click [
+								use [pf] [
+									set-face pf: get in get-opener-face 'parent-face value
+									hide-menu-face
+									do-face pf none
+								]
+							]
+							on-key [
+								if find [#" " #"^M"] event/key [
+									act-face face none 'on-click
+								]
+							]
+							on-escape [
+								hide-menu-face
+							]
 					]
-				]
+					; need a way to initialize this face
+					[bottom right]
+					[top right]
+				;use [fp d] [
+				;	all [
+				;		fp: face/parent-face
+				;		d: request-date/date any [attempt [to date! get-face fp] now]
+				;		set-face fp d
+				;		do-face fp none
+				;	]
+				;]
 			]
 		]
 		access: make access [
@@ -265,11 +294,16 @@ stylize/master [
 						right [face/data + 1]
 					]
 				act-face face event 'on-key
+				if event/key = #"^M" [
+					act-face face event 'on-return
+				]
+				event
 			]
 			; scroll-wheel moves back and forth one month
 			scroll-face*: func [face x y] [
 				set-face* face face/data/month: face/data/month + pick [1 -1] positive? y
 				act-face face none 'on-scroll
+				true
 			]
 		]
 	]

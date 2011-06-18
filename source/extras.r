@@ -109,13 +109,21 @@ set-image: func [face image] [
 ]
 
 ; hinges a face to another face, by specified hinge points
-hinge: func [face1 points1 face2 points2 /local offset] [
+hinge: func [face1 points1 face2 points2 /local face1-offset offset] [
 	offset: 0x0
 	; Find hinge point for face 1
-	if find points1 'left	[offset/x: face1/offset/x]
-	if find points1 'right	[offset/x: face1/offset/x + face1/size/x]
-	if find points1 'top	[offset/y: face1/offset/y]
-	if find points1 'bottom	[offset/y: face1/offset/y + face1/size/y]
+	face1-offset:
+		either same? find-window face1 find-window face2 [
+			; Both faces exist in the same window
+			face1/offset
+		][
+			; Faces exist in different windows, so rely on screen face to provide offset
+			face1/win-offset + get in find-window face1 'offset
+		]
+	if find points1 'left	[offset/x: face1-offset/x]
+	if find points1 'right	[offset/x: face1-offset/x + face1/size/x]
+	if find points1 'top	[offset/y: face1-offset/y]
+	if find points1 'bottom	[offset/y: face1-offset/y + face1/size/y]
 	; Find offset for face 2
 	face2/offset: offset
 	if find points2 'right	[face2/offset/x: face2/offset/x - face2/size/x]

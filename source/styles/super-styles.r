@@ -98,9 +98,24 @@ LAYOUT-DATE: COMPOUND [
 	return
 	date-nav-month
 		spring [left right]
-		on-scroll [set-face face/parent-face/pane/3 get-face face]
-		on-key [set-face face/parent-face/pane/3 get-face face]
-		on-click [set-face face/parent-face/pane/3 get-face face]
+		on-scroll [
+			set-face face/parent-face/pane/3 get-face face
+			act-face face/parent-face none 'on-scroll
+		]
+		on-key [
+			set-face face/parent-face/pane/3 get-face face
+			act-face face/parent-face event 'on-key
+		]
+		on-click [
+			set-face face/parent-face/pane/3 get-face face
+			act-face face/parent-face none 'on-click
+		]
+		on-select [
+			act-face face/parent-face none 'on-select
+		]
+		on-return [
+			act-face face/parent-face none 'on-return
+		]
 ] with [
 	access: make access [
 		set-face*: func [face value] [

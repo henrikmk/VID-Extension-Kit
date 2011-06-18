@@ -689,6 +689,7 @@ ctx-text: [
 				escape [
 					;-- we don't unset the tab face here
 					if flag-face? face hide swap-text
+					act-face face event 'on-escape
 					unfocus
 				]
 			] key

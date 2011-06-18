@@ -220,14 +220,23 @@ vid-face/actors: make object! [
 	on-edit:
 	on-select:
 	on-unselect:
+	on-highlight:
 	on-validate:
 	on-init-validate:
+	on-init-window:
 	on-change:
 	on-enable:
 	on-disable:
 	on-freeze:
 	on-thaw:
 	on-redraw:
+	on-activate:
+	on-deactivate:
+	on-maximize:
+	on-minimize:
+	on-restore:
+	on-text:
+	on-offset:
 		none
 ]
 
@@ -377,14 +386,23 @@ facet-words: [ ; Order of these is important to the code
 	on-edit				[set-actor new 'on-edit second args next args]
 	on-select			[set-actor new 'on-select second args next args]
 	on-unselect			[set-actor new 'on-unselect second args next args]
+	on-highlight		[set-actor new 'on-highlight second args next args]
 	on-validate			[set-actor new 'on-validate second args next args]
 	on-init-validate	[set-actor new 'on-init-validate second args next args]
+	on-init-window		[set-actor new 'on-init-window second args next args]
 	on-change			[set-actor new 'on-change second args next args] ; not formally available for use
 	on-enable			[set-actor new 'on-enable second args next args]
 	on-disable			[set-actor new 'on-disable second args next args]
 	on-freeze			[set-actor new 'on-freeze second args next args]
 	on-thaw				[set-actor new 'on-thaw second args next args]
 	on-redraw			[set-actor new 'on-redraw second args next args]
+	on-activate			[set-actor new 'on-activate second args next args]
+	on-deactivate		[set-actor new 'on-deactivate second args next args]
+	on-maximize			[set-actor new 'on-maximize second args next args]
+	on-minimize			[set-actor new 'on-minimize second args next args]
+	on-restore			[set-actor new 'on-restore second args next args]
+	on-text				[set-actor new 'on-text second args next args]
+	on-offset			[set-actor new 'on-offset second args next args]
 ]
 
 fw-with: find facet-words 'with

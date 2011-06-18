@@ -57,7 +57,9 @@ stylize/master [
 							find [right down] event/key [face/step]
 						]
 					do-face face none
+					event: none
 				]
+				event
 			]
 		]
 		init: [
@@ -149,7 +151,9 @@ stylize/master [
 					; step size is determined outside the scroller
 					set-face face max 0 min 1 val + pick steps found? find [left up] event/key
 					do-face face none
+					event: none
 				]
+				event
 			]
 			resize-face*: func [face size x y /local axis tmp] [
 				face/axis: pick [y x] size/y >= size/x

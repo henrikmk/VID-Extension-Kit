@@ -26,7 +26,13 @@ do %../../build/include.r
 clear ctx-vid-debug/debug
 probe 's
 view make-window [
-	; [ ] - focus with keyboard input
 	c: choice
-	button "Focus?" [probe describe-face system/view/focal-face]
+		[probe 'a]						; this is still run as an action with do-face somewhere
+;		on-select [wait 1 probe describe-face face probe 'selecting]	; choice-list
+;		on-click [probe describe-face face probe 'clicking]		; choice
+	;button "Focus?" [probe describe-face system/view/focal-face]
+	;button "Get-face" [probe get-face c]
+	;button "Set-face" [set-face c 'choice2]
+	;button "Do-face" [do-face c none] ; this should perform the selection, rather than open the face
+	;button "On-select" [act-face c none 'on-select] ; wrong face here
 ]

@@ -211,30 +211,99 @@ stylize/master [
 		setup: [choice1 "Choice 1" choice2 "Choice 2" choice3 "Choice 3"]
 		surface: 'choice
 		feel: svvf/choice
-		; opens and positions the menu list
-		open-choice-face: func [face /local edge idx line-height] [
-			if all [face <> get-opener-face face block? face/setup not empty? face/setup] [
-				set-face face/choice-face/pane/1 extract/index face/setup 2 2
-				idx: divide 1 + index? face/data 2
-				face/choice-face/pane/1/selected: to-block idx
-				face/choice-face/pane/1/over: as-pair 1 idx
-				ctx-resize/align-contents face/choice-face none
-				line-height: face/choice-face/pane/1/sub-face/size/y
-				edge: edge-size get in root-face face 'menu-face
-				; should actually focus the menu face here
-				; but the focus ring is not set around the menu
-				show-menu-face/size/offset
-					face
-					face/choice-face
-					as-pair face/size/x add divide line-height * length? head face/data 2 edge/y * 2
-					;-- Using WIN-OFFSET? here, because the parent face may be scrolled
-					add win-offset? face as-pair 0 line-height - (line-height * idx)
-				; [!] - set base tab face to menu-face, but this happens inside show-menu-face
-				svvf/set-face-state face none
-			]
+		close-choice-face: func [face /local fc] [
+			fc: find-style get-menu-face 'choice-list 'data
+			set-face face second pick fc/data fc/selected/1
+			hide-menu-face
 		]
-		; need a common resize face here
-		; balancer and resizer
+		open-choice-face: func [face] [
+			probe 'opening
+			; allow navigating the caret-list
+			show-menu-face
+				face
+				compose/deep [
+					origin 0
+					choice-list
+						on-scroll [ ; does not work
+							probe 'a
+						]
+						with [
+							surface: 'edge
+							value: none
+							; Sub face with selection marker cell and text cell
+							sub-face: [
+								across space 0
+								list-text-cell (as-pair face/size/x - face/size/y face/size/y) spring [bottom]
+								list-text-cell (to-pair face/size/y) fill 0x0 spring [bottom left]
+							]
+							columns: [word value]
+							back-render-func: func [face cell /local colors row] [
+								row: pick face/data-sorted cell/pos/y
+								colors: ctx-colors/colors
+								case [
+									find face/highlighted row [
+										cell/color: colors/field-select-color
+										cell/font/color: colors/body-text-color
+									]
+									find face/selected row [
+										cell/color: colors/select-color
+										cell/font/color: colors/select-body-text-color
+									]
+									true [
+										cell/color: none
+										cell/font/color: colors/body-text-color
+									]
+								]
+							]
+							render-func: func [face cell /local dot-center] [
+								dot-center: (to-pair face/size/y / 2)
+								if cell/pos/x = 2 [
+									cell/text: none
+									cell/effect: all [cell/data = face/value [draw [pen none fill-pen black circle 4 dot-center]]]
+								]
+							]
+							insert init [
+								; Get size
+								size: get in get-opener-face 'size
+								size/y: size/y * divide length? get in get-opener-face 'setup 2
+								; Build data array
+								data: make block! []
+								value: get-face get-opener-face
+								foreach [word string] get in get-opener-face 'setup [
+									insert/only tail data reduce [string word]
+								]
+							]
+							append init [
+								; Get actors from opener face
+								foreach fnc get in get in get-opener-face 'actors 'on-select [
+									insert-actor-func self 'on-select :fnc
+								]
+								actor-face: get-opener-face
+								; Perform initial selection, not using select-face, otherwise ON-SELECT would be used
+								value: get-face get-opener-face
+								highlighted: copy
+								selected: reduce [divide 1 + index? find get in get-opener-face 'setup value 2]
+							]
+						]
+				]
+				compose [
+					; . - flickering on popup close. the popup is reopened quickly and closed again, when the action completes
+					;     open-choice-face is run after the default action. open-choice-face is only tied to on-click
+
+					; x - complete init
+					; . - scroll using scroll-wheel
+					; . - correct offset on init
+					; x - complete columns and column-order
+					; ! - face/value is unknown, possibly wrong path
+					; x - sizes may be wrong, as we are not calculating certain edges correctly
+					; . - need to share the font from parent
+					; . - edge will be part of the list
+					; x - the list has no background color
+;					size: (as-pair face/size/x face/size/y * divide length? face/setup 2)
+; need a different way to convey this
+					offset: (as-pair 0 negate face/size/y * divide 1 + index? find face/setup get-face face 2)
+				]
+		]
 		access: make access [
 			setup-face*: func [face value] [
 				face/setup: value
@@ -252,109 +321,12 @@ stylize/master [
 			get-face*: func [face] [
 				first face/data
 			]
-			key-face*: func [face event] [
-				switch event/key [
-					#" " [  ; space
-						; open and focus list
-						open-choice-face face
-					]
-					#"^M" [ ; enter
-						; open and focus list
-						open-choice-face face
-					]
-					#"^[" [ ; escape
-						; close choice face
-						act-face face/choice-face/pane/1 event 'on-click
-					]
-				]
-				event
-			]
 		]
-		choice-face: none ; cache of choice layout
 		init: [
-			; the choice face should appear in a separate layout
-			choice-face: layout/tight [
-				space 0 origin 0 caret-list 100x100 fill 1x1
-					; this does not work as it's never focused
-					on-key [ ; key-face is done before this
-						use [fp opener-face] [
-							fp: face/parent-face ; is this choice-face?
-							opener-face: fp/opener-face
-							case [
-								find [up down] event/key [
-									; [ ] - adjustment needs to adhere to current selection rather than it's own up/down scheme
-									unless empty? face/selected [
-										if any [
-											all [fp/offset/y < 0 event/key = 'up]
-											all [fp/offset/y + fp/size/y > fp/parent-face/size/y event/key = 'down]
-										] [
-											fp/offset/y: face/choice-face-offset face opener-face
-										]
-									]
-								]
-								find [#"^M" #" "] event/key [ ; enter, space
-									set-face opener-face pick opener-face/setup 2 * face/selected/1 - 1
-									do-face opener-face none
-									hide-menu-face face
-								]
-								#"^[" = event/key [ ; escape
-									hide-menu-face face
-								]
-							]
-						]
-					]
-					on-click [
-						; perform this action every time the mouse is clicked
-						hide-menu-face face
-					] [
-						; perform this action only when the click happens on a different entry than the current one
-						; happens before ON-CLICK
-						use [opener-face] [
-							opener-face: get-opener-face face
-							set-face opener-face pick opener-face/setup 2 * face/selected/1 - 1
-							do-face opener-face none
-							act-face opener-face none 'on-click
-							act-face opener-face none 'on-select
-						]
-					]
-					with [
-						render-func: func [face cell] [
-							; [ ] - when using keyboard, colors are swapped here, due to the keyboard moving the selected face
-							; unconfirmed that this still happens
-							case [
-								all [face/over face/over/y = cell/pos/y] [
-									cell/color: ctx-colors/colors/line-color
-									cell/font/color: ctx-colors/colors/select-body-text-color
-								]
-								find face/selected cell/pos/y [
-									cell/color: ctx-colors/colors/select-color
-									cell/font/color: ctx-colors/colors/select-body-text-color
-								]
-								true [
-									cell/color: ctx-colors/colors/menu-color
-									cell/font/color: ctx-colors/colors/body-text-color
-								]
-							]
-						]
-						choice-face-offset: func [face opener-face /local y-size] [
-							y-size: opener-face/size/y; - (2 * second edge-size pop-face)
-							second opener-face/offset + as-pair 0 y-size - (y-size * face/selected/1)
-						]
-						select-mode: 'mutex
-						sub-face: [list-text-cell right bold 100 fill 1x0 spring [bottom]] ; does not bold and has the wrong size
-					]
-			]
-			flag-face choice-face tabbed
-			; [ ] - tab-panel causes the offset to be incorrect. perhaps it's really a problem with win-offset and the edge
-			sub-face: choice-face/pane/1/sub-face
-			sub-face/pane/1/real-size: sub-face/real-size: none
-;			sub-face/pane/1/size: sub-face/size: size + 10; - (probe 2 * self/draw-body/margin/y); (2 * edge-size face) ; size is now wrong, because the edge is wrong here
-; [ ] - when not present, this face is right aligned
-			sub-face/pane/1/font: make sub-face/pane/1/font [align: 'left]
-			if setup [
-				access/setup-face* self setup
-			]
-			;ctx-resize/do-align choice-face self none
+			access/setup-face* self any [setup []]
+			insert-actor-func self 'on-click :open-choice-face
+			insert-actor-func self 'on-select :close-choice-face
+			insert-actor-func self 'on-select :action
 		]
 	]
 

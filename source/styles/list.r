@@ -78,6 +78,7 @@ stylize/master [
 		v-scroller:					; vertical scroller attached to list face
 		h-scroller:					; horizontal scroller attached to list face
 		selected:					; block of integers with selected indexes in the original data
+		highlighted:				; block of integers with highlighted indexes in the original data
 		actor-face:					; the face passed to any actor used in LIST
 		;-- CTX-LIST information
 		filter-func:				; filter function
@@ -111,7 +112,9 @@ stylize/master [
 			fs/size/y: fs/size/y - face/spacing
 			if face/size [fs/size/x: face/size/x]
 			set-parent-faces/parent fs face
-			unless init [ctx-resize/align/no-show fs]
+			unless init [
+				ctx-resize/align/no-show fs
+			]
 		]
 		list-size: func [face] [
 			to integer! face/size/y - (any [attempt [2 * face/edge/size/y] 0]) / face/sub-face/size/y
@@ -186,24 +189,45 @@ stylize/master [
 				empty-render-func face cell
 			]
 		]
-		;-- Cell background render function
-		back-render-func: func [face cell] [
-			either find face/selected pick face/data-sorted cell/pos/y [
-				cell/color:
-					either flag-face? face disabled [
-						ctx-colors/colors/select-disabled-color
-					][
-						ctx-colors/colors/select-color
-					]
-				cell/font/color: ctx-colors/colors/select-body-text-color
-			][
-				cell/color: ctx-colors/colors/field-color
-				cell/font/color:
-					either flag-face? face disabled [
-						ctx-colors/colors/body-text-disabled-color
-					][
-						ctx-colors/colors/body-text-color
-					]
+		;-- Cell background render function (could be optimized, if we had disable-face*)
+		back-render-func: func [face cell /local colors row] [
+			colors: ctx-colors/colors
+			row: pick face/data-sorted cell/pos/y
+			case [
+				find face/highlighted row [
+					cell/color:
+						either flag-face? face disabled [
+							colors/select-disabled-color
+						][
+							colors/field-select-color
+						]
+					cell/font/color:
+						either flag-face? face disabled [
+							colors/body-text-disabled-color
+						][
+							colors/body-text-color
+						]
+				]
+				find face/selected row [
+					cell/color:
+						either flag-face? face disabled [
+							colors/select-disabled-color
+						][
+							colors/select-color
+						]
+					cell/font/color:
+						colors/select-body-text-color
+				]
+				true [
+					cell/color:
+						colors/field-color
+					cell/font/color:
+						either flag-face? face disabled [
+							colors/body-text-disabled-color
+						][
+							colors/body-text-color
+						]
+				]
 			]
 			if odd? cell/pos/y [
 				cell/color: cell/color - 10
@@ -323,6 +347,7 @@ stylize/master [
 				do-face self get-face face
 				if keys [act-face face/actor-face none 'on-select]
 			]
+			event
 		]
 		;-- Accessor functions
 		access: make access [
@@ -337,8 +362,9 @@ stylize/master [
 			]
 			; performs face navigation using LIST-* styles in the sub-face
 			key-face*: func [face event /local old] [
-				face/key-select-func face event
+				event: face/key-select-func face event
 				act-face face/actor-face event 'on-key
+				event
 			]
 			; scrolls the list face
 			scroll-face*: func [face x y /local old size] [
@@ -495,108 +521,77 @@ stylize/master [
 			]
 		]
 		init: [
-			;-- Build sub-face from columns
-			case [
-				;-- Use sub-face directly and supply sorting and type information from columns
-				all [sub-face columns] [
-					; use columns for sorting and types and nothing else
-					; this is applied to the ctx-list attached here
-				]
-				;-- Create new sub-face
-				all [not sub-face columns] [
-					sub-face: make block! 100
-					foreach column columns [
-						append sub-face map-type column/type
-					]
-				]
-				;-- Create sub-face from data
-				all [not sub-face not columns] [
-					either block? data [
-						unless empty? data [
-							sub-face: make block! 100
-							switch/default type?/word data/1 [
-								object! [
-									foreach item first data/1 [
-										append sub-face map-type type? item
-									]
-								]
-								block! [
-									foreach item data/1 [
-										append sub-face map-type type? item
-									]
-								]
-							] [
-								; assuming that all data are of the same type
-								append sub-face map-type type? data/1
-							]
-						]
-					][
-						;-- Create empty single column list
-						sub-face: [list-text-cell 100x20 spring [bottom] fill 1x0]
-					]
-				]
-			]
-			make-sub-face/init self any [sub-face attempt [second :action] [list-text-cell]] ; empty sub-face = infinite loop
+			unless all [columns sub-face] [make error! "SUB-FACE and COLUMNS are not defined"]
+			; Set up columns
+			all [columns not column-order column-order: columns]
+			; Build sub-face
+			make-sub-face/init self sub-face ; empty sub-face = infinite loop
 			if none? size [
 				size: 300x200
 				size/x: sub-face/size/x + first edge-size? self
 			]
-			;-- Build column order
-			unless block? column-order [
-				column-order: make block! []
-				repeat i length? sub-face/pane [
-					append column-order to word! join 'column- i
-				]
-			]
-			;-- Build columns from sub-face
-			case [
-				;-- Create column list from sub-face
-				all [sub-face not columns] [
-					columns: make block! []
-					repeat i length? sub-face/pane [
-						append columns to word! join 'column- i
-						append columns none
-					]
-				]
-			]
-			;-- Attach source data
+			; Attach source data
 			if none? data [data: make block! []]
 			if object? data [data: ctx-list/object-to-data data]
 			output: copy data-sorted: copy data-filtered: copy data-display: make block! length? data
 			ctx-list/set-filtered self
+			; Prepare selection
 			any [block? selected selected: make block! []]
+			any [block? highlighted highlighted: make block! []]
+			; Prepare rendering
 			pane: :pane-func
-			;-- Actor handling
+			; Actor handling
 			actor-face: self
 		]
 	]
 
 	; list with keyboard caret selection instead of plain selection
 	CARET-LIST: LIST with [
-		;-- Cell selection function for keyboard. FACE is cell that acts as caret.
-		; face/selected is not actually touched and this only works on single selection
-		key-select-func: func [face event /local out s step] [
+		;-- Cell selection function for keyboard. FACE is the list that holds the caret.
+		key-select-func: func [face event /local dir out s step] [
 			if find [up down] event/key [
 				out: head output
 				dir: pick [1 -1] event/key = 'down
 				if event/control [dir: dir * list-size face]
 				if empty? out [
 					face/over: none
-					clear face/selected
+					clear face/highlighted
 					act-face face/actor-face none 'on-unselect
 					return false
 				]
-				face/over: either face/over [0x1 * dir + face/over][1x1]
-				face/over: min max 1x1 face/over to pair! length? out
-				follow face face/over/y
-				act-face face/actor-face none 'on-select
+				either empty? face/highlighted [
+					insert
+						face/highlighted
+						first either empty? face/selected [
+							face/data-sorted
+						][
+							face/selected
+						]
+				][
+					all [
+						s: find face/data-sorted face/highlighted/1
+						s: skip s dir
+						change face/highlighted first either tail? s [back s][s]
+					]
+				]
+				follow face first face/highlighted
+				act-face face/actor-face none 'on-highlight
 			]
 			if find [#" " #"^M"] event/key [
-				append clear face/selected face/over/y
+				unless empty? face/highlighted [
+					append clear face/selected face/highlighted
+				]
+				if event/key = #"^M" [
+					act-face face/actor-face none 'on-return
+				]
 				act-face face/actor-face none 'on-select
 			]
+			event
 		]
 	]
+
+	; CARET-LIST used in CHOICE selector
+	CHOICE-LIST: CARET-LIST fill 1x1
 
 	; iterated bottom-up list with user defined sub-face. internal use only.
 	REVERSE-LIST: LIST with [
@@ -669,8 +664,9 @@ stylize/master [
 				]
 			]
 			key-face*: func [face event] [
-				key-face face/list event
+				event: key-face face/list event
 				set-scroller face
+				event
 			]
 			set-face*: func [face data] [
 				set-face/no-show face/list data
