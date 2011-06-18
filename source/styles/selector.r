@@ -282,17 +282,9 @@ stylize/master [
 						]
 				]
 				as-pair 0 negate face/size/y * divide 1 + index? find face/setup get-face face 2
-				; . - scroll using scroll-wheel
-				;     need to get the actor here, but nothing happens
-				;     no on-scroll actor is called, so face can't be scrolled
 
-				; . - scroll to different value without opening, by using the scroll-wheel
-
-				; x - face/value is unknown, possibly wrong path
-				; x - sizes may be wrong, as we are not calculating certain edges correctly
 				; . - need to share the font from parent
 				; . - edge will be part of the list
-				; x - the list has no background color
 		]
 		access: make access [
 			setup-face*: func [face value] [
@@ -317,13 +309,13 @@ stylize/master [
 					face
 					first
 						either y > 0 [
-							skip face/data -2
-						][
 							either tail? skip face/data 2 [
 								face/data
 							][
 								skip face/data 2
 							]
+						][
+							skip face/data -2
 						]
 				old <> face/data
 			]
@@ -333,6 +325,7 @@ stylize/master [
 			insert-actor-func self 'on-click :open-choice-face
 			insert-actor-func self 'on-select :close-choice-face
 			insert-actor-func self 'on-select :action
+			insert-actor-func self 'on-scroll :action
 		]
 	]
 

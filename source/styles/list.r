@@ -587,7 +587,33 @@ stylize/master [
 	]
 
 	; CARET-LIST used in CHOICE selector
-	CHOICE-LIST: CARET-LIST fill 1x1
+	CHOICE-LIST: CARET-LIST fill 1x1 with [
+		access: make access [
+			; moves the window face to within screen-face dimensions
+			scroll-face*: func [face x y /local dir menu-face opener-face window-face] [
+				dir: pick [-1 1] positive? y
+				opener-face: get-opener-face
+				window-face: find-window opener-face
+				menu-face: get-menu-face
+				menu-face/offset/y: opener-face/size/y * dir + menu-face/offset/y
+				if menu-face/offset/y < 0 [menu-face/offset/y: menu-face/offset/y - 1]
+				;-- restrain to opener-face top
+				menu-face/offset/y:
+					min
+						menu-face/offset/y
+						window-face/offset/y + opener-face/win-offset/y
+				;-- restrain to opener-face bottom
+				menu-face/offset/y:
+					max
+						menu-face/offset/y
+						add
+							window-face/offset/y
+							opener-face/win-offset/y + opener-face/size/y - menu-face/size/y
+				show menu-face
+				false
+			]
+		]
+	]
 
 	; iterated bottom-up list with user defined sub-face. internal use only.
 	REVERSE-LIST: LIST with [
