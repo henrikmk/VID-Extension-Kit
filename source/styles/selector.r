@@ -217,15 +217,13 @@ stylize/master [
 			hide-menu-face
 		]
 		open-choice-face: func [face] [
-			probe 'opening
-			; allow navigating the caret-list
-			show-menu-face
+			show-menu-face/offset
 				face
 				compose/deep [
 					origin 0
 					choice-list
 						on-scroll [ ; does not work
-							probe 'a
+							probe 'scrolling
 						]
 						with [
 							surface: 'edge
@@ -275,10 +273,7 @@ stylize/master [
 							]
 							append init [
 								; Get actors from opener face
-								foreach fnc get in get in get-opener-face 'actors 'on-select [
-									insert-actor-func self 'on-select :fnc
-								]
-								actor-face: get-opener-face
+								pass-actor get-opener-face self 'on-select
 								; Perform initial selection, not using select-face, otherwise ON-SELECT would be used
 								value: get-face get-opener-face
 								highlighted: copy
@@ -286,26 +281,18 @@ stylize/master [
 							]
 						]
 				]
-				compose [
-					; . - flickering on popup close. the popup is reopened quickly and closed again, when the action completes
-					;     open-choice-face is run after the default action. open-choice-face is only tied to on-click
-					;     the on-click is run by the list cells when clicked, which when the actor-face is the choice
-					;     becomes that the choice face on-click is really run. there is no way to avoid this.
-					;     other than actor-face really just produces conflicts
+				as-pair 0 negate face/size/y * divide 1 + index? find face/setup get-face face 2
+				; . - scroll using scroll-wheel
+				;     need to get the actor here, but nothing happens
+				;     no on-scroll actor is called, so face can't be scrolled
 
-					; x - complete init
-					; . - scroll using scroll-wheel
-					; . - correct offset on init
-					; x - complete columns and column-order
-					; ! - face/value is unknown, possibly wrong path
-					; x - sizes may be wrong, as we are not calculating certain edges correctly
-					; . - need to share the font from parent
-					; . - edge will be part of the list
-					; x - the list has no background color
-;					size: (as-pair face/size/x face/size/y * divide length? face/setup 2)
-; need a different way to convey this
-					offset: (as-pair 0 negate face/size/y * divide 1 + index? find face/setup get-face face 2)
-				]
+				; . - scroll to different value without opening, by using the scroll-wheel
+
+				; x - face/value is unknown, possibly wrong path
+				; x - sizes may be wrong, as we are not calculating certain edges correctly
+				; . - need to share the font from parent
+				; . - edge will be part of the list
+				; x - the list has no background color
 		]
 		access: make access [
 			setup-face*: func [face value] [
@@ -323,6 +310,22 @@ stylize/master [
 			]
 			get-face*: func [face] [
 				first face/data
+			]
+			scroll-face*: func [face x y /local old] [
+				old: face/data
+				set-face*
+					face
+					first
+						either y > 0 [
+							skip face/data -2
+						][
+							either tail? skip face/data 2 [
+								face/data
+							][
+								skip face/data 2
+							]
+						]
+				old <> face/data
 			]
 		]
 		init: [

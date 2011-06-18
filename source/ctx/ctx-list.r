@@ -189,28 +189,6 @@ ctx-list: context [
 		set-columns face
 	]
 
-	; sets the sorting for the given list face
-	;set-sorting: func [face /local op col idx] [
-	;	set-vars face
-	;	insert clear sidx* fidx*
-	;	if all [sod* soc*] [
-	;		op: get select [ascending lesser? asc lesser? descending greater? desc greater?] sod*
-	;		; op can be improved to handle any datatype
-	;		switch/default to word! get-list-type [
-	;			object! [
-	;				sort/compare sidx* func [x y] [op get in pick data* x soc* get in pick data* y soc*]
-	;			]
-	;			block! [
-	;				col: index? find cols* soc*
-	;				sort/compare sidx* func [x y] [op pick pick data* x col pick pick data* y col]
-	;			]
-	;		][
-	;			sort/compare sidx* func [x y] [op pick data* x pick data* y]
-	;		]
-	;	]
-	;	set-columns face
-	;]
-
 	; sets the indexes for the columns to be displayed in the list face in the correct order
 	set-columns: func [face /local def] [
 		set-vars face
@@ -246,32 +224,6 @@ ctx-list: context [
 							val
 						]
 					]
-			]
-		]
-	]
-
-	; returns the contents of a single cell according to filtered and sorted data
-	; unused
-	get-cell: func [face phys-row col /local val] [
-		set-vars face
-		either col <= length? sidx* [
-			val: pick data* pick sidx* phys-row
-		][
-			unset 'val
-		]
-		col: pick dadis* col
-		case [
-			not value? 'val [
-				copy ""
-			]
-			object? val [
-				get in val pick next first val col
-			]
-			any-block? val [
-				pick val col
-			]
-			true [
-				val ; not form?
 			]
 		]
 	]

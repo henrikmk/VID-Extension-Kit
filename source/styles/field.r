@@ -311,7 +311,7 @@ stylize/master [
 			;-- Set actor sharing between self and area
 			foreach act [on-key on-return on-escape on-tab] [
 				insert-actor-func self act :set-scroller
-				area/actors/:act: self/actors/:act
+				pass-actor self area act
 			]
 			; set scroller when pressing a key
 			deflag-face area tabbed ; don't allow tabbing to it

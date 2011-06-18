@@ -36,7 +36,7 @@ stylize/master [
 						pos: face/pos
 						lst/select-func face event
 						act-face
-							lst/actor-face
+							lst
 							event
 							pick [on-double-click on-click] event/double-click
 						face/pos: pos ; maintain position even after list is closed
@@ -79,7 +79,6 @@ stylize/master [
 		h-scroller:					; horizontal scroller attached to list face
 		selected:					; block of integers with selected indexes in the original data
 		highlighted:				; block of integers with highlighted indexes in the original data
-		actor-face:					; the face passed to any actor used in LIST
 		;-- CTX-LIST information
 		filter-func:				; filter function
 		sort-direction:				; 'asc, 'ascending or 'desc, 'descending
@@ -101,7 +100,7 @@ stylize/master [
 		feel: make feel [
 			redraw: func [face act pos][
 				if all [not svv/resizing? act = 'draw] [
-					act-face face/actor-face none 'on-redraw
+					act-face face none 'on-redraw
 				]
 			]
 		]
@@ -296,7 +295,7 @@ stylize/master [
 				show self
 				face/pos: old ; otherwise it changes due to SHOW
 			]
-			act-face actor-face none 'on-select
+			act-face self none 'on-select
 		]
 		;-- Cell selection function for keyboard. FACE is the list in focus.
 		key-select-func: func [face event /local dir keys old out s step] [
@@ -305,10 +304,10 @@ stylize/master [
 					select-face/no-show face not event/shift
 				]
 				#"^M" = event/key [
-					act-face face/actor-face none 'on-return
+					act-face face none 'on-return
 				]
 				#"^[" = event/key [
-					act-face face/actor-face none 'on-escape
+					act-face face none 'on-escape
 				]
 				keys: find [up down] event/key [
 					old: copy face/selected
@@ -345,7 +344,7 @@ stylize/master [
 			face/selected: head insert head clear face/selected unique sel
 			if sel <> old [
 				do-face self get-face face
-				if keys [act-face face/actor-face none 'on-select]
+				if keys [act-face face none 'on-select]
 			]
 			event
 		]
@@ -363,7 +362,7 @@ stylize/master [
 			; performs face navigation using LIST-* styles in the sub-face
 			key-face*: func [face event /local old] [
 				event: face/key-select-func face event
-				act-face face/actor-face event 'on-key
+				act-face face event 'on-key
 				event
 			]
 			; scrolls the list face
@@ -379,7 +378,6 @@ stylize/master [
 						at head face/output add y * subtract length? face/data size 1
 					]
 				clamp-list face
-				act-face face/actor-face event 'on-scroll
 				not-equal? index? old index? face/output ; update only for show when the index shows a difference
 			]
 			; returns selected rows from the list face
@@ -419,14 +417,14 @@ stylize/master [
 				]
 				face/data: any [data make block! []]
 				ctx-list/set-filtered face
-				act-face face/actor-face none 'on-unselect
+				act-face face none 'on-unselect
 			]
 			; clears the face data block
 			clear-face*: func [face] [
 				clear face/selected
 				clear face/data
 				ctx-list/set-filtered face
-				act-face face/actor-face none 'on-unselect
+				act-face face none 'on-unselect
 			]
 			; selects rows in the face
 			select-face*: func [face values] [
@@ -434,12 +432,12 @@ stylize/master [
 				case [
 					;-- Select Nothing
 					empty? face/data-sorted [
-						act-face face/actor-face none 'on-unselect
+						act-face face none 'on-unselect
 					]
 					;-- Select Range
 					any-block? :values [
 						insert face/selected unique intersect values face/data-sorted
-						act-face face/actor-face none 'on-select
+						act-face face none 'on-select
 					]
 					;-- Select by Function
 					any-function? :values [
@@ -448,7 +446,7 @@ stylize/master [
 							if values pick face/data id [insert tail face/selected id]
 						]
 						act-face
-							face/actor-face
+							face
 							none
 							either empty? face/selected ['on-unselect]['on-select]
 					]
@@ -456,18 +454,18 @@ stylize/master [
 					'first = :values [
 						insert clear face/selected first face/data-sorted
 						follow face 1
-						act-face face/actor-face none 'on-select
+						act-face face none 'on-select
 					]
 					;-- Select Last
 					'last = :values [
 						insert clear face/selected last face/data-sorted
 						follow face length? face/data-sorted
-						act-face face/actor-face none 'on-select
+						act-face face none 'on-select
 					]
 					;-- Select All
 					true = :values [
 						insert face/selected face/data-sorted
-						act-face face/actor-face none 'on-select
+						act-face face none 'on-select
 					]
 				]
 				face/start: face/selected/1
@@ -478,7 +476,7 @@ stylize/master [
 				clear face/selected
 				face/filter-func: :value
 				ctx-list/set-filtered face
-				act-face face/actor-face none 'on-unselect
+				act-face face none 'on-unselect
 			]
 			; perform edits on the list, when the list is object based
 			edit-face*: func [face op value pos /local j] [
@@ -540,8 +538,6 @@ stylize/master [
 			any [block? highlighted highlighted: make block! []]
 			; Prepare rendering
 			pane: :pane-func
-			; Actor handling
-			actor-face: self
 		]
 	]
 
@@ -556,7 +552,7 @@ stylize/master [
 				if empty? out [
 					face/over: none
 					clear face/highlighted
-					act-face face/actor-face none 'on-unselect
+					act-face face none 'on-unselect
 					return false
 				]
 				either empty? face/highlighted [
@@ -575,16 +571,16 @@ stylize/master [
 					]
 				]
 				follow face first face/highlighted
-				act-face face/actor-face none 'on-highlight
+				act-face face none 'on-highlight
 			]
 			if find [#" " #"^M"] event/key [
 				unless empty? face/highlighted [
 					append clear face/selected face/highlighted
 				]
 				if event/key = #"^M" [
-					act-face face/actor-face none 'on-return
+					act-face face none 'on-return
 				]
-				act-face face/actor-face none 'on-select
+				act-face face none 'on-select
 			]
 			event
 		]
@@ -664,26 +660,27 @@ stylize/master [
 				]
 			]
 			key-face*: func [face event] [
-				event: key-face face/list event
+				event: face/list/access/key-face* face/list event
 				set-scroller face
 				event
 			]
 			set-face*: func [face data] [
-				set-face/no-show face/list data
+				face/list/access/set-face* face/list data
 				face/data: face/list/data
 				set-scroller face
 			]
 			get-face*: func [face] [
-				get-face face/list
+				face/list/access/get-face* face/list
 			]
 			clear-face*: func [face] [
-				clear-face/no-show face/list data
+				face/list/access/clear-face* face/list data
 				face/data: face/list/data
 				set-scroller face
 			]
 			scroll-face*: func [face x y] [
-				scroll-face face/list x y
-				set-scroller face
+				also
+					face/list/access/scroll-face* face/list x y
+					set-scroller face
 			]
 			setup-face*: func [face values /local output-length] [
 				;-- Reset face values
@@ -822,24 +819,23 @@ stylize/master [
 					if find [
 						on-click on-key on-select on-unselect on-return on-escape on-double-click
 					] actor [
-						face/list/actors/:actor: get in face/actors actor
+						pass-actor face face/list actor
 					]
 				]
-				face/list/actor-face: face
 				;-- Setup Scroller
 				insert-actor-func face 'on-align get in access 'set-scroller
 				insert-actor-func face 'on-resize get in access 'set-scroller
 			]
 			select-face*: func [face values] [
-				select-face/no-show face/list :values
+				face/list/access/select-face* face/list :values
 				set-scroller face
 			]
 			query-face*: func [face value] [
-				query-face/no-show face/list :value
+				face/list/access/query-face* face/list :value
 				set-scroller face
 			]
 			edit-face*: func [face op value pos] [
-				edit-face/at/no-show face/list :op :value :pos
+				face/list/access/edit-face* face/list :op :value :pos
 				set-scroller face
 			]
 		]

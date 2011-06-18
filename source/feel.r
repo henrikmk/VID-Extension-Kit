@@ -797,8 +797,8 @@ scroll-face: func [
 			]
 		]
 		set/any 'show? access/scroll-face* face x-value y-value
-		act-face face none 'on-scroll
 		if value? 'show? [no-show: not show?]
+		if show? [act-face face none 'on-scroll]
 	]
 	any [no-show show face]
 	face
@@ -948,13 +948,13 @@ disable-face: func [
 
 ;-- Actor Functions:
 
-insert-actor-func: func [face actor fn] [
-	if in face 'actors [
-		if none? get in face/actors actor [
-			face/actors/:actor: make block! []
+insert-actor-func: func [fc actor fn /from fac] [
+	if in fc 'actors [
+		if none? get in fc/actors actor [
+			fc/actors/:actor: make block! []
 		]
-		unless find face/actors/:actor :fn [
-			insert/only tail face/actors/:actor :fn
+		unless find fc/actors/:actor :fn [
+			insert/only insert tail fc/actors/:actor either from [fac][fc] :fn
 		]
 	]
 ]
@@ -963,25 +963,21 @@ remove-actor-func: func [face actor fn /local act] [
 	if in face 'actors [
 		any [
 			none? act: get in face/actors actor
-			remove find act :fn
-		]
-	]
-]
-context [
-
-count: 0
-
-; set criteria and throw an error on N count
-set 'boom func [act num] [
-	if do act [
-		count: count + 1
-		if do bind num 'count [
-			throw make error! reform ["boom with:" mold act]
+			act: find act :fn
+			act: back act
+			remove/part act 2
 		]
 	]
 ]
 
+pass-actor: func [src-face target-face actor] [
+	if all [in src-face 'actors in target-face 'actors] [
+		foreach [fc act] any [get in src-face/actors actor []] [
+			insert-actor-func/from target-face actor :act fc
+		]
+	]
 ]
+
 act-face: func [[catch] face event actor] [
 	unless in face 'actors [
 		throw make error! join "Actors do not exist for " describe-face face
@@ -995,8 +991,8 @@ act-face: func [[catch] face event actor] [
 	]
 	;-- run through the block here for each actor function
 	if block? get in face/actors actor [
-		foreach act get in face/actors actor [
-			act face get-face face event actor ; face, value, event and actor
+		foreach [fc act] get in face/actors actor [
+			act fc get-face fc event actor ; face, value, event and actor
 		]
 	]
 	;do get in get in face 'actors actor face get-face face event actor ; face, value, event and actor
@@ -1359,7 +1355,7 @@ ctx-access: context [
 			; is sometimes never reached
 			switch event/key [
 				#"^[" [ ; escape
-					act-face face event probe 'on-escape
+					act-face face event 'on-escape
 				]
 				#"^M" [ ; return
 					act-face face event 'on-return

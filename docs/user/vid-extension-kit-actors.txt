@@ -57,6 +57,18 @@ You can remove actor functions by using the REMOVE-ACTOR-FUNC function:
 
 	remove-actor-func face 'on-click :my-func
 
+---Passing Actors
+
+Normally, when assigining actor functions, the functions are assigned to a single face.
+
+Some compound faces will require the use of the same actors, such as when a DATA-LIST needs to pass an ON-CLICK actor to the LIST style that is used inside it.
+
+This is done by passing the actor functions between faces, using the actors object. Each actor stores actor functions in a block that is then performed in sequence. The functions are stored along with the face that was originally assigned using INSERT-ACTOR-FUNC.
+
+Example:
+
+	pass-actor face1 face2 'on-click
+
 ---Debugging Actors
 
 Actors can be debugged, as in you can see which actors are called in the console, if inserting the 'actors flag in CTX-VID-DEBUG:

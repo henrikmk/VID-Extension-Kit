@@ -329,10 +329,9 @@ init-window: func [
 			err-face
 			all [focus-face system/words/focus focus-face true]
 			;-- find a default focus face here in the layout
-			(probe 'focus-default-input focus-default-input face)
-			(probe 'focus-first-input focus-first-input face)
-			(probe 'focus-first-false focus-first-false face)
-			(probe 'nothing)
+			focus-default-input face
+			focus-first-input face
+			focus-first-false face
 		]
 	]
 	face

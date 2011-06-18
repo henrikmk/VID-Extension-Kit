@@ -123,7 +123,7 @@ stylize/master [
 		fold: func [face window /no-show /local edge min-size] [
 			edge: second (2 * edge-size window)
 			min-size: window/title-face/size/y + edge
-			either probe window/size/y = min-size [
+			either window/size/y = min-size [
 				window/fold-face/effect: effect-window-fold
 				window/size/y: window/content-face/size/y + window/content-face/offset/y + edge
 			][
