@@ -200,7 +200,7 @@ svvf: system/view/vid/vid-feel: context [
 	;]
 
 	icon: button: :hot
-	
+
 	choice: make hot [
 		engage: func [face action event][
 			if action = 'down [
@@ -967,7 +967,21 @@ remove-actor-func: func [face actor fn /local act] [
 		]
 	]
 ]
+context [
 
+count: 0
+
+; set criteria and throw an error on N count
+set 'boom func [act num] [
+	if do act [
+		count: count + 1
+		if do bind num 'count [
+			throw make error! reform ["boom with:" mold act]
+		]
+	]
+]
+
+]
 act-face: func [[catch] face event actor] [
 	unless in face 'actors [
 		throw make error! join "Actors do not exist for " describe-face face

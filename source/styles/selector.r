@@ -289,6 +289,9 @@ stylize/master [
 				compose [
 					; . - flickering on popup close. the popup is reopened quickly and closed again, when the action completes
 					;     open-choice-face is run after the default action. open-choice-face is only tied to on-click
+					;     the on-click is run by the list cells when clicked, which when the actor-face is the choice
+					;     becomes that the choice face on-click is really run. there is no way to avoid this.
+					;     other than actor-face really just produces conflicts
 
 					; x - complete init
 					; . - scroll using scroll-wheel

@@ -12,6 +12,16 @@ There are no fixed rules on when to call an actor, so this document also serves 
 
 ===Actors
 
+---Using Actors
+
+To use an actor in your layout, simply add the actor word with a block:
+
+	view make-window [
+		button on-click [print "Hello World"]
+	]
+
+Which actors you can use, is listed in the reference section below.
+
 ---Calling Actors
 
 When creating your own styles or when using actors, you call actors by the ACT-FACE function:
@@ -53,23 +63,9 @@ Actors can be debugged, as in you can see which actors are called in the console
 
 	insert ctx-vid-debug/debug 'actors
 
----Reference
+===Reference
 
-+++ON-SETUP
-
-This actor is called during SETUP-FACE.
-
-+++ON-KEY
-
-This actor is called whenever you press a key, when the face is focused.
-
-+++ON-TAB
-
-This actor is called whenever you press the TAB key, when the face is focused.
-
-+++ON-RETURN
-
-This actor is called whenever you press the RETURN key, when the face is focused.
+---Mouse Input
 
 +++ON-CLICK
 
@@ -83,6 +79,12 @@ This is run when right clicking on a button, a field
 
 This is run when double clicking a button or a list item.
 
+---Accessor
+
++++ON-SETUP
+
+This actor is called during SETUP-FACE.
+
 +++ON-SET
 
 This is run on SET-FACE.
@@ -95,33 +97,9 @@ This is run on CLEAR-FACE.
 
 This is run on RESET-FACE.
 
-+++ON-ESCAPE
-
-This actor is called whenever you press the ESCAPE key, when the face is focused.
-
-+++ON-FOCUS
-
-This actor is called whenever a face goes into focus, i.e. gets the focus ring.
-
-+++ON-UNFOCUS
-
-This actor is called whenever a face loses its focus, i.e. has the focus ring removed, such as when pressing the TAB key.
-
 +++ON-SCROLL
 
-This actor is called, whenever
-
-+++ON-RESIZE
-
-This actor is called, whenever the window resizes.
-
-+++ON-ALIGN
-
-This actor is called, whenever the window is aligned, which usually only is directly after layout.
-
-+++ON-TIME
-
-This actor is called when a FACE/RATE event has occurred.
+This actor is called, whenever a face needs to be scrolled using SCROLL-FACE.
 
 +++ON-SEARCH
 
@@ -143,14 +121,6 @@ This is run on SELECT-FACE, when a range is specified.
 
 This is run on SELECT-FACE, when the specified range is NONE.
 
-+++ON-VALIDATE
-
-This is run on validation.
-
-+++ON-INIT-VALIDATE
-
-This is run on initial validation.
-
 +++ON-ENABLE
 
 This is run on ENABLE-FACE.
@@ -166,3 +136,95 @@ This is run on FREEZE-FACE.
 +++ON-THAW
 
 This is run on THAW-FACE.
+
+---Keyboard
+
++++ON-KEY
+
+This actor is called whenever you press a key, when the face is focused.
+
++++ON-TAB
+
+This actor is called whenever you press the TAB key, when the face is focused.
+
++++ON-RETURN
+
+This actor is called whenever you press the RETURN key, when the face is focused.
+
++++ON-ESCAPE
+
+This actor is called whenever you press the ESCAPE key, when the face is focused.
+
+---Focusing
+
++++ON-FOCUS
+
+This actor is called whenever a face goes into focus, i.e. gets the focus ring.
+
++++ON-UNFOCUS
+
+This actor is called whenever a face loses its focus, i.e. has the focus ring removed, such as when pressing the TAB key.
+
+---Resizing
+
++++ON-RESIZE
+
+This actor is called, whenever the window resizes.
+
++++ON-ALIGN
+
+This actor is called, whenever the window is aligned, which usually only is directly after layout.
+
+---Validation
+
++++ON-VALIDATE
+
+This is run on validation.
+
++++ON-INIT-VALIDATE
+
+This is run on initial validation.
+
+---Window Handling
+
++++ON-INIT-WINDOW
+
+When the window is initialized.
+
++++ON-ACTIVATE
+
+This is run, when the window is activated.
+
++++ON-DEACTIVATE
+
+When the window is deactivated.
+
++++ON-MAXIMIZE
+
+When the window is maximized.
+
++++ON-MINIMIZE
+
+When the window is minimized.
+
++++ON-RESTORE
+
+When the window is restored from minimization.
+
++++ON-TEXT
+
+When the title of the window changes.
+
++++ON-OFFSET
+
+When the window moves.
+
+---Other Events
+
++++ON-TIME
+
+This actor is called when a FACE/RATE event has occurred.
+
++++ON-HIGHLIGHT
+
+When a data element (table row, text part, etc.) in the face is highlighted.
