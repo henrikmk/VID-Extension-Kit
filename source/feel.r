@@ -954,7 +954,7 @@ insert-actor-func: func [fc actor fn /from fac] [
 			fc/actors/:actor: make block! []
 		]
 		unless find fc/actors/:actor :fn [
-			insert/only insert tail fc/actors/:actor either from [fac][fc] :fn
+			insert/only insert fc/actors/:actor either from [fac][fc] :fn
 		]
 	]
 ]

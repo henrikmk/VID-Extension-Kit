@@ -133,17 +133,9 @@ stylize/master [
 								hide-menu-face
 							]
 					]
-					; need a way to initialize this face
 					[bottom right]
 					[top right]
-				;use [fp d] [
-				;	all [
-				;		fp: face/parent-face
-				;		d: request-date/date any [attempt [to date! get-face fp] now]
-				;		set-face fp d
-				;		do-face fp none
-				;	]
-				;]
+
 			]
 		]
 		access: make access [
@@ -182,6 +174,9 @@ stylize/master [
 	DATE-WEEKDAY-CELL: IMAGE with [
 		data: none
 		colors: none
+		feel: make face/feel [
+			engage: func [face act event] [] ; disallows passing events here
+		]
 		init: [
 			colors: reduce [
 				font/color

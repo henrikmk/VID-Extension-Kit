@@ -222,9 +222,6 @@ stylize/master [
 				compose/deep [
 					origin 0
 					choice-list
-						on-scroll [ ; does not work
-							probe 'scrolling
-						]
 						with [
 							surface: 'edge
 							value: none
@@ -283,8 +280,12 @@ stylize/master [
 				]
 				as-pair 0 negate face/size/y * divide 1 + index? find face/setup get-face face 2
 
+				; . - pixel error when reaching zero
+				; . - key typing navigation
 				; . - need to share the font from parent
-				; . - edge will be part of the list
+				; . - highlight overshadows parent effect edge
+				; . - scroll to position when moving with highlight
+				; x - edge will be part of the list
 		]
 		access: make access [
 			setup-face*: func [face value] [

@@ -2,45 +2,55 @@ VID Extension Kit - Menu Face
 
 ===Introduction
 
-The Menu Face is a standard face included with every window that is made with MAKE-WINDOW. It is situated as the last face in the window face tree. The purpose is to display a floating face for popup menus. The face can be displayed at a specific location and tied to a specific face. When its purpose is completed, the contents are removed and the face is hidden.
+The menu face is a window face that can be created and shown using the SHOW-MENU-FACE function and be situated near the face that opens the menu face. The menu-face is borderless and has no title.
 
-Currently, the menu face appears only inside the parent window, thus is limited by the boundary of that window. Later it will be made possible to open the menu face as a separate window.
+The purpose is to display a floating face for popup menus. When its purpose is completed, the contents are removed and the face is hidden using HIDE-MENU-FACE.
 
-Also at this time, the menu face can be used only for one menu per window at a time, ruling out sub-menus.
+At this time, the menu face can be used only for one menu per window at a time, ruling out sub-menus.
 
 Functions to manage the menu face are located inside the CTX-MENU-FACE context.
+
+---Naming
+
+:menu-face - The menu face itself. The menu face is a face object for as long as the menu face is shown on screen. When it closes, the menu-face becomes NONE.
+
+:opener-face - The face that opens the menu face. The opener face is a face object for as long as the menu face is shown on screen. When it closes, the opener face becomes NONE.
 
 ---Usage
 
 +++SHOW-MENU-FACE
 
-The menu face is opened using SHOW-MENU-FACE.
+The menu face is created opened using SHOW-MENU-FACE. The menu face is then displayed using INFORM, so that it does not produce any extra task bar buttons, but deactivates the window in which the opener face exists.
+
+When the window is shown, it goes through the same INIT-WINDOW process as regular windows, so default faces will be focused on open.
+
+Also, if clicking on the background of another REBOL window in the same process, the popup is closed.
 
 SHOW-MENU-FACE has the following arguments:
 
 :face - The face that opens the menu face. This is used as a reference for where to open the menu face.
 
-:content - This is a layout block or a face object that is used to describe the content of the menu face.
+:content - This is a layout block that is used to describe the content of the menu face.
 
 It has the following refinements:
 
-:/offset - This is the offset as a pair! from the lower left hand corner of the opening face. When not using this refinement, the menu face will appear with its top left corner at the lower left hand corner of the opening face.
+:/hinge - The face can be hinged to a particular corner of the opener face, specified as two blocks of two words. If you want to hinge the bottom right corner of the opener face to the top left corner of the menu face, use the blocks in sequence: [bottom right] [top left]. When not using this refinement, the menu face will appear with its top left corner at the lower left hand corner of the opening face.
 
-:/size - The size as a pair! of the content area. When not using this refinement, the menu face will assume whatever size is calculated by the content.
+:/offset - This is the offset as a pair! from the lower left hand corner of the opening face or from the hinge point, if the /hinge refinement is used.
 
 +++HIDE-MENU-FACE
 
 To close the menu, use the HIDE-MENU-FACE function.
 
-HIDE-MENU-FACE uses any face in the current window as an argument.
+HIDE-MENU-FACE does not use any arguments.
 
 +++GET-MENU-FACE
 
-This retrieves the menu face in the current window. This is useful when referencing the menu face from a face inside the menu face
+This retrieves the menu face. This is useful when referencing the menu face from another face.
 
 +++GET-OPENER-FACE
 
-This retrieves the face that opened the menu face. This is useful when referencing the opener face from a face inside the menu face
+This retrieves the face that opened the menu face, i.e. the opener face. This is useful when referencing the opener face from a face inside the menu face or elsewhere.
 
 ---Examples
 
@@ -54,7 +64,7 @@ Clicking an entry in the list will close the face again, using the hide-menu-fac
 
 +++Calendar
 
-Any complex face can be opened with SHOW-MENU-FACE. In this example, we are using a basic POP-FACE to open a month calendar, with the DATE-NAV-MONTH style, just underneath the face and deliver a date to the POP-FACE, when clicking a date in the calendar.
+Any layout can be created and opened with SHOW-MENU-FACE. In this example, we are using a basic POP-FACE to open a month calendar, with the DATE-NAV-MONTH style, just underneath the face and deliver a date to the POP-FACE, when clicking a date in the calendar.
 
 	pop-face on-click [
 		show-menu-face face [
@@ -65,11 +75,11 @@ Any complex face can be opened with SHOW-MENU-FACE. In this example, we are usin
 		]
 	]
 
-The example will display the calendar hinged to the left side of the opener face. However, since the popup button is in the right hand side of the face, it's more appropriate to open it, hinged to the right hand side at the bottom of the opener face. For this we can use the <strong>/hinge</strong> refinement to specify an offset or two blocks of words to describe the desired hinge point of the menu face as well as for the opener face.
+The example will display the calendar hinged to the left side of the opener face. When clicking an item, the opener face (the pop-face), will be set with the selected date value and the menu face closes.
+
+However, since the popup button is in the right hand side of the face, it's more appropriate to open the menu face, hinged to the right hand side at the bottom of the opener face. For this we can use the <strong>/hinge</strong> refinement to specify an offset or two blocks of words to describe the desired hinge point of the menu face as well as for the opener face.
 
 See the vid-extension-kit-extra-functions.txt for details on the HINGE function, which is used inside SHOW-MENU-FACE.
-
-Furthermore, we need to align the menu face. This will happen in accordance with the opener face.
 
 	pop-face on-click [
 		show-menu-face/hinge face [
@@ -79,16 +89,3 @@ Furthermore, we need to align the menu face. This will happen in accordance with
 			]
 		] [bottom right] [top right]
 	]
-
-+++MacOSX Style Scrollable Popup
-
-In MacOSX, certain popups will appear with a selected item directly on top of the face that was clicked to reduce necessary mouse movement. We already have a style for this, named CHOICE, but let's study in this example, how it's built.
-
-In this example, it's necessary to perform some calculations and add code to menu face to make it behave in the desired fashion:
-
-# When opening, we present a CARET-LIST, which is a type of list that always displays a selected item and can be navigated up and down with the cursor keys. See the vid-extension-kit-list.txt file for more information on the CARET-LIST style.
-
-# When scrolling, the face must only be scrollable using the scroll wheel, when the menu face is not entirely visible inside the window.
-
-# When opening, it must open with the selected item, directly on top of the opener face.
-

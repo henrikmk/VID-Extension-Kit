@@ -519,11 +519,11 @@ stylize/master [
 			]
 		]
 		init: [
-			unless all [columns sub-face] [make error! "SUB-FACE and COLUMNS are not defined"]
 			; Set up columns
+			any [columns columns: [column]]
 			all [columns not column-order column-order: columns]
 			; Build sub-face
-			make-sub-face/init self sub-face ; empty sub-face = infinite loop
+			make-sub-face/init self any [sub-face [list-text-cell]] ; empty sub-face = infinite loop
 			if none? size [
 				size: 300x200
 				size/x: sub-face/size/x + first edge-size? self
@@ -596,13 +596,15 @@ stylize/master [
 				window-face: find-window opener-face
 				menu-face: get-menu-face
 				menu-face/offset/y: opener-face/size/y * dir + menu-face/offset/y
+				; Fix pixel offset error for negative values
+				; (not a perfect fix, as there is still a one-pixel but constant offset)
 				if menu-face/offset/y < 0 [menu-face/offset/y: menu-face/offset/y - 1]
-				;-- restrain to opener-face top
+				; Restrain to opener-face top
 				menu-face/offset/y:
 					min
 						menu-face/offset/y
 						window-face/offset/y + opener-face/win-offset/y
-				;-- restrain to opener-face bottom
+				; Restrain to opener-face bottom
 				menu-face/offset/y:
 					max
 						menu-face/offset/y
