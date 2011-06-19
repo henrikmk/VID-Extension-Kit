@@ -67,15 +67,35 @@ stylize/master [
 			if 30 on-tab day-act on-set day-act
 			if 30 on-tab month-act on-set month-act
 			if 44 on-tab year-act on-set year-act max-length 4
-			button 24x0 fill 0x1 "..." [
-				use [fp d] [
-					all [
-						fp: face/parent-face
-						d: request-date/date get-face fp
-						set-face fp d
-						do-face fp none
+			button 24x0 fill 0x1 "..." on-click [
+				show-menu-face/hinge
+					face
+					[
+						layout-date
+							on-init-window [
+								use [d] [
+									d: get-face get in get-opener-face 'parent-face
+									set-face face d/date
+								]
+							]
+							on-click [
+								use [pf] [
+									set-face pf: get in get-opener-face 'parent-face value
+									hide-menu-face
+									do-face pf none
+								]
+							]
+							on-key [
+								if find [#" " #"^M"] event/key [
+									act-face face none 'on-click
+								]
+							]
+							on-escape [
+								hide-menu-face
+							]
 					]
-				]
+					[bottom right]
+					[top right]
 			]
 		]
 		init: [
@@ -135,7 +155,6 @@ stylize/master [
 					]
 					[bottom right]
 					[top right]
-
 			]
 		]
 		access: make access [

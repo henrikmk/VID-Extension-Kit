@@ -284,7 +284,7 @@ stylize/master [
 				; . - key typing navigation
 				; . - need to share the font from parent
 				; . - highlight overshadows parent effect edge
-				; . - scroll to position when moving with highlight
+				; . - scroll to position when moving with highlight, possibly using on-highlight actor
 				; x - edge will be part of the list
 		]
 		access: make access [
