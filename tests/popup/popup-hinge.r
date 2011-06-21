@@ -22,7 +22,7 @@ REBOL [
 ]
 
 do %../../build/include.r
-
+probe 'a
 clear ctx-vid-debug/debug
 
 inform make-window [
@@ -32,6 +32,7 @@ inform make-window [
 		show-menu-face face [origin 4 space 0 field button "..."]
 	]
 	date1: date-time-field
+	date2: date-field
 	b1: button "Over There ->" 300 on-click [
 		show-menu-face/hinge
 			face

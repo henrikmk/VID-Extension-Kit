@@ -49,9 +49,9 @@ stylize/master [
 			get-face*: func [face] [
 				attempt [
 					to-date to-string reduce [
-						face/pane/3/text '-
-						face/pane/2/text '-
-						face/pane/1/text
+						face/pane/3/data '-
+						face/pane/2/data '-
+						face/pane/1/data
 					]
 				]
 			]
@@ -83,11 +83,14 @@ stylize/master [
 									set-face pf: get in get-opener-face 'parent-face value
 									hide-menu-face
 									do-face pf none
+									act-face pf none 'on-click
+									act-face pf none 'on-select
 								]
 							]
 							on-key [
 								if find [#" " #"^M"] event/key [
 									act-face face none 'on-click
+									act-face face none 'on-select
 								]
 							]
 							on-escape [
@@ -142,11 +145,14 @@ stylize/master [
 									set-face pf: get in get-opener-face 'parent-face value
 									hide-menu-face
 									do-face pf none
+									act-face pf none 'on-click
+									act-face pf none 'on-select
 								]
 							]
 							on-key [
 								if find [#" " #"^M"] event/key [
 									act-face face none 'on-click
+									act-face face none 'on-select
 								]
 							]
 							on-escape [
@@ -251,11 +257,11 @@ stylize/master [
 		sunday: false
 		color: ctx-colors/colors/grid-color
 		access: make access [
-			set-face*: func [face value /local i] [
-				if date? value [face/data: value/date]                  ; store date as for month to display
-				start-date: face/data                                   ; requested date
-				start-date: start-date - start-date/day + 1             ; first day of month
-				start-date: start-date - start-date/weekday + 1         ; first day visible in month calendar
+			set-face*: func [face value /local i start-date] [
+				if date? value [face/data: value/date]			; store date as for month to display
+				start-date: face/data							; requested date
+				start-date: start-date - start-date/day + 1		; first day of month
+				start-date: start-date - start-date/weekday + 1	; first day visible in month calendar
 				i: 0
 				;-- Distribute dates for all cells
 				foreach day face/pane [

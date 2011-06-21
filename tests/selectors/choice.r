@@ -25,7 +25,7 @@ do %../../build/include.r
 
 clear ctx-vid-debug/debug
 
-probe 's
+probe ""
 
 choices: []
 loop 50 [val: random "abcdefgh" repend choices [to-word val val]]

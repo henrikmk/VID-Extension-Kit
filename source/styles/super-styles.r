@@ -122,7 +122,7 @@ LAYOUT-DATE: COMPOUND [
 			if date? value [
 				face/data: value
 				set-face face/pane/3 form value
-				set-face face/pane/4 value
+				set-face face/pane/4 value ; this has a copy problem
 			]
 		]
 		get-face*: func [face] [

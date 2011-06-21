@@ -255,7 +255,7 @@ set 'set-font func [aface 'word val] [ ; deals with none font and cloning the fo
 set 'set-para func [aface 'word val] [
 	; it appears that this is not used in vid in the same way as font
 	if none? aface/para [aface/para: vid-face/para]
-	unless flag-face? aface para [probe 'para-issue aface/para: make aface/para [] flag-face aface para]
+	unless flag-face? aface para [aface/para: make aface/para [] flag-face aface para]
 	set in aface/para word val
 ]
 
