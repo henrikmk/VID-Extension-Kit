@@ -304,6 +304,13 @@ stylize/master [
 			get-face*: func [face] [
 				first face/data
 			]
+			clear-face*: func [face /local values] [
+				values: head face/data
+				set-face* face values/1
+			]
+			reset-face*: func [face] [
+				clear-face* face
+			]
 			scroll-face*: func [face x y /local old] [
 				old: face/data
 				set-face*

@@ -954,7 +954,9 @@ insert-actor-func: func [fc actor fn /from fac] [
 			fc/actors/:actor: make block! []
 		]
 		unless find fc/actors/:actor :fn [
-			insert/only insert fc/actors/:actor either from [fac][fc] :fn
+			; perhaps the actor that we are seeking should be found, closer to runtime than to layout-time
+			insert/only insert fc/actors/:actor if from [fac] :fn
+			;insert/only insert fc/actors/:actor either from [fac][fc] :fn
 		]
 	]
 ]
@@ -973,7 +975,8 @@ remove-actor-func: func [face actor fn /local act] [
 pass-actor: func [src-face target-face actor] [
 	if all [in src-face 'actors in target-face 'actors] [
 		foreach [fc act] any [get in src-face/actors actor []] [
-			insert-actor-func/from target-face actor :act fc
+			insert-actor-func/from target-face actor :act any [fc src-face]
+			;insert-actor-func/from target-face actor :act fc
 		]
 	]
 ]
@@ -992,7 +995,8 @@ act-face: func [[catch] face event actor] [
 	;-- run through the block here for each actor function
 	if block? get in face/actors actor [
 		foreach [fc act] get in face/actors actor [
-			act fc get-face fc event actor ; face, value, event and actor
+			act any [fc face] get-face any [fc face] event actor ; face, value, event and actor
+			;act fc get-face fc event actor ; face, value, event and actor
 		]
 	]
 	;do get in get in face 'actors actor face get-face face event actor ; face, value, event and actor

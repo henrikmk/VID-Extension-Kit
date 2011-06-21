@@ -79,9 +79,9 @@ dump-face: func [
 		"Spring:" all [in face 'spring mold face/spring]
 		"P:"
 		case [
+			none? face/parent-face ["No"]
 			any [all [not parent face/parent-face] face/parent-face = p] ["Yes"]
 			face/parent-face ["(Yes)"]
-			true ["No"]
 		]
 	]
 	insert depth tab
