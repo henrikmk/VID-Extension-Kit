@@ -37,6 +37,52 @@ stylize/master [
 		day-act: [numeric-range face [1 31] zero-pad face 2]
 		month-act: [numeric-range face [1 12] zero-pad face 2]
 		year-act: [numeric-range face [0 9999] zero-pad face 4]
+		calendar-act: [
+			show-menu-face/hinge
+				face
+				[
+					layout-date
+						on-init-window [
+							use [d] [
+								d: get-face get in get-opener-face 'parent-face
+								set-face face d/date
+							]
+						]
+						on-click [
+							use [pf] [
+								set-face pf: get in get-opener-face 'parent-face value
+								hide-menu-face
+								do-face pf none
+								act-face pf none 'on-click
+								act-face pf none 'on-select
+							]
+						]
+						on-key [
+							if find [#" " #"^M"] event/key [
+								act-face face none 'on-click
+								act-face face none 'on-select
+							]
+						]
+						on-escape [
+							hide-menu-face
+						]
+				]
+				[bottom right]
+				[top right]
+		]
+		content: [
+			across space 0
+			style
+				if
+					field integer max-length 2 fill 0x1 ; these fields don't set the parent value immediately
+						on-key [act-face face/parent-face event 'on-key]
+						[do-face face/parent-face none]
+						with [spring: none append flags [auto-tab] font: (make self/font [])]
+			if 30 on-tab day-act on-set day-act
+			if 30 on-tab month-act on-set month-act
+			if 44 on-tab year-act on-set year-act max-length 4
+			button 24x0 fill 0x1 "..." on-click calendar-act
+		]
 		access: make access [
 			set-face*: func [face value] [
 				value: attempt [to-date value]
@@ -49,56 +95,11 @@ stylize/master [
 			get-face*: func [face] [
 				attempt [
 					to-date to-string reduce [
-						face/pane/3/data '-
-						face/pane/2/data '-
-						face/pane/1/data
+						face/pane/3/text '-
+						face/pane/2/text '-
+						face/pane/1/text
 					]
 				]
-			]
-		]
-		content: [
-			across space 0
-			style
-				if
-					field integer max-length 2 fill 0x1
-						on-key [act-face face/parent-face event 'on-key]
-						[do-face face/parent-face none]
-						with [append flags [auto-tab] font: (make self/font [])]
-			if 30 on-tab day-act on-set day-act
-			if 30 on-tab month-act on-set month-act
-			if 44 on-tab year-act on-set year-act max-length 4
-			button 24x0 fill 0x1 "..." on-click [
-				show-menu-face/hinge
-					face
-					[
-						layout-date
-							on-init-window [
-								use [d] [
-									d: get-face get in get-opener-face 'parent-face
-									set-face face d/date
-								]
-							]
-							on-click [
-								use [pf] [
-									set-face pf: get in get-opener-face 'parent-face value
-									hide-menu-face
-									do-face pf none
-									act-face pf none 'on-click
-									act-face pf none 'on-select
-								]
-							]
-							on-key [
-								if find [#" " #"^M"] event/key [
-									act-face face none 'on-click
-									act-face face none 'on-select
-								]
-							]
-							on-escape [
-								hide-menu-face
-							]
-					]
-					[bottom right]
-					[top right]
 			]
 		]
 		init: [
@@ -129,42 +130,10 @@ stylize/master [
 			if 30 on-tab hour-act on-set hour-act
 			if 30 on-tab minute-act on-set minute-act
 			if 30 on-tab second-act on-set second-act
-			button 24x0 fill 0x1 "..." on-click [
-				show-menu-face/hinge
-					face
-					[
-						layout-date
-							on-init-window [
-								use [d] [
-									d: get-face get in get-opener-face 'parent-face
-									set-face face d/date
-								]
-							]
-							on-click [
-								use [pf] [
-									set-face pf: get in get-opener-face 'parent-face value
-									hide-menu-face
-									do-face pf none
-									act-face pf none 'on-click
-									act-face pf none 'on-select
-								]
-							]
-							on-key [
-								if find [#" " #"^M"] event/key [
-									act-face face none 'on-click
-									act-face face none 'on-select
-								]
-							]
-							on-escape [
-								hide-menu-face
-							]
-					]
-					[bottom right]
-					[top right]
-			]
+			button 24x0 fill 0x1 "..." on-click calendar-act
 		]
 		access: make access [
-			set-face*: func [face value /local time] [
+			set-face*: func [face value] [
 				value: attempt [to-date value]
 				unless value [exit]
 				unless face/pane [exit]
