@@ -74,7 +74,7 @@ stylize/master [
 			across space 0
 			style
 				if
-					field integer max-length 2 fill 0x1 ; these fields don't set the parent value immediately
+					field integer max-length 2 fill 0x1
 						on-key [act-face face/parent-face event 'on-key]
 						[do-face face/parent-face none]
 						with [spring: none append flags [auto-tab] font: (make self/font [])]
