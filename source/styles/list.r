@@ -180,6 +180,8 @@ stylize/master [
 				pick pick face/output row col
 			]
 			cell/access/set-face* cell r
+			; this produces selected rows outside, which means that selected rows will appear at the bottom
+			; with no text in them
 			back-render-func face cell
 			either inside [
 				cell/row: pick face/data pick face/data-sorted cell/pos/y
@@ -838,8 +840,8 @@ stylize/master [
 				face/selected:			face/list/selected
 				face/list/prototype:	face/prototype
 				face/list/v-scroller:	face/v-scroller
-				face/list/select-mode:	does [face/select-mode]
-				if get in face 'back-render [face/list/back-render-func: func [face cell] get in face 'back-render]
+				face/list/select-mode:	face/select-mode
+				if get in face 'back-render [face/list/back-render-func: func [face cell] get in face 'back-render] 
 				if get in face 'empty-render [face/list/empty-render-func: func [face cell] get in face 'empty-render]
 				if get in face 'render [face/list/render-func: func [face cell] get in face 'render]
 				;-- Map actors from DATA-LIST to internal components

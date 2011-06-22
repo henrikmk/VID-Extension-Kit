@@ -40,7 +40,11 @@ view make-window [
 	bar
 	across
 	panel [
-		l-data: data-list data list-data on-key [set-i-status] on-click [set-i-status] on-select [set-i-status]
+		l-data: data-list data list-data
+			on-key [set-i-status]
+			on-click [set-i-status]
+			on-select [set-i-status]
+			setup [select-mode 'mutex]
 		i-status: info fill 1x0 spring [top]
 	]
 	right-panel [
@@ -53,7 +57,7 @@ view make-window [
 		h3 "Select Mode:"
 		rs: radio-selector
 			setup [mutex "Mutex" multi "Multi" persistent "Persistent"]
-			[l-data/select-mode: value select-face l-data none]
-		do [set-face rs 'multi set-i-status]
+			[l-data/select-mode: l-data/list/select-mode: value select-face l-data none]
+		do [set-face rs l-data/select-mode set-i-status]
 	]
 ]
