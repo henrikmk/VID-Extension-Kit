@@ -300,6 +300,7 @@ system/view/wake-event: func [event] bind bind [
 ] in system/view 'self ctx-key-nav
 
 ; AWAKE handler for port with event compression
+; Inspired by Gabriele Santilli and Romano Paolo Tenca's eat.r script
 system/ports/wait-list/1/awake: func [port /local events] [
 	events: copy []
 	while [event: pick port 1] [
