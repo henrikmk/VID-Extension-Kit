@@ -272,13 +272,16 @@ system/view/popface-feel: make object! [
 	]
 ]
 
+; Which events to compress, stored in a context for faster lookup
+compressed-events: context [offset: move: none]
+
 ; Patched WAKE-EVENT to handle keyboard navigation after other events.
-system/view/wake-event: func [port] bind bind [
-	event: pick port 1
+system/view/wake-event: func [event] bind bind [
 	if none? event [
 		if debug [print "Event port awoke, but no event was present."]
 		return false
 	]
+	; true is returned, when no windows are left and that quits the program
 	either pop-face [
 		;-- INFORM window
 		if in pop-face/feel 'pop-detect [event: pop-face/feel/pop-detect pop-face event]
@@ -295,6 +298,29 @@ system/view/wake-event: func [port] bind bind [
 		empty? screen-face/pane
 	]
 ] in system/view 'self ctx-key-nav
+
+; AWAKE handler for port with event compression
+system/ports/wait-list/1/awake: func [port /local events] [
+	events: copy []
+	while [event: pick port 1] [
+		; pile up events here and compress them as necessary
+		either all [
+			in compressed-events event/type
+			last-type = event/type
+		] [
+			change back tail events event
+		][
+			last-type: event/type
+			insert tail events event
+		]
+	]
+	; process resulting events
+	foreach event events [
+		; process each event using wake-event
+		if system/view/wake-event event [return true]
+	]
+	false
+]
 
 ; Window FEEL with keyboard navigation
 system/view/window-feel: make object! [

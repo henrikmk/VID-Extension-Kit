@@ -22,6 +22,9 @@ REBOL [
 ]
 
 do %../../build/include.r
+;do %../../../eat.r
+
+;eat/forever [offset move]
 
 clear ctx-vid-debug/debug
 

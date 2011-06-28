@@ -69,6 +69,22 @@ stylize/master [
 
 	; cell image for LIST
 	LIST-IMAGE-CELL: LIST-CELL
+	
+	; column resizer for LIST
+	LIST-RESIZER: RESIZER with [
+		; needs an ON-DRAG that works on other ON-DRAG elements
+		; also needs a different surface, so the list face won't fail here
+		; 2 pixels wide
+		; no drag bar necessary in sub-face, possibly
+		; the drag bar needs to account for the face that it needs to redrag inside the on-drag item
+		; 
+		resize-column: func [face] [
+			
+		]
+		append init [
+			insert-actor-func self 'on-drag :resize-column
+		]
+	]
 
 	; iterated list with user defined sub-face. internal use only.
 	LIST: IMAGE with [
