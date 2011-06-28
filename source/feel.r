@@ -503,6 +503,9 @@ svvf: system/view/vid/vid-feel: context [
 					set-tab-face get in root-face face 'tab-face
 					do-face face none
 					act-face face event 'on-click
+					if find [away over] act [
+						act-face face event 'on-drag
+					]
 				]
 			]
 			set-face-state face act

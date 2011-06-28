@@ -205,6 +205,7 @@ vid-face/actors: make object! [
 	on-click:
 	on-alt-click:
 	on-double-click:
+	on-drag:
 	on-set:
 	on-clear:
 	on-reset:
@@ -371,6 +372,7 @@ facet-words: [ ; Order of these is important to the code
 	on-click			[set-actor new 'on-click second args next args]
 	on-alt-click		[set-actor new 'on-alt-click second args next args]
 	on-double-click		[set-actor new 'on-double-click second args next args]
+	on-drag				[set-actor new 'on-drag second args next args]
 	on-set				[set-actor new 'on-set second args next args]
 	on-clear			[set-actor new 'on-clear second args next args]
 	on-reset			[set-actor new 'on-reset second args next args]

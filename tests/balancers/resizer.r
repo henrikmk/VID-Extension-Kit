@@ -24,14 +24,14 @@ REBOL [
 do %../../build/include.r
 
 clear ctx-vid-debug/debug
-
+print ""
 view make-window [
 	h3 "RESIZER Test"
 	bar
 	across
 	box red
-	resizer
+	resizer on-drag [probe face/offset]
 	box green
-	resizer
+	resizer on-drag [probe face/offset]
 	box blue
 ]
