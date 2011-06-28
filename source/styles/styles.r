@@ -133,6 +133,6 @@ stylize/master [
 	;]
 ;	SLIDER: SLIDER edge field-edge
 ;	BALANCER: BALANCER ctx-colors/colors/frame-background-color edge field-edge
-	RESIZER: RESIZER ctx-colors/colors/frame-background-color edge field-edge
+;	RESIZER: RESIZER ctx-colors/colors/frame-background-color edge field-edge
 
 ]

@@ -15,7 +15,7 @@ REBOL [
 		Use at your own risk.
 	}
 	Purpose: {
-		Test resize.
+		Test BALANCER.
 	}
 	History: []
 	Keywords: []
@@ -26,7 +26,7 @@ do %../../build/include.r
 clear ctx-vid-debug/debug
 
 view make-window [
-	h3 "Balancer Test"
+	h3 "BALANCER Test"
 	bar
 	panel [
 		panel [
