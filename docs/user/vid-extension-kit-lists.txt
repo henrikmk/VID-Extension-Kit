@@ -20,9 +20,9 @@ Common of all of these lists are that they are based on iterated faces. This mea
 
 :SCROLLER - Depending on the style, it may require a scroller to scroll the list horizontally or vertically.
 
-:LIST-CELL - A text cell optimized for lists. If you want clickable rows and custom render functions in the list, this or one of its derivatives should be used.
+:LIST-CELL - A text cell optimized for lists. If you want clickable rows and custom render functions in the list, this or one of its derivatives mentioned below should be used.
 
-:LIST-TEXT-CELL - A derivative of LIST-CELL.
+:LIST-TEXT-CELL - A derivative of LIST-CELL that is optimized for plain text.
 
 :LIST-IMAGE-CELL - A derivative of LIST-CELL for images.
 

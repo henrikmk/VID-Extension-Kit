@@ -73,6 +73,36 @@ frame: edge [
 		disabled [color: 140.140.140]
 	]
 ]
+drag-frame: edge [
+	colors state [
+		released [
+			background: any [color 200.200.200]
+			shine: background + 40
+			shadow: background - 60
+		]
+		pressed drag-over drag-away [
+			background: any [all [color color / 2] 100.150.100]
+			shine: background - 40
+			shadow: background + 60
+		]
+		over [
+			background: any [all [color color + 10] 210.210.210]
+			shine: background + 40
+			shadow: background - 60
+		]
+		disabled [
+			background: 200.200.200
+			shine: background + 20
+			shadow: background - 30
+		]
+	]
+	font state [
+		released [color: black]
+		over [color: blue]
+		pressed drag-over drag-away [color: white]
+		disabled [color: 140.140.140]
+	]
+]
 recessed: frame [
 	template [
 		anti-alias off

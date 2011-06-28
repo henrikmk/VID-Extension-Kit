@@ -132,7 +132,7 @@ stylize/master [
 	;	dragger: make dragger [edge: make face/edge normal-edge]
 	;]
 ;	SLIDER: SLIDER edge field-edge
-	BALANCER: BALANCER ctx-colors/colors/frame-background-color edge field-edge
+;	BALANCER: BALANCER ctx-colors/colors/frame-background-color edge field-edge
 	RESIZER: RESIZER ctx-colors/colors/frame-background-color edge field-edge
 
 ]

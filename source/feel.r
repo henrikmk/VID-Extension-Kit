@@ -40,7 +40,7 @@ svvf: system/view/vid/vid-feel: context [
 	]
 
 	; act on the face data state and UI feedback state using an UP method
-	act-face-state: func [face event] [
+	act-on-up: func [face event] [
 		switch event [
 			up [
 				if all [not face/rate find [drag-over pressed] face/touch] [
@@ -68,6 +68,35 @@ svvf: system/view/vid/vid-feel: context [
 					do-face-alt face face/data
 					act-face face event 'on-alt-click
 				]
+			]
+		]
+	]
+
+	; act on face data state and UI feedback state using a DOWN method
+	act-on-down: func [face event] [
+		switch event [
+			down [
+				; Update face state information
+				if all [block? face/states not empty? head face/states] [
+					face/states: next face/states
+					if tail? face/states [
+						face/states:
+							either face/virgin [
+								next head face/states
+							][
+								head face/states
+							]
+					]
+					face/state: face/states/1
+				]
+				; Do face action on button release above face
+				do-face face face/data
+				; handle double-click here
+				act-face face event 'on-click
+			]
+			alt-down [
+				do-face-alt face face/data
+				act-face face event 'on-alt-click
 			]
 		]
 	]
@@ -135,7 +164,7 @@ svvf: system/view/vid/vid-feel: context [
 	sensor: make face/feel [
 		cue: blink: none
 		engage: func [face action event][
-			act-face-state face action
+			act-on-up face action
 			set-face-state face action
 			show face
 		]
@@ -182,7 +211,7 @@ svvf: system/view/vid/vid-feel: context [
 					face/data: not face/data
 				]
 			]
-			act-face-state face action
+			act-on-up face action
 			set-face-state face action
 			show face
 		]
@@ -421,7 +450,7 @@ svvf: system/view/vid/vid-feel: context [
 
 ;-------- Balancer and Resizer
 
-	balancer: make face/feel [
+	balancer: make hot [
 		old-offset: none
 		; limit the movement of the face
 		real-face?: func [face new-face] [
@@ -444,7 +473,8 @@ svvf: system/view/vid/vid-feel: context [
 		]
 		upper-limit: func [face pos /local nf] [
 			; restrict right panel edge or right next face edge
-			pos: min face/parent-face/size pos
+			; [ ] - do not obscure balancer at end
+			pos: min face/parent-face/size - face/size pos
 			nf: next-face face
 			if real-face? face nf [pos: min pos nf/size + nf/offset - face/size]
 			pos
@@ -454,13 +484,18 @@ svvf: system/view/vid/vid-feel: context [
 			case [
 				act = 'down [
 					old-offset: face/offset
+					act-on-down face act
 				]
 				; pose limit on offset
 				find [away over up] act [
 					tmp: face/offset + event/offset
 					tmp: lower-limit face tmp
 					tmp: upper-limit face tmp
-					if tmp/:axis = face/offset/:axis [exit]
+					if tmp/:axis = face/offset/:axis [
+						set-face-state face act
+						show face
+						exit
+					]
 					face/offset/:axis: tmp/:axis
 					face/before face face/offset - old-offset ; perform resize/move before this face
 					face/after face face/offset - old-offset ; perform resize/move after this face
@@ -470,6 +505,7 @@ svvf: system/view/vid/vid-feel: context [
 					act-face face event 'on-click
 				]
 			]
+			set-face-state face act
 			show face/parent-face
 		]
 	]
