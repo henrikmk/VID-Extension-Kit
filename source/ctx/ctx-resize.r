@@ -1,7 +1,24 @@
 REBOL [
-	Title: "DevBase: GUI Resizing"
-	Author: ["Henrik Mikael Kristensen" "Brian Hawley"]
-	Date: 1-Dec-2007
+	Title:  "REBOL/View: GUI Resizing"
+	Author: ["Brian Hawley" "Henrik Mikael Kristensen"]
+	Rights: "Copyright 2000 REBOL Technologies. All rights reserved."
+	Note:   {Improvements to this code are welcome, but all changes preserve the above copyright.}
+	Purpose: {
+		Face alignment and resizing.
+	}
+	; You are free to use, modify, and distribute this software with any
+	; REBOL Technologies products as long as the above header, copyright,
+	; and this comment remain intact. This software is provided "as is"
+	; and without warranties of any kind. In no event shall the owners or
+	; contributors be liable for any damages of any kind, even if advised
+	; of the possibility of such damage. See license for more information.
+
+	; Please help us to improve this software by contributing changes and
+	; fixes via http://www.rebol.com/feedback.html - Thanks!
+
+	; Changes in this file are contributed by Henrik Mikael Kristensen.
+	; Changes and fixes to this file can be contributed to Github at:
+	; https://github.com/henrikmk/VID-Extension-Kit
 ]
 
 ctx-resize: context [

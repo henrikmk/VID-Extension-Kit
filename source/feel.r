@@ -1128,17 +1128,32 @@ ctx-access: context [
 				true [face/text]
 			]
 		]
+		; Convention:
+		;   if the face is empty, the stored data value is NONE
+		;   the stored text is always a string and is always the same string
+		;   text and data do not share the same string
+		;   if a value of NONE is passed to a standard field, TEXT becomes empty and DATA becomes NONE
+		;   if a value of NONE is passed for number fields, TEXT becomes "0" and DATA becomes 0
+		;   if a value of NONE is passed to a password field, TEXT becomes "" and DATA becomes ""
 		set-face*: func [face value][
 			if face/para [face/para/scroll: 0x0]
-			face/text: all [value form value] ; conversion/copy
-			either flag-face? face hide [
-				face/data: all [value form value]
-				face/text: all [value head insert/dup copy "" "*" length? face/data]
-			][
-				either any [
+			face/text:
+				either face/text [
+					clear head face/text
+				][
+					copy ""
+				]
+			case [
+				flag-face? face hide [
+					;-- Password field
+					face/data: any [all [value form value] copy ""]
+					if value [insert/dup face/text #"*" length? face/data]
+				]
+				any [
 					flag-face? face integer
 					flag-face? face decimal
 				] [
+					;-- Number field
 					face/data:
 						case [
 							none? value [0]
@@ -1149,12 +1164,14 @@ ctx-access: context [
 							equal? to-integer value to-decimal value [to-integer value]
 							true [to-decimal value]
 						]
-					face/text: form face/data
-				][
+					insert face/text form face/data
+				]
+				true [
+					;-- Standard field
+					if value [insert face/text form value]
 					face/data: all [value not empty? face/text copy face/text]
 				]
 			]
-			; this is a bit unstable
 			if system/view/focal-face = face [
 				ctx-text/unlight-text
 				system/view/caret: at face/text index? system/view/caret
@@ -1169,6 +1186,9 @@ ctx-access: context [
 			if flag-face? face hide [clear face/data]
 			ctx-text/set-text-body face form face/data
 			face/line-list: none
+		]
+		reset-face*: func [face][
+			set-face* face face/default
 		]
 		scroll-face*: func [face x y /local edge para size][
 			edge: any [attempt [2 * face/edge/size] 0]

@@ -1,24 +1,24 @@
 REBOL [
-	Title: "VID Extension Kit COLORS Core"
-	Short: "VID Extension Kit COLORS Core"
-	Author: ["Henrik Mikael Kristensen"]
-	Copyright: "2011 - HMK Design"
-	Filename: %ctx-colors.r
-	Version: 0.0.1
-	Type: 'script
-	Maturity: 'unstable
-	Release: 'internal
-	Created: 09-May-2010
-	Date: 09-May-2010
-	License: {
-		BSD (www.opensource.org/licenses/bsd-license.php)
-		Use at your own risk.
-	}
+	Title:  "REBOL/View: Color Management Core"
+	Author: "Henrik Mikael Kristensen"
+	Rights: "Copyright 2000 REBOL Technologies. All rights reserved."
+	Note:   {Improvements to this code are welcome, but all changes preserve the above copyright.}
 	Purpose: {
-		COLORS context for color management for surfaces as well as color conversion functions.
+		Functions for color management
 	}
-	History: []
-	Keywords: []
+	; You are free to use, modify, and distribute this software with any
+	; REBOL Technologies products as long as the above header, copyright,
+	; and this comment remain intact. This software is provided "as is"
+	; and without warranties of any kind. In no event shall the owners or
+	; contributors be liable for any damages of any kind, even if advised
+	; of the possibility of such damage. See license for more information.
+
+	; Please help us to improve this software by contributing changes and
+	; fixes via http://www.rebol.com/feedback.html - Thanks!
+
+	; Changes in this file are contributed by Henrik Mikael Kristensen.
+	; Changes and fixes to this file can be contributed to Github at:
+	; https://github.com/henrikmk/VID-Extension-Kit
 ]
 
 ctx-colors: context [

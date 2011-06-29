@@ -64,7 +64,7 @@ foreach file [
 	ctx/ctx-draw		; Face DRAW core
 	ctx/ctx-surface		; SURFACE core
 	ctx/ctx-skin		; SKIN core
-	funcs				; face navigation functions
+	face-tree			; face tree functions
 	<layout>			; (unused)
 	image-stock			; all image bitmaps
 	ctx/ctx-content		; text content formatting context

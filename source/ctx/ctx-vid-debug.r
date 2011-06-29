@@ -95,3 +95,32 @@ dump-face: func [
 	]
 	remove depth
 ]
+
+describe-face: func [
+	{Small dump of face characteristics for error messages.}
+	face
+] [
+	either object? face [
+		to-string reduce [
+			"'"
+			any [
+				all [
+					in face 'style
+					face/style
+				]
+				all [
+					in face 'var
+					face/var
+				]
+			]
+			"' named: '"
+			face/text
+			"' at: "
+			face/offset
+			" size: "
+			face/size
+		]
+	][
+		reform ["Unknown face" type? face]
+	]
+]

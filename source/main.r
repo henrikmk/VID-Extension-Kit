@@ -26,7 +26,7 @@ REBOL [
 #include %ctx/ctx-vid-debug.r		; debugging
 #include %feel.r					; feel and access contexts for various styles
 #include %ctx/ctx-text.r			; text editing core
-#include %funcs.r					; face navigation functions
+#include %face-tree.r				; face tree functions
 #include %image-stock.r				; all image bitmaps
 #include %ctx/ctx-content.r			; text content formatting context
 #include %ctx/ctx-list.r			; list context for list styles

@@ -1,24 +1,24 @@
 REBOL [
-	Title: "VID Functions"
-	Short: "VID Functions"
-	Author: ["Henrik Mikael Kristensen"]
-	Copyright: "2009, 2010 - HMK Design"
-	Filename: %funcs.r
-	Version: 0.0.1
-	Type: 'script
-	Maturity: 'unstable
-	Release: 'internal
-	Created: 09-May-2009
-	Date: 09-May-2009
-	License: {
-		BSD (www.opensource.org/licenses/bsd-license.php)
-		Use at your own risk.
-	}
+	Title:  "REBOL/View: Face Tree Functions"
+	Author: ["Brian Hawley" "Henrik Mikael Kristensen"]
+	Rights: "Copyright 2000 REBOL Technologies. All rights reserved."
+	Note:   {Improvements to this code are welcome, but all changes preserve the above copyright.}
 	Purpose: {
-		Various functions to maintain a VID layout.
+		Various functions to maintain and investigate a face tree.
 	}
-	History: []
-	Keywords: []
+	; You are free to use, modify, and distribute this software with any
+	; REBOL Technologies products as long as the above header, copyright,
+	; and this comment remain intact. This software is provided "as is"
+	; and without warranties of any kind. In no event shall the owners or
+	; contributors be liable for any damages of any kind, even if advised
+	; of the possibility of such damage. See license for more information.
+
+	; Please help us to improve this software by contributing changes and
+	; fixes via http://www.rebol.com/feedback.html - Thanks!
+
+	; Changes in this file are contributed by Henrik Mikael Kristensen.
+	; Changes and fixes to this file can be contributed to Github at:
+	; https://github.com/henrikmk/VID-Extension-Kit
 ]
 
 set-parent-faces: func [
@@ -55,24 +55,6 @@ set-parent-faces: func [
 	]
 ]
 
-;get-parent-faces: func [
-;	"Gets which faces in a layout do not have a parent-face, for debugging"
-;	face
-;] [
-;	case [
-;		function? get in face 'pane ['function]
-;		block? face/pane [
-;			foreach fc face/pane [
-;				get-parent-faces fc face
-;			]
-;		]
-;		object? face/pane [
-;			get-parent-faces face/pane
-;		]
-;	]
-;	
-;]
-
 click-face: func [
 	"Simulate a mouse click"
 	face
@@ -86,35 +68,6 @@ click-face: func [
 	if all [in face 'feel face/feel in face/feel 'engage] [
 		face/feel/engage face down none
 		face/feel/engage face up none
-	]
-]
-
-describe-face: func [
-	{Small dump of face characteristics for error messages.}
-	face
-] [
-	either object? face [
-		to-string reduce [
-			"'"
-			any [
-				all [
-					in face 'style
-					face/style
-				]
-				all [
-					in face 'var
-					face/var
-				]
-			]
-			"' named: '"
-			face/text
-			"' at: "
-			face/offset
-			" size: "
-			face/size
-		]
-	][
-		reform ["Unknown face" type? face]
 	]
 ]
 
@@ -212,7 +165,6 @@ next-face: func [
 	/local f fp fpi root-face val
 ] [
 	idx: any [idx 2] ; first pane
-;	attempt [probe reduce [face/style deep]]
 	f: false
 	if face/parent-face [
 		f:
@@ -221,30 +173,7 @@ next-face: func [
 			][
 				find-face face ; if there is an error, it will be slightly harder to find now
 			]
-	];[
-		; alternative method here. this will work, but there may be dangerous implications
-		; need this for back-face as well
-		;return either iterated-face? face [
-		;	iterated-pane face
-		;][
-		;	; this needs to be a lot bigger
-		;	if face/pane [face/pane/1]
-		;]
-		;either all [in face 'style find [window menu-items] face/style] [
-		;	return either iterated-face? face [
-		;		iterated-pane face
-		;	][
-		;		face/pane/1
-		;	]
-		;][
-		;	err-face: face
-		;	throw make error! reform [
-		;		"Face"
-		;		describe-face face
-		;		"has no parent-face."
-		;	]
-		;]
-	;]
+	]
 	either deep [
 		either iterated-face? face [ ; an iterated face does not have multiple panes
 			fp: iterated-pane face
@@ -274,8 +203,6 @@ next-face: func [
 				]
 				any [
 					root-face
-					; this might be the wrong way to do that. we can apparently not get to the right pane.
-					; I think the method is wrong, so we have to study when /panes goes into effect.
 					either panes [next-face/deep/panes fp idx + 2][next-face fp]
 				]
 			]

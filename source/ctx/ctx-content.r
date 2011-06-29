@@ -1,24 +1,24 @@
 REBOL [
-	Title: "VID Text Content Formatting Context"
-	Short: "VID Text Content Formatting Context"
-	Author: ["Henrik Mikael Kristensen"]
-	Copyright: "2009, 2010 - HMK Design"
-	Filename: %vid-ctx-format.r
-	Version: 0.0.1
-	Type: 'script
-	Maturity: 'unstable
-	Release: 'internal
-	Created: 22-May-2009
-	Date: 22-May-2009
-	License: {
-		BSD (www.opensource.org/licenses/bsd-license.php)
-		Use at your own risk.
-	}
+	Title:  "REBOL/View: Text Content Formatting Context"
+	Author: "Henrik Mikael Kristensen"
+	Rights: "Copyright 2000 REBOL Technologies. All rights reserved."
+	Note:   {Improvements to this code are welcome, but all changes preserve the above copyright.}
 	Purpose: {
-		VID Text Standard Formatting Functions
+		Content formatting functions for text inputs
 	}
-	History: []
-	Keywords: []
+	; You are free to use, modify, and distribute this software with any
+	; REBOL Technologies products as long as the above header, copyright,
+	; and this comment remain intact. This software is provided "as is"
+	; and without warranties of any kind. In no event shall the owners or
+	; contributors be liable for any damages of any kind, even if advised
+	; of the possibility of such damage. See license for more information.
+
+	; Please help us to improve this software by contributing changes and
+	; fixes via http://www.rebol.com/feedback.html - Thanks!
+
+	; Changes in this file are contributed by Henrik Mikael Kristensen.
+	; Changes and fixes to this file can be contributed to Github at:
+	; https://github.com/henrikmk/VID-Extension-Kit
 ]
 
 ctx-content: [
@@ -111,6 +111,7 @@ context [
 ]
 
 ; password hide
+; this is unused. we are still using the old method.
 ;hide: func [face event /local l] [
 ;	; as each keystroke is done, it's replaced in text with a "*"
 ;	l: length? face/pass
