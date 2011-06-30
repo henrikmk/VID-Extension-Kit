@@ -225,6 +225,7 @@ vid-face/actors: make object! [
 	on-validate:
 	on-init-validate:
 	on-init-window:
+	on-close-window:
 	on-change:
 	on-enable:
 	on-disable:
@@ -392,6 +393,7 @@ facet-words: [ ; Order of these is important to the code
 	on-validate			[set-actor new 'on-validate second args next args]
 	on-init-validate	[set-actor new 'on-init-validate second args next args]
 	on-init-window		[set-actor new 'on-init-window second args next args]
+	on-close-window		[set-actor new 'on-close-window second args next args]
 	on-change			[set-actor new 'on-change second args next args] ; not formally available for use
 	on-enable			[set-actor new 'on-enable second args next args]
 	on-disable			[set-actor new 'on-disable second args next args]

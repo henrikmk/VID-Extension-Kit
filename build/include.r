@@ -36,12 +36,12 @@ foreach file [
 	ctx/ctx-draw		; Face DRAW core
 	ctx/ctx-surface		; SURFACE core
 	ctx/ctx-skin		; SKIN core
-	funcs				; face navigation functions
+	face-tree			; face tree functions
 	<layout>			; (unused)
 	image-stock			; all image bitmaps
 	ctx/ctx-content		; text content formatting context
 	ctx/ctx-list		; list context for list styles
-	ctx/ctx-scroll		; scroll context for scroll styles
+;	ctx/ctx-scroll		; scroll context for scroll styles
 	ctx/ctx-focus-ring	; focus ring handling
 	ctx/ctx-menu-face	; handles the display of menu faces (unused)
 	ctx/ctx-tool-tip	; tool tip system

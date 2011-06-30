@@ -391,6 +391,7 @@ ctx-text: [
 	integer-keys: make bitset! [#"0" - #"9"]
 	sign-key: make bitset! [#"-" #"+"]
 	decimal-keys: make bitset! [#"0" - #"9" #"." #","]
+	tuple-keys: make bitset! [#"0" - #"9" #"."]
 
 	keys-to-insert: func [face /local base] [
 		base: case [
@@ -401,6 +402,25 @@ ctx-text: [
 		if flag-face? face sign [base: union base sign-key]
 ;		if flag-face? face full-text-edit [base: union base nav-keys]
 		base
+	]
+
+	content-to-insert: func [face key] [
+		case [
+			flag-face? face decimal [
+				;-- allow only one decimal point
+				any [
+					all [
+						key <> #"."
+						key <> #","
+					]
+					all [
+						not find any [face/text ""] #"."
+						not find any [face/text ""] #","
+					]
+				]
+			]
+			true [true]
+		]
 	]
 
 	insert-char: func [face char][
@@ -509,7 +529,7 @@ ctx-text: [
 		liney: line-info/size/y
 
 		;-- Most keys insert into the text, others convert to words:
-		if char? key [
+		if all [char? key content-to-insert face key] [
 			either find keys-to-insert face key [
 				either all [
 					not hilight?
@@ -533,6 +553,9 @@ ctx-text: [
 						]
 					]
 				][
+					; manage here to avoid multiple decimal points
+					; but needs to be done before this, as we can ask this question multiple times
+					; there can be a content based filter for this, like we have the key filter
 					insert-char face key
 				]
 			] [

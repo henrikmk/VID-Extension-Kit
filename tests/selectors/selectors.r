@@ -29,27 +29,29 @@ stylize/master [
 	disable: toggle "Disable" [either value [disable-face back-face face][enable-face back-face face]]
 ]
 
+selections: [choice1 "Choice A" choice2 "Choice B" choice3 "Choice C"]
+
 view make-window [
 	across
 	label "Selector"
-	selector
+	selector setup selections
 	return
 	label "Multi Selector"
-	multi-selector
+	multi-selector setup selections
 	return
 	label "Radio Selector"
-	radio-selector
+	radio-selector setup selections
 	return
 	label "Check Selector"
-	check-selector
+	check-selector setup selections
 	return
 	label "Choice"
-	choice
+	choice setup selections
 	return
-	label "Rotary"
-	rotary
-	disable ; rotary does not respond to disable
+	;label "Rotary"
+	;rotary ; won't work with setup
+	;disable ; rotary does not respond to disable
 	return
 	label "Tab Selector"
-	tab-selector return ; draw-image fail
+	tab-selector setup selections return
 ]

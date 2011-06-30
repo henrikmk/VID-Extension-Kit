@@ -130,18 +130,17 @@ stylize/master [
 	; list of toggles that can be multi-selected
 	MULTI-SELECTOR: SELECTOR with [
 		default: copy data: make block! []
-		setup: reduce ['choice1 "Choice 1" false 'choice2 "Choice 2" false 'choice3 "Choice 3" false]
 		do-setup: func [face input-value /local keys i clr][
 			clr: any [color 0.0.0]
-			keys: extract input-value 3
+			keys: extract input-value 2
 			face/widths: face/calc-widths length? keys face/size/x
 			i: 0
 			face/emit [across space 0]
-			foreach [key text value] input-value [
+			foreach [key value] input-value [
 				i: i + 1
 				; should be the same as for check
 				face/emit compose/deep [
-					multi-selector-toggle (widths/:i) (text) (value) (clr) [
+					multi-selector-toggle (widths/:i) (value) (clr) [
 						face/parent-face/dirty?: true
 						do-face face/parent-face none
 						validate-face face/parent-face
@@ -183,11 +182,11 @@ stylize/master [
 			keys: extract input-value 2
 			i: 0
 			face/emit [space 0]
-			foreach [key text value] input-value [
+			foreach [key value] input-value [
 				i: i + 1
 				face/emit compose/deep [
 					; [ ] - allow disabling of single checkmarks in this panel
-					check-line (text) (value) with [
+					check-line (value) with [
 						var: (to-lit-word key)
 						;font: (make face/font []) ; this is necessary for disable-face
 						;para: (make face/para [])

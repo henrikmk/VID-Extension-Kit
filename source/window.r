@@ -181,11 +181,13 @@ detect-func: func [face event /local cf] [
 			]
 		]
 		event/type = 'close [
-			if all [
+			either all [
 				get-opener-face
 				same? find-window get-opener-face find-window event/face
 			] [
 				hide-menu-face
+			][
+				act-face face event 'on-close-window
 			]
 		]
 		event/type = 'move [
