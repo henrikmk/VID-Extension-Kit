@@ -51,6 +51,7 @@ stylize/master [
 						on-click [
 							use [pf] [
 								set-face pf: get in get-opener-face 'parent-face value
+								dirty-face get-opener-face
 								hide-menu-face
 								do-face pf none
 								act-face pf none 'on-click

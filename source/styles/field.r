@@ -222,7 +222,6 @@ stylize/master [
 		; [ ] - when DRAGGING the scroller to the bottom and then ctrl-a for all text, the ratio changes for the scroller to 1
 		; [ ] - there seem to be more bugs that cause the scroller ratio to be incorrect
 		; [ ] - check that set-text-body actually sets correct ratio for the face
-		; [ ] - when focusing the text area with a mouse-click the focus ring is not set
 		area: v-scroller: h-scroller: none
 		area-surface: 'area
 		size: 200x200

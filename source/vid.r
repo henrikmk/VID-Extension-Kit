@@ -141,7 +141,7 @@ vid-face: make face [ ; root definition
 	max-size:				; maximum size of face
 	real-size:				; size of the face including negative size
 	pane-size:				; size of layout pane
-	dirty?:					; indicates that text has been changed
+	dirty?:					; indicates that value has been changed
 	help:					; optional help string
 	user-data: none			; unused user data storage
 	size: none				; size must be none to allow autosizing

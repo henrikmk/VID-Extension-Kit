@@ -63,7 +63,7 @@ stylize/master [
 				i: i + 1
 				face/emit compose/deep [
 					selector-toggle (face/color) (as-pair face/widths/:i face/size/y) (value) of 'selection [
-						face/parent-face/dirty?: true
+						dirty-face face
 						do-face face/parent-face none
 						validate-face face/parent-face
 					] with [
@@ -141,7 +141,7 @@ stylize/master [
 				; should be the same as for check
 				face/emit compose/deep [
 					multi-selector-toggle (widths/:i) (value) (clr) [
-						face/parent-face/dirty?: true
+						dirty-face face
 						do-face face/parent-face none
 						validate-face face/parent-face
 					] with [var: (to-lit-word key)]
@@ -166,7 +166,7 @@ stylize/master [
 					radio-line (value) of 'selection with [
 						var: (to-lit-word key)
 					] [
-						face/parent-face/dirty?: true
+						dirty-face face
 						do-face face/parent-face none
 						validate-face face/parent-face
 					]
@@ -195,7 +195,7 @@ stylize/master [
 							para: make para []
 						]
 					] [
-						face/parent-face/dirty?: true
+						dirty-face face
 						alter face/parent-face/data face/var
 						do-face face/parent-face none
 						validate-face face/parent-face
@@ -284,6 +284,7 @@ stylize/master [
 				; . - need to share the font from parent
 				; . - highlight overshadows parent effect edge
 				; . - scroll to position when moving with highlight, possibly using on-highlight actor
+				; ! - when using ON-SELECT, the value is not yet set, so there is a problem using ON-SELECT for CHOICE
 				; x - edge will be part of the list
 		]
 		access: make access [

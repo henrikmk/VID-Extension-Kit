@@ -294,14 +294,14 @@ traverse-face: func [
 ]
 
 ascend-face: func [
-	"Traverses through parent faces and performs an action on each parent."
+	"Ascends through parent faces and performs an action on each parent. Stops when action returns FALSE."
 	face [object!]
 	action
-	/local func-act
+	/local func-act res
 ] [
 	func-act: func [face] action
-	while [face/parent-face] [
-		func-act face/parent-face
+	while [all [not res face/parent-face]] [
+		res: func-act face/parent-face
 		face: face/parent-face
 	]
 ]
@@ -867,6 +867,16 @@ dirty-face?: func [
 		]
 	]
 	result
+]
+
+dirty-face: func [
+	"Marks a face as dirty as well as its nearest parent compound face."
+	face
+] [
+	unless face/dirty? [
+		ascend-face face [all [flag-face? face compound face/dirty?: true]]
+		face/dirty?: true
+	]
 ]
 
 clean-face: func [

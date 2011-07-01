@@ -42,9 +42,12 @@ set 'unset-tab-face func [face [none! object!] /local rf] [
 	face
 ]
 
-; sets the current tab face for the face which exists in a certain window
-set 'set-tab-face func [face [object!] /local rf] [
-	any [flag-face? face tabbed return face]
+; sets the current tab face for the tabbed face or the nearest tabbed parent
+set 'set-tab-face func [face [object!] /local fc rf] [
+	unless flag-face? face tabbed [
+		ascend-face face [all [flag-face? face tabbed fc: face]]
+		either fc [face: fc][return face]
+	]
 	rf: root-face face
 	if all [
 		in rf 'tab-face

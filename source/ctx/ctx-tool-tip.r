@@ -54,7 +54,7 @@ set 'get-tool-tip func [face] [
 set 'set-tool-tip func [fc offset /local sz] [
 	;-- Locate appropriate tool tip
 	any [tool-tip-face: get-tool-tip fc exit]
-	any [get in fc 'tool-tip ascend-face fc [all [get in face 'tool-tip fc: face break]]]
+	any [get in fc 'tool-tip ascend-face fc [all [get in face 'tool-tip fc: face]]]
 	any [tip-content: get in fc 'tool-tip exit]
 	all [any-function? :tip-content tip-content: tip-content fc]
 	any [block? tip-content object? tip-content tip-content: form tip-content]

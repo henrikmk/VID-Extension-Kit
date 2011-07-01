@@ -428,7 +428,7 @@ ctx-text: [
 		; For password spoofed text (***), the above may put caret on wrong face.
 		; Check, and restore proper caret, otherwise we lose a character.
 		unless same? head face/text head caret [caret: at face/text index? caret]
-		face/dirty?: true
+		dirty-face face
 		; The caret may be off the end, so just append if it is.
 		if error? try [caret: insert caret char][append caret char]
 	]
@@ -616,7 +616,7 @@ ctx-text: [
 							remove caret: back caret
 						]
 					]
-					face/dirty?: true
+					dirty-face face
 				]
 				del-char [
 					if all [not delete-selected-text not tail? caret][
@@ -626,7 +626,7 @@ ctx-text: [
 							remove caret
 						]
 					]
-					face/dirty?: true
+					dirty-face face
 				]
 				left [
 					any [
@@ -666,16 +666,16 @@ ctx-text: [
 					]
 				]
 				copy-text [copy-text face unlight-text] ; why unlight?
-				cut-text [copy-text face delete-selected-text face/dirty?: true]
+				cut-text [copy-text face delete-selected-text dirty-face face]
 				paste-text [
 					delete-selected-text
 					face/line-list: none
-					face/dirty?: true
+					dirty-face face
 					caret: insert caret read clipboard://
 				]
 				clear-tail [
 					remove/part caret end-of-line caret
-					face/dirty?: true
+					dirty-face face
 				]
 				all-text [hilight-all face]
 				tab-char [
