@@ -213,6 +213,7 @@ stylize/master [
 		close-choice-face: func [face /local fc] [
 			fc: find-style get-menu-face 'choice-list 'data
 			set-face face second pick fc/data fc/selected/1
+			dirty-face face
 			hide-menu-face
 		]
 		open-choice-face: func [face] [
@@ -337,24 +338,6 @@ stylize/master [
 		]
 	]
 
-	; Normal rotary
-	; redesign this later
-	;ROTARY: BUTTON ctx-colors/colors/action-color with [
-	;	data: copy [choice1 "Choice 1" choice2 "Choice 2" choice3 "Choice 3"]
-	;	edge: [size: 4x2 effect: 'bezel]
-	;	surface: none
-	;	feel: svvf/rotary
-	;	access: ctx-access/data-find
-	;	insert init [if texts [data: texts]]
-	;	flags: [input]
-	;	words: [data [
-	;		;second args
-	;		if all [block? args new/texts: args/2 not empty? new/texts][new/text: first new/texts]
-	;		next args
-	;	]]
-	;	access: ctx-access/selector
-	;]
-
 	; Tab buttons for panel selection
 	TAB-SELECTOR: SELECTOR with [
 		color: none
@@ -365,7 +348,7 @@ stylize/master [
 			foreach [pane text] input-value [
 				i: i + 1
 				face/emit compose/deep [
-				 	tab-button (text) of 'selection [
+					tab-button (text) of 'selection [
 						set-face/no-show face/parent-face (to-lit-word pane)
 						do-face face/parent-face none
 					] with [
