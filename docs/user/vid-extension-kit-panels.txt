@@ -18,11 +18,18 @@ For example, if you connect the panel to a list, you may display a boiler plate,
 
 +++Defining Sub-Panels
 
-Multiple sub-panels are defined using SETUP:
+Multiple sub-panels are defined using SETUP, by a word/block pair:
 
 	panel setup [
-		
+		panel1 [
+			...layout code...
+		]
+		panel2 [
+			...layout code...
+		]
 	]
+
+You can have as many panels as you like.
 
 +++Switching Sub-Panels
 
@@ -53,10 +60,16 @@ The tab panel uses a word, a name and a layout block:
 		]
 	]
 
+By standard, the layout block is "tight", i.e. used with an offset and origin of 0x0, hence the use of the origin word to define the spacing between the layout and the tab panel frame.
+
 +++Caveats
 
 The tab panel can currently only support a number of tabs that are visible within the width of the tab panel.
 
 ---Compound Styles
 
-Compound styles are <strong>tightly grouped faces</strong> inside a panel.
+Compound styles are <strong>tightly grouped faces</strong> inside a panel. The idea is that compound styles act and appear like a single face. Examples of compound styles can be a text-area with an attached scroller.
+
+Usually compound styles consists of styles that don't work on their own.
+
+=incomplete

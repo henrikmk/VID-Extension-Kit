@@ -1,4 +1,4 @@
-VID Extension Kit Actors
+VID Extension Kit - Actors
 
 ===Introduction
 
