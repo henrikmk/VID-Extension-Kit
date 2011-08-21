@@ -1,6 +1,8 @@
-VID Extension Kit - Extra Functions
+VID Extension Kit - Extra Functions (unfinished)
 
 ===Introduction
+
+This document is not yet finished.
 
 Some functions work as helpers when creating styles. These are listed in this document.
 
@@ -52,4 +54,6 @@ At this time, the maximum size that is used for calculation is 1000 pixels.
 
 +++Example
 
-	face-size-from-text
+	face-size-from-text ???
+
+=incomplete

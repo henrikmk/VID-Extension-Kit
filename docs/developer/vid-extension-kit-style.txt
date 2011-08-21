@@ -1,4 +1,4 @@
-VID Extension Kit - Style Creation - Build 003
+VID Extension Kit - Style Creation - Build 003 (obsolete)
 
 	Author: Henrik Mikael Kristensen
 	Version: 0.0.3

@@ -1,6 +1,8 @@
-VID Extension Kit - Panels
+VID Extension Kit - Panels (unfinished)
 
 ===Introduction
+
+This document is not yet finished.
 
 The VID Extension Kit supports various types of panels. All of them are derived through the PANEL style.
 

@@ -1,4 +1,4 @@
-VID Extension Kit - User Manual
+VID Extension Kit - User Manual (unfinished)
 
 	Author: Henrik Mikael Kristensen
 	Version: 0.0.5
@@ -15,7 +15,7 @@ VID Extension Kit - User Manual
 
 =image images/style-browser.png
 
-The VID Extension Kit extends the basic capabilities of VID for REBOL 2, while fixing some style bugs. Some concepts are added and replaced, which makes it not 100% compatible with VID. 
+The VID Extension Kit extends the basic capabilities of VID for REBOL 2, while fixing some style bugs. Some concepts are added and replaced, which makes it not 100% compatible with VID.
 
 <b>This kit only works with REBOL 2, not REBOL 3.</b>
 
@@ -43,7 +43,7 @@ All screenshots are grabbed from Windows XP.
 
 To use the latest build of the VID Extension Kit, use the following line:
 
-	do http://97.107.135.89/www.hmkdesign.dk/data/projects/vid-ext-kit/downloads/vid-ext-kit.r
+	do http://www.hmkdesign.dk/data/projects/vid-ext-kit/downloads/nightly/vid-ext-kit.r
 
 Note that the URL might change, so you may want to download it locally.
 

@@ -1,6 +1,6 @@
 VID Extension Kit - Function Reference - Build 003 (obsolete)
 
-This document is under construction. Note that this document only fits build 003.
+This document is obsolete and will be updated for the latest build.
 
 ===Window Handling
 
