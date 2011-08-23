@@ -15,7 +15,7 @@ REBOL [
 		Use at your own risk.
 	}
 	Purpose: {
-		Test the DRAW-BODY context with a derivative BUTTON
+		Test the DRAW-BODY context
 	}
 	History: []
 	Keywords: []
@@ -37,7 +37,6 @@ m: make-window [
 	; [ ] - scroller does not clamp, after resizing, when it's scrolled to the end
 	; [ ] - scroller does not allow clamping, when clicked
 	; [ ] - scroller does not resize down after resizing up, when it has been scrolled to the end
-	; [ ] - so when you scroll to the end, you need to do things to get it going
 ]
 
 view m

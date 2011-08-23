@@ -1,21 +1,21 @@
 REBOL [
-	Title: "Balancer Test"
-	Short: "Balancer Test"
+	Title: "Accordion Panel Test"
+	Short: "Accordion Panel Test"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2011 - HMK Design"
-	Filename: %balancer.r
+	Filename: %fold-panel.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
 	Release: 'internal
-	Created: 29-May-2011
-	Date: 29-May-2011
+	Created: 06-Jun-2011
+	Date: 06-Jun-2011
 	License: {
 		BSD (www.opensource.org/licenses/bsd-license.php)
 		Use at your own risk.
 	}
 	Purpose: {
-		Test BALANCER.
+		Test basic ACCORDION.
 	}
 	History: []
 	Keywords: []
@@ -26,22 +26,17 @@ do %../../build/include.r
 clear ctx-vid-debug/debug
 
 view make-window [
-	h3 "BALANCER Test"
+	h3 "ACCORDION Panel"
 	bar
-	panel [
-		panel [
-			across
-			text-area 200x200 spring [right]
-			balancer
-			data-list 200x200
-		] spring [bottom]
-		balancer
-		text-area 300x100 fill 1x0
-	]
-	bottom-panel [
-		across
-		button
-		balancer
-		toggle
+	a: accordion 300x300 setup [
+		page1 "Page 1" [
+			field
+		]
+		page2 "Page 2" [
+			button
+		]
+		page3 "Page 3" [ ; this panel does not resize or show properly
+			image help.gif
+		]
 	]
 ]
