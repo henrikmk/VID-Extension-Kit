@@ -1,0 +1,229 @@
+VID Extension Kit - Tests and Demonstrations
+
+===Introduction
+
+The VID Extension Kit, when downloaded from Github in the source section, contains a list of tests and demonstrations in the <b>tests/</b> directory. They are listed in this document and can be used for educational purposes.
+
+Some files appear incomplete and will contain comments on missing parts in the VID Extension Kit. Some tests will not work.
+
+---Balancers
+
++++balancer.r
+
+This tests the BALANCER style.
+
++++resizer.r
+
+This tests the RESIZER style.
+
+---Browsers
+
++++dialog-browser.r
+
+This displays a list of all possible dialogs in the VID Extension Kit. Clicking a button will open a dialog.
+
++++style-browser.r
+
+This displays a list of all possible styles in the VID Extension Kit. Each style is displayed in the lower right corner of the main window. The style list can be sorted alphabetically or by time of creation during startup.
+
+The style browser also is able to list the source code of the style as it appears in evaluated form, as well as flags, help text, style size.
+
+Clicking the "Get Face..." button will return the value of the face in a dialog.
+
+Disable the face using "Disable Face".
+
+---Draw
+
++++draw-body.r
+
+This performs a small test of the draw body context, by drawing some styles that require interaction. Each style should draw itself correctly foreach draw state.
+
++++drawing.r
+
+This is meant to test the DRAWING style, but is incomplete at this time.
+
+---Editors
+
++++surface-editor.r
+
+This is meant to become a basic surface editor, but is conceptual at this time and does not work.
+
+---Fields
+
++++field.r
+
+This demonstrates various FIELD styles and various settings within the FIELD style.
+
+---Include
+
++++built-vid-ext-kit.r
+
+This demonstrates how to build and use finished build of the VID Extension Kit. The built version is best for production use.
+
++++included-vid-ext-kit.r
+
+This demonstrates how to include the VID Extension Kit. This is best for development use.
+
+---Layout
+
++++left-right-align.r
+
+This tests a particular problem with aligning left and right inside a window. It should produce a centered item panel.
+
++++right-align.r
+
+This tests aligning to the right, inside a FILL 1x0 panel.
+
+---Lists
+
++++actors.r
+
+This demonstrates outputting actor debug information using a plain LIST style.
+
++++caret-list.r
+
+This demonstrates the CARET-LIST style, which has special keyboard navigation.
+
++++column-mode.r
+
+This tests different column modes for a DATA-LIST using SETUP.
+
++++column-order.r
+
+This demonstrates column reordering, using one order for input and another order of the same columns for output.
+
++++data-handling.r
+
+This demonstrates a DATA-LIST with basic data handling, like adding, removing and updating a row fully or partially. Try sorting, while updating.
+
++++filtering.r
+
+This demonstrates a DATA-LIST with filtering using the QUERY-FACE function.
+
++++hidden.r
+
+This demonstrates a DATA-LIST with alternative column order, where one column is hidden.
+
++++list.r
+
+This demonstrates a basic LIST, the bare minimum needed to display an array of iterated faces.
+
++++one-column.r
+
+This shows a simple DATA-LIST with one column.
+
++++parameter-list.r
+
+This demonstrates the PARAMETER-LIST style with an object directly as data input.
+
++++rendering-2.r
+
+This shows how to use the RENDER keyword to define rendering manipulation for a single cell. Here, the input is a block of objects.
+
++++rendering.r
+
+This shows how to use the RENDER keyword to define rendering manipulation for a single cell. Here, the input is a block of values (non-objects).
+
++++selection.r
+
+This demonstrates how to set and get selection and view selection details for a DATA-LIST.
+
++++set-get.r
+
+This tests SET-FACE and GET-FACE in a DATA-LIST.
+
++++setup-face.r
+
+This tests SETUP-FACE in a DATA-LIST. Click the buttons to perform SETUP-FACE for an entirely different DATA-LIST appearance and structure in the same DATA-LIST face.
+
++++sorting.r
+
+This tests basic sorting in a DATA-LIST.
+
++++specs-dialect-2.r
+
+This tests the specifications dialect for a DATA-LIST, by passing a single object as input for determining column names.
+
++++specs-dialect.r
+
+This tests all keywords in the specifications dialect for a DATA-LIST.
+
++++specs-object.r
+
+This tests the specifications dialect for a DATA-LIST by passing a single object as the specification itself.
+
++++sub-face.r
+
+This demonstrates HEADER-FACE SUB-FACE for a DATA-LIST to set up custom appearance for the header and for list rows.
+
+---Panels
+
++++accordion-panel.r
+
+Tests the ACCORDION style.
+
++++frame.r
+
+Tests the FRAME, TOP-FRAME, BOTTOM-FRAME, LEFT-FRAME and RIGHT-FRAME styles. The test is identical to panel.r
+
++++h-scroll-panel.r
+
+This demonstrates a horizontal scrolling panel, H-SCROLL-PANEL.
+
++++panel.r
+
+Tests the FRAME, TOP-PANEL, BOTTOM-PANEL, LEFT-PANEL and RIGHT-PANEL styles. The test is identical to frame.r
+
++++scroll-panel.r
+
+This shows a SCROLL-PANEL with an image in it.
+
++++sub-panel.r
+
+This shows a PANEL with externally defined sub-panels and methods to select a panel.
+
++++tab-panel.r
+
+This demonstrates a basic TAB-PANEL.
+
++++v-scroll-panel.r
+
+This shows a V-SCROLL-PANEL (vertical scroller only) with an image in it. The test is identical to scroll-panel.r
+
+---Popup
+
++++popup-hinge.r
+
+This demonstrates face hinging using SHOW-MENU-FACE with the /HINGE refinement: How to place a new window in relation to a clicked face, useful for popup menus.
+
++++popup.r
+
+This demonstrates a basic popup menu, using the SHOW-MENU-FACE function.
+
+---Resize
+
++++fill.r
+
+Test resizing using FILL.
+
+---Selectors
+
++++check.r
+
+Demonstrates the CHECK style used with and without internal relation.
+
++++choice.r
+
+Demonstrates the CHOICE style with a large number of entries.
+
++++radio.r
+
+Demonstrates the RADIO style used with and without internal relation.
+
++++selectors.r
+
+Demonstrates all SELECTOR based styles: SELECTOR, MULTI-SELECTOR, RADIO-SELECTOR, CHECK-SELECTOR, CHOICE and TAB-SELECTOR.
+
++++toggle.r
+
+Demonstrates the CHECK style used with and without internal relation. This should work similarly to the CHECK style in the check.r test.
