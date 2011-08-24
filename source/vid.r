@@ -772,11 +772,14 @@ set 'layout func [
 				def-style: none
 			][
 				new/parent-face: none ; used to flag that child needs to be parent
+				either new/surface [new/draw-body: make-draw-body set-surface new][svvf/set-face-state new none]
+;				if new/draw-body [new/origin: origin: new/draw-body/margin] ; doesn't work
+				; parent face size must grow in accordance with margin
 				if :var [new/var: bind to-word :var :var] ; New 1.2.30
-				if get in new 'init [do bind new/init in new 'init]
 				if get in new 'surface [set-surface new]
 				if new/parent-face [new: new/parent-face]
 				if :var [set :var new var: none] ; New 1.2.30
+				if get in new 'init [do bind new/init in new 'init]
 				append pane new
 				unless flag-face? new fixed [
 					max-off: maximum max-off new/size + space + where
@@ -903,7 +906,7 @@ choice-face: make face [
 	]
 ]
 
-
+; [ ] - this could be changed to accommodate draw-body instead
 set-edge: func [face type args][
 	face/edge: make face/edge [size: 2x2 effect: type color: 128.128.128]
 	unless tail? args: next args [
