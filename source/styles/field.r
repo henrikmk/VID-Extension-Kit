@@ -55,13 +55,12 @@ stylize/master [
 			max-length [new/max-length: second args args: next args]
 		]
 		init: [
-			;unless string? text [text: either text [form text][copy ""]]
 			;-- use actors here to map action to unfocus and return
 			if function? :action [
 				insert-actor-func self 'on-unfocus :action
 				insert-actor-func self 'on-return :action
 			]
-			access/set-face* self any [text copy ""]
+			access/set-face* self copy any [text ""]
 			para: make para [] ; avoid sharing the same para object
 		]
 	]
