@@ -145,7 +145,7 @@ ctx-list: context [
 		fidx*:	face/data-filtered			; filtering -> source map
 		sidx*:	face/data-sorted			; sorting -> source map
 		soc*:	face/sort-column			; sorted column as word
-		sod*:	face/sort-direction			; not usable
+		sod*:	face/sort-direction			; sorted column's sort direction
 		cols*:	face/columns				; names of columns (block of words)
 		cor*:	face/column-order			; order and visibility of columns (block of words)
 		dadis*:	face/data-display			; order of columns for display as indexes
@@ -171,7 +171,7 @@ ctx-list: context [
 		insert clear sidx*
 			either all [sod* soc*] [
 				values: clear []
-				col: index? find cor* soc*
+				col: index? find cols* soc*
 				obtain: func [row]
 					case [
 						object? data*/1 [[get in row soc*]]
