@@ -668,6 +668,7 @@ stylize/master [
 
 	; standard data list with list, user defined header and user defined sub-face or column definition
 	DATA-LIST: NAV-LIST with [ ; [!] - compound later
+;		surface: 'static-frame
 		;-- Faces
 		header-face:			; header face
 		v-scroller:				; vertical scroller face
@@ -818,7 +819,7 @@ stylize/master [
 				;-- Build Header
 				if face/header-face [
 					append face/pane compose/only [
-						panel blue fill 1x0 spring [bottom] (face/header-face) return
+						panel fill 1x0 spring [bottom] (face/header-face) return
 					]
 				]
 				;-- Build Pane
@@ -997,15 +998,18 @@ stylize/master [
 	]
 
 	TABLE: LIST
-	TEXT-LIST: LIST
-	PARAMETER-LIST: DATA-LIST with [
-		setup: [
-			; need to allow defining bold font
-			input [key value]
-			output [key | value]
-			widths [100 200]
-			resize-column value
-		]
+	TEXT-LIST: DATA-LIST setup [
+		input [items]
+		widths [200]
+		select-mode 'mutex
+		header-face []
+	]
+	PARAMETER-LIST: DATA-LIST setup [
+		; need to allow defining bold font
+		input [key value]
+		output [key | value]
+		widths [100 200]
+		resize-column value
 	]
 
 ]
