@@ -1,9 +1,9 @@
 REBOL [
-	Title: "One Column Test"
-	Short: "One Column Test"
+	Title: "Text List Test"
+	Short: "Text List Test"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2011 - HMK Design"
-	Filename: %one-column.r
+	Filename: %text-list.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -15,7 +15,7 @@ REBOL [
 		Use at your own risk.
 	}
 	Purpose: {
-		Test DATA-LIST with a single column.
+		Test TEXT-LIST, which is a 1-dimensional DATA-LIST derivative without a header.
 	}
 	History: []
 	Keywords: []
@@ -25,10 +25,11 @@ do %../../build/include.r
 
 clear ctx-vid-debug/debug
 
-list-data: ["1" "2" "3"]
+list-data: ["aaa" "bbb" "ccc"]
+print ""
 
 view make-window [
-	h3 "One Column Test"
+	h3 "Text List Test"
 	bar
-	l-data: data-list data list-data setup [input [items]]
+	l-data: text-list data list-data [probe get-face face]
 ]
