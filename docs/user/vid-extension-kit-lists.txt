@@ -40,6 +40,8 @@ In the future, there will be more styles to provide direct manipulation of rows,
 
 :PARAMETER-LIST - This is derives from DATA-LIST and shows a predefined setup for displaying objects in parameter or key/value form easily.
 
+:TEXT-LIST - This is a simple 1-dimensional DATA-LIST set up for MUTEX selection mode and has a scroller, but no header. It can be used for very quick display of strings or numbers in a block.
+
 :CHOICE - This uses a CARET-LIST to show the options list.
 
 ===Specifying a List
@@ -319,19 +321,21 @@ What occurs on every update, is:
 
 The selected rows can be accessed through FACE/SELECTED and will be the indexes of the items in the original data block.
 
+To get the items themselves, use the GET-FACE function.
+
 See the file <strong>tests/lists/selection.r</strong> for an example.
 
 ---Selection Mode
 
 When setting the selection mode in the list, you can determine the behavior of selection:
 
-:MUTEX - This selects only one row at a time, regardless of whether holding down qualifier keys or not.
+:MUTEX - This selects only one row at a time, regardless of whether holding down qualifier keys or not. When using MUTEX, using GET-FACE will return the selected item directly, not wrapped in a block.
 
 :MULTI - When clicking a row, it will be highlighted. When clicking other rows using SHIFT or CONTROL keys, those rows will be highlighted, either in sequence (SHIFT) or appended to the current selection (CTRL).
 
 :PERSISTENT - When clicking a row it will be highlighted. When clicking another row without holding down any qualifier keys, that row will also be highlighted. Clicking a row again will remove the highlight.
 
-When using MULTI or PERSISTENT, selecting multiple rows will be returned in the order they are selected, when using GET-FACE on the list.
+When using MULTI or PERSISTENT, selecting multiple rows will be returned in a block in the order they are selected, when using GET-FACE on the list.
 
 ---Example
 
