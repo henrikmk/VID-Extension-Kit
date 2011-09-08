@@ -156,6 +156,10 @@ This tests the specifications dialect for a DATA-LIST by passing a single object
 
 This demonstrates HEADER-FACE SUB-FACE for a DATA-LIST to set up custom appearance for the header and for list rows.
 
++++text-list.r
+
+This demonstrates a simple TEXT-LIST.
+
 ---Panels
 
 +++accordion-panel.r
