@@ -92,6 +92,10 @@ This tests different column modes for a DATA-LIST using SETUP.
 
 This demonstrates column reordering, using one order for input and another order of the same columns for output.
 
++++column-order-2.r
+
+This demonstrates column reordering, using one order for input and another order of some of the same columns for output, while others are hidden.
+
 +++data-handling.r
 
 This demonstrates a DATA-LIST with basic data handling, like adding, removing and updating a row fully or partially. Try sorting, while updating.
