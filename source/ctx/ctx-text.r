@@ -326,50 +326,6 @@ ctx-text: [
 		ft
 	]
 
-;-- Text Field Functions:
-
-; obsolete
-	set 'clear-fields func [
-		"Clear all text fields faces of a layout."
-		panel [object!]
-	][
-		unless all [in panel 'type panel/type = 'face] [exit]
-		unfocus
-		foreach face panel/pane [
-			; [!] - this is done incorrectly
-			if all [series? face/text flag-face? face field] [
-				clear face/text
-				face/line-list: none
-			]
-		]
-	]
-
-; obsolete
-	next-field: func [face /local item][
-		all [
-			item: find face/parent-face/pane face
-			while [
-				if tail? item: next item [item: head item]
-				face <> first item
-			][
-				if all [object? item/1 flag-face? item/1 tabbed][return item/1]
-			]
-		]
-		none
-	]
-
-; obsolete
-	back-field: func [face /local item][
-		all	[
-			item: find face/parent-face/pane face
-			while [face <> first item: back item][
-				if all [object? item/1 flag-face? item/1 tabbed][return item/1]
-				if head? item [item: tail item]
-			]
-		]
-		none
-	]
-
 ;-- Character handling:
 
 	keymap: [   ; a small table, so does not benefit from hashing
@@ -455,22 +411,6 @@ ctx-text: [
 				return true
 			]
 		]
-	]
-
-	; obsolete
-	move: func [event ctrl plain] [
-		; Deal with cursor movement, including special shift and control cases.
-		; MacOSX does not capture event/shift and event/control at the same time
-		either event/shift [
-			any [highlight-start highlight-start: caret]
-		][
-			if hilight? [
-				caret: caret-highlight event
-			]
-			unlight-text
-		]
-		caret: either event/control ctrl plain
-		if event/shift [either caret = highlight-start [unlight-text][highlight-end: caret]]
 	]
 
 	move: func [event ctrl-move-to move-to hilight-func] [
@@ -575,24 +515,6 @@ ctx-text: [
 				]
 			]
 		]
-
-		;if char? key [
-		;	either find keys-to-insert key [insert-char face key][
-		;		key: either all [
-		;			block? face/keycode
-		;			; Does it require the CTRL-key pressed?
-		;			; (E.g. prevents mixup between TAB key and CTRL-I.)
-		;			tmp: find face/keycode key
-		;			either tmp/2 = 'control [event/control][true]
-		;		][
-		;			if flag-face? face hide swap-text
-		;			action face key
-		;			none
-		;		][
-		;			select keymap key
-		;		]
-		;	]
-		;]
 
 		;-- Key action handling:
 		if word? key [ ;probe key
@@ -783,7 +705,6 @@ ctx-text: [
 
 	;-- Feel used for non-active text (still allow selection and copy)
 	swipe: make face/feel [
-
 		engage: func [face act event][
 			switch act [
 				down [
