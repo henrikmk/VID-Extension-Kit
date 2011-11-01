@@ -207,11 +207,11 @@ stylize/master [
 			]
 		]
 		;-- Cell background render function (could be optimized, if we had disable-face*)
-		back-render-func: func [face cell /local colors row] [
+		back-render-func: func [face cell /local colors y-pos] [
 			colors: ctx-colors/colors
-			row: pick face/data-sorted cell/pos/y
+			y-pos: pick face/data-sorted cell/pos/y
 			case [
-				find face/highlighted row [
+				find face/highlighted y-pos [
 					cell/color:
 						either flag-face? face disabled [
 							colors/select-disabled-color
@@ -225,7 +225,7 @@ stylize/master [
 							colors/body-text-color
 						]
 				]
-				find face/selected row [
+				find face/selected y-pos [
 					cell/color:
 						either flag-face? face disabled [
 							colors/select-disabled-color
@@ -445,7 +445,8 @@ stylize/master [
 				act-face face none 'on-unselect
 			]
 			; selects rows in the face
-			select-face*: func [face values] [
+			select-face*: func [face values /local old-selection next-value] [
+				old-selection: copy face/selected
 				clear face/selected
 				case [
 					;-- Select Nothing
@@ -453,8 +454,8 @@ stylize/master [
 						act-face face none 'on-unselect
 					]
 					;-- Select Range
-					any-block? :values [
-						insert face/selected unique intersect values face/data-sorted
+					any [integer? :values any-block? :values] [
+						insert face/selected unique intersect to block! values face/data-sorted
 						act-face face none 'on-select
 					]
 					;-- Select by Function
@@ -473,6 +474,28 @@ stylize/master [
 						insert clear face/selected first face/data-sorted
 						follow face 1
 						act-face face none 'on-select
+					]
+					;-- Select Next
+					'next = :values [
+						next-value: find face/data-sorted old-selection/1
+						if next-value [
+							unless tail? next next-value [
+								next-value: next next-value
+							]
+							insert face/selected first next-value
+							follow face index? next-value
+							act-face face none 'on-select
+						]
+					]
+					;-- Select Previous
+					'previous = :values [
+						next-value: find face/data-sorted old-selection/1
+						if next-value [
+							next-value: back next-value
+							insert face/selected first next-value
+							follow face index? next-value
+							act-face face none 'on-select
+						]
 					]
 					;-- Select Last
 					'last = :values [

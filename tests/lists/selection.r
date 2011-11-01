@@ -4,12 +4,12 @@ REBOL [
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2011 - HMK Design"
 	Filename: %selection.r
-	Version: 0.0.1
+	Version: 0.0.2
 	Type: 'script
 	Maturity: 'unstable
 	Release: 'internal
 	Created: 29-May-2011
-	Date: 29-May-2011
+	Date: 30-Oct-2011
 	License: {
 		BSD (www.opensource.org/licenses/bsd-license.php)
 		Use at your own risk.
@@ -39,7 +39,7 @@ view make-window [
 	h3 "Selection Test"
 	bar
 	across
-	panel [
+	panel fill 0x1 [
 		l-data: data-list data list-data
 			on-key [set-i-status]
 			on-click [set-i-status]
@@ -51,8 +51,13 @@ view make-window [
 		button "Select All" [select-face l-data true]
 		button "Select None" [select-face l-data none]
 		button "Select First" [select-face l-data 'first]
+		button "Select Next" [select-face l-data 'next]
+		button "Select Previous" [select-face l-data 'previous]
 		button "Select Last" [select-face l-data 'last]
 		button "Select > 90" [select-face l-data func [val] [any [val/1 > 90 val/2 > 90 val/3 > 90 val/4 > 90]]]
+		button "Select Row 3" [select-face l-data 3]
+		button "Select Row 6" [select-face l-data 6]
+		button "Select 4 and 7" [select-face l-data [4 7]]
 		bar
 		h3 "Select Mode:"
 		rs: radio-selector
