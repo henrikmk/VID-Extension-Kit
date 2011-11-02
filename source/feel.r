@@ -637,6 +637,7 @@ setup-face: func [
 		in access 'setup-face*
 	][
 		access/setup-face* face :value
+		ctx-resize/align/no-show face
 		act-face face none 'on-setup
 	]
 	any [no-show show face]
@@ -1509,7 +1510,7 @@ ctx-access: context [
 			face/size: face/pane/size
 			face/pane: face/pane/pane
 			set-parent-faces face ; this doesn't work when this is called during init
-			ctx-resize/align face
+;			ctx-resize/align face
 			if all [face/show? tab-face] [
 				focus any [find-flag face tabbed root-face face]
 			]
