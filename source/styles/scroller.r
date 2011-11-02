@@ -70,6 +70,7 @@ stylize/master [
 			redrag 0.1
 		]
 		redrag: func [val /local tmp][
+			probe 'redrag
 			; clip the ratio to proper range (save for possible resize)
 			ratio: min 1 max 0 val
 			; compute page step size
@@ -80,7 +81,8 @@ stylize/master [
 			tmp: val/:axis * ratio
 			; don't let dragger get smaller than 10 pixels
 			if tmp < 10 [page: either val/:axis = tmp: 10 [1][tmp / (val/:axis - tmp)]]
-			either axis = 'y [dragger/size/y: tmp][dragger/size/x: tmp]
+			probe 'dragger
+			either axis = 'y [probe dragger/size/y: tmp][dragger/size/x: tmp]
 			resize-draw-body dragger
 		]
 	]
@@ -188,7 +190,7 @@ stylize/master [
 			; this would perform a lot better if we had a static grid to layout in
 			if axis = 'x [spring: [top]] ; seems to be very specific
 			spring: unique spring
-			access/resize-face* self size none none
+;			access/resize-face* self size none none
 		]
 	]
 
