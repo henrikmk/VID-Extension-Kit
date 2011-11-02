@@ -109,6 +109,9 @@ stylize/master [
 		column-order:				; block of words describing column output order (block of words)
 		output:						; output to list from source. index position describes first visible entry.
 			none
+		;-- Settings
+		follow-size:				; whether to move a PAGE or a LINE, when following the selected row
+			none
 		;-- Layout information
 		spacing: 0					; spacing between rows in pixels
 		over:						; face position currently hovering over
@@ -135,16 +138,30 @@ stylize/master [
 			to integer! face/size/y - (any [attempt [2 * face/edge/size/y] 0]) / face/sub-face/size/y
 		]
 		; moves to the given position in the list and makes it visible, if not visible
-		follow: func [face pos /local idx range size] [
+		follow: func [face pos /local idx range size list-size] [
 			any [pos exit]
+			list-size: face/list-size face
 			range: sort reduce [
 				index? face/output
-				min length? face/data subtract add index? face/output size: face/list-size face 1
+				min length? face/data subtract add index? face/output size: list-size 1
 			]
 			case [
 				all [pos >= range/1 pos <= range/2] [exit]
 				pos < range/1 [face/output: at head face/output pos]
 				pos >= range/2 [face/output: at head face/output pos - size + 1]
+			]
+			; adjust new position by follow size
+			if face/follow-size = 'page [
+				case [
+					; if cursor is now at top, move page size back
+					equal? pos index? face/output [
+						face/output: at face/output negate (list-size - 1)
+					]
+					; if cursor is now at bottom, move page size forward
+					equal? pos - size + 1 index? face/output [
+						face/output: min at face/output list-size at tail face/output negate list-size
+					]
+				]
 			]
 		]
 		; calculates list size ratio (internal)
@@ -711,6 +728,7 @@ stylize/master [
 		names:					; Column names (block of strings)
 		selected:				; selected rows in list (block of integers)
 		resize-column:			; which single column resizes (word)
+		follow-size:			; whether to move a PAGE or a LINE, when following the selected row
 			none
 		access: make access [
 			; adjusts the scroller ratio and drag (internal)
@@ -765,11 +783,11 @@ stylize/master [
 					[
 						value:
 							case [
-								lit-word? :value [:value]
-								word? :value [get :value]
-								path? :value [either value? :value [do :value][:value]]
-								object? :value [words-of :value]
-								true [:value]
+								lit-word?	:value	[:value]
+								word?		:value	[get :value]
+								path?		:value	[either value? :value [do :value][:value]]
+								object?		:value	[words-of :value]
+								true				[:value]
 							]
 						set in face word value
 					]
@@ -808,6 +826,10 @@ stylize/master [
 				;-- Select Mode
 				if none? face/select-mode [
 					face/select-mode: 'multi
+				]
+				;-- Follow Size
+				if none? face/follow-size [
+					face/follow-size: 'line
 				]
 				;-- Widths
 				if none? face/widths [
@@ -881,6 +903,7 @@ stylize/master [
 				face/list/prototype:	face/prototype
 				face/list/v-scroller:	face/v-scroller
 				face/list/select-mode:	face/select-mode
+				face/list/follow-size:	face/follow-size
 				if get in face 'back-render [face/list/back-render-func: func [face cell] get in face 'back-render] 
 				if get in face 'empty-render [face/list/empty-render-func: func [face cell] get in face 'empty-render]
 				if get in face 'render [face/list/render-func: func [face cell] get in face 'render]
