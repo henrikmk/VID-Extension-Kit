@@ -279,28 +279,6 @@ A basic example here uses this method to use bold text for a column with numbers
 
 Notice here that a check of CELL/DATA is done to ensure that the check can only be done on rows that contain output.
 
----Iterated Faces Caveats
-
-Of other note is that when using iterated faces, you are essentially re-using the same face all the way down in the list, just moved a line height down and "stamped" in the list area.
-
-So, if you set a facet in a face, say, bold font, the bold setting will continue all the way down the list, until it's changed.
-
-Hence the line:
-
-	if cell/pos/x = 7 [
-		if all [cell/data cell/data > 90] [cell/font/style: 'bold]
-	]
-
-will always produce bold text after the first time this expression is TRUE.
-
-The way around this, is to use:
-
-	if cell/pos/x = 7 [
-		cell/font/style: if all [cell/data cell/data > 90] ['bold]
-	]
-
-to make sure that only cell position 7 contains a bold font style.
-
 ---Random Colors
 
 Another handy use of the render function is to assign a random color to a cell. Since lists are iterated faces, the entire list is always generated with all faces in one single draw operation, when calling SHOW.
