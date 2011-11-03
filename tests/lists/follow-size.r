@@ -32,7 +32,7 @@ view make-window [
 	h3 "Follow Size Test"
 	bar
 	text "Move up and down with cursor keys to test" fill 1x0
-	l-data: data-list data list-data setup [follow-size 'page]
+	l-data: data-list fill 1x0 data list-data setup [follow-size 'page]
 	across
 	s-follow: selector ; selector has no on-select or on-click actor
 		setup [line "By Line" page "By Page"]
@@ -40,5 +40,7 @@ view make-window [
 		[setup-face l-data reduce ['follow-size to-lit-word value]]
 	arrow 24x24 up [select-face l-data 'previous]
 	arrow 24x24 down [select-face l-data 'next]
+	button "Follow Row 1" [l-data/follow l-data 1 show l-data]
+	button "Follow Row 15" [l-data/follow l-data 15 show l-data]
 	do [set-face s-follow 'page]
 ]

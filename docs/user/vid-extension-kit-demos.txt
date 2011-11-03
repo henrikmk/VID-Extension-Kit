@@ -106,7 +106,9 @@ This demonstrates a DATA-LIST with filtering using the QUERY-FACE function.
 
 +++follow-size.r
 
-This demonstrates a DATA-LIST with FOLLOW-SIZE being of PAGE or LINE. Use the up/down cursor keys to test the differences.
+This demonstrates a DATA-LIST with FOLLOW-SIZE being of PAGE or LINE. Use the up/down cursor keys to test the differences. Using the arrow buttons scrolls using SELECT-FACE.
+
+Using the FOLLOW buttons shows the difference of FOLLOW behavior on different settings on FOLLOW-SIZE.
 
 +++hidden.r
 
