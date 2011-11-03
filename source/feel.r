@@ -637,7 +637,13 @@ setup-face: func [
 		in access 'setup-face*
 	][
 		access/setup-face* face :value
-		ctx-resize/align/no-show face
+		;-- perform align, if the face has a layout flag and is not undergoing INIT
+		if all [
+			any [none? face/init empty? face/init]
+			flag-face? face layout
+		] [
+			ctx-resize/align/no-show face
+		]
 		act-face face none 'on-setup
 	]
 	any [no-show show face]

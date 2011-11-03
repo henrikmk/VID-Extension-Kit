@@ -50,6 +50,7 @@ REBOL [
 ; TRANSPARENT		- For panels, does not SET-FACE and returns NONE for GET-FACE when INPUT faces inside it are disabled.
 ; SCROLLABLE		- Indicates that this style can be scrolled using a SCROLLER or SLIDER
 ; COMPOUND			- Styles that contain specific other faces, built in a custom way, like COMPOUNDs and CONSTRUCTs
+; LAYOUT			- Provides its own layout that is typically built using LAYOUT inside SETUP-FACE
 
 foreach [style flags] face-flags: [
 
@@ -191,11 +192,11 @@ LIST					[iterated action]
 CARET-LIST				[iterated action tabbed input scrollable]
 CHOICE-LIST				[iterated action tabbed input scrollable]
 REVERSE-LIST			[iterated action]
-NAV-LIST				[tabbed action compound]
-DATA-LIST				[tabbed action compound scrollable input]
-PARAMETER-LIST			[tabbed action compound scrollable input]
+NAV-LIST				[tabbed action compound layout]
+DATA-LIST				[tabbed action compound layout scrollable input]
+PARAMETER-LIST			[tabbed action compound layout scrollable input]
 ;SCROLL-DATA-LIST		[tabbed compound action] ; compound, is not iterated in itself
-TEXT-LIST				[tabbed action compound flags text as-is input]
+TEXT-LIST				[tabbed action compound layout flags text as-is input]
 ;MENU-ITEMS				[iterated action]
 ANIM					[]
 ;BTN					[tabbed action]
