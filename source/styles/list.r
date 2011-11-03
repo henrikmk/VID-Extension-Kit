@@ -160,9 +160,10 @@ stylize/master [
 					]
 					; if cursor is now at bottom, move page size forward
 					equal? pos - size + 1 index? face/output [
-						face/output: min at face/output list-size at tail face/output negate list-size
+						face/output: at face/output list-size
 					]
 				]
+				access/clamp-list face
 			]
 		]
 		; calculates list size ratio (internal)
