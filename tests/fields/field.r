@@ -39,6 +39,10 @@ view make-window [
 			field on-key [probe get-face face]
 			s r c g
 			return
+		label "Filled Field"
+			field "Test" on-key [probe get-face face]
+			s r c g
+			return
 		label "Password Field"
 			field hide on-key [probe get-face face]
 			s r c g

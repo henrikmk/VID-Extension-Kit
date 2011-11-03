@@ -104,6 +104,10 @@ This demonstrates a DATA-LIST with basic data handling, like adding, removing an
 
 This demonstrates a DATA-LIST with filtering using the QUERY-FACE function.
 
++++follow-size.r
+
+This demonstrates a DATA-LIST with FOLLOW-SIZE being of PAGE or LINE. Use the up/down cursor keys to test the differences.
+
 +++hidden.r
 
 This demonstrates a DATA-LIST with alternative column order, where one column is hidden.

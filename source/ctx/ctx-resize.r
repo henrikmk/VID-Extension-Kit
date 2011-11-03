@@ -405,7 +405,6 @@ ctx-resize: context [
 		if face/parent-face [
 			win-pos: face/parent-face/win-offset
 		]
-		; this is not run at all during startup
 		do-align face face/parent-face
 		any [no-show show face]
 		face

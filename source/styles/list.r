@@ -134,6 +134,7 @@ stylize/master [
 				ctx-resize/align/no-show fs
 			]
 		]
+		; determine number of visible rows in list
 		list-size: func [face] [
 			to integer! face/size/y - (any [attempt [2 * face/edge/size/y] 0]) / face/sub-face/size/y
 		]
@@ -386,13 +387,13 @@ stylize/master [
 		;-- Accessor functions
 		access: make access [
 			; makes sure the list output does not scroll beyond the edge
-			clamp-list: func [face /local sz] [
-				if all [
-					not head? face/output
-					greater? sz: face/list-size face length? face/output
-				] [
-					face/output: skip tail face/output negate sz
-				]
+			clamp-list: func [face] [
+				face/output:
+					at
+						head face/output
+						min
+							index? face/output
+							index? at tail face/output negate face/list-size face 
 			]
 			; performs face navigation using LIST-* styles in the sub-face
 			key-face*: func [face event /local old] [
@@ -462,7 +463,7 @@ stylize/master [
 				act-face face none 'on-unselect
 			]
 			; selects rows in the face
-			select-face*: func [face values /local old-selection next-value] [
+			select-face*: func [face values /local old-selection new-value] [
 				old-selection: copy face/selected
 				clear face/selected
 				case [
@@ -477,7 +478,6 @@ stylize/master [
 					]
 					;-- Select by Function
 					any-function? :values [
-						clear face/selected
 						foreach id face/data-sorted [
 							if values pick face/data id [insert tail face/selected id]
 						]
@@ -488,35 +488,33 @@ stylize/master [
 					]
 					;-- Select First
 					'first = :values [
-						insert clear face/selected first face/data-sorted
+						insert face/selected first face/data-sorted
 						follow face 1
 						act-face face none 'on-select
 					]
 					;-- Select Next
 					'next = :values [
-						next-value: find face/data-sorted old-selection/1
-						if next-value [
-							unless tail? next next-value [
-								next-value: next next-value
-							]
-							insert face/selected first next-value
-							follow face index? next-value
-							act-face face none 'on-select
+						new-value: find face/data-sorted old-selection/1
+						new-value: either new-value [
+							at head new-value min index? next new-value index? back tail new-value
+						][
+							face/data-sorted
 						]
+						insert face/selected first new-value
+						follow face index? new-value
+						act-face face none 'on-select
 					]
 					;-- Select Previous
 					'previous = :values [
-						next-value: find face/data-sorted old-selection/1
-						if next-value [
-							next-value: back next-value
-							insert face/selected first next-value
-							follow face index? next-value
-							act-face face none 'on-select
-						]
+						new-value: find face/data-sorted old-selection/1
+						new-value: either new-value [back new-value][face/data-sorted]
+						insert face/selected first new-value
+						follow face index? new-value
+						act-face face none 'on-select
 					]
 					;-- Select Last
 					'last = :values [
-						insert clear face/selected last face/data-sorted
+						insert face/selected last face/data-sorted
 						follow face length? face/data-sorted
 						act-face face none 'on-select
 					]
@@ -775,7 +773,7 @@ stylize/master [
 				if object? values [values: reduce ['input words-of values]]
 				foreach
 					word
-					[input output select-mode widths adjust modes types names resize-column header-face sub-face render]
+					[input output widths adjust modes types names resize-column header-face sub-face render]
 					[set in face word none]
 				foreach
 					[word value]
@@ -875,10 +873,10 @@ stylize/master [
 					list fill 1x1 align [left]
 						[do-face face/parent-face none]
 						with [ ; size is ignored, because it's made inside list size
-							sub-face: (face/sub-face)
-							data: (face/data)
-							columns: (face/input)
-							column-order: (face/column-order)
+							sub-face:		(face/sub-face)
+							data:			(face/data)
+							columns:		(face/input)
+							column-order:	(face/column-order)
 						]
 				]
 				face/pane: layout/tight compose/deep/only face/pane
@@ -886,11 +884,6 @@ stylize/master [
 				;-- Calculate sizes
 				any [face/size face/size: face/pane/size + any [all [object? face/edge 2 * face/edge/size] 0]]
 				face/panes: reduce ['default face/pane: face/pane/pane]
-				either empty? face/init [
-					ctx-resize/align/no-show face
-				][
-					ctx-resize/resize/no-show face/pane/1 as-pair face/size/x - (2 * first edge-size face) 24 0x0
-				]
 				;-- Name faces
 				set bind either face/header-face [
 					[header-face v-scroller list]

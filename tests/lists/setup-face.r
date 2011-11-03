@@ -23,7 +23,6 @@ REBOL [
 
 do %../../build/include.r
 
-;insert insert insert clear ctx-vid-debug/debug 'align 'face 'resize
 
 list-data: []
 loop 100 [append/only list-data array/initial 3 does [random "abcdef xyz nml"]]
