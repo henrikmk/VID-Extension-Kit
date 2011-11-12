@@ -220,6 +220,10 @@ This demonstrates a basic popup menu, using the SHOW-MENU-FACE function.
 
 Test resizing using FILL.
 
++++window.r
+
+Test programmatic resizing of window. Try both resizing to bigger and smaller window, while the window is open and while it's closed.
+
 ---Selectors
 
 +++check.r
