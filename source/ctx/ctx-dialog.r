@@ -1,30 +1,27 @@
 REBOL [
-	Title:  "REBOL/View: Dialog Management"
-	Author: "Henrik Mikael Kristensen"
-	Rights: "Copyright 2000 REBOL Technologies. All rights reserved."
-	Note:   {Improvements to this code are welcome, but all changes preserve the above copyright.}
+	Title: "VID Extension Kit Dialog Management"
+	Short: "VID Extension Kit Dialog Management"
+	Author: ["Henrik Mikael Kristensen"]
+	Copyright: "2011 - HMK Design"
+	Filename: %ctx-dialog.r
+	Version: 0.0.2
+	Type: 'script
+	Maturity: 'unstable
+	Release: 'internal
+	Created: 09-May-2010
+	Date: 05-Dec-2011
+	License: {
+		BSD (www.opensource.org/licenses/bsd-license.php)
+		Use at your own risk.
+	}
 	Purpose: {
 		Management of Tool Windows, Requesters, Information Windows and Alerts
 	}
-	; You are free to use, modify, and distribute this software with any
-	; REBOL Technologies products as long as the above header, copyright,
-	; and this comment remain intact. This software is provided "as is"
-	; and without warranties of any kind. In no event shall the owners or
-	; contributors be liable for any damages of any kind, even if advised
-	; of the possibility of such damage. See license for more information.
-
-	; Please help us to improve this software by contributing changes and
-	; fixes via http://www.rebol.com/feedback.html - Thanks!
-
-	; Changes in this file are contributed by Henrik Mikael Kristensen.
-	; Changes and fixes to this file can be contributed to Github at:
-	; https://github.com/henrikmk/VID-Extension-Kit
+	History: []
+	Keywords: []
 ]
 
 ctx-dialog: context [
-
-layout-content: none
-call-back: none
 
 ;-- Dialog Functions
 
@@ -38,7 +35,7 @@ set-dialog-value: func [face value /local win] [
 ]
 
 ; performs validation of a dialog and if true, sets the data to its content and closes it
-dialog-use: func [face /local pnl] [
+dialog-use: func [face /local pnl vals] [
 	pnl: back-face face/parent-face
 	; validate dialog panel here and perform action on it
 	if true [
@@ -69,7 +66,7 @@ bind-face-func: func [content call-back] [
 ;-- Tool Windows
 
 ; create new tool window
-set 'tool func [title [string!] type [word! block!] content [any-type!] call-back [any-function!] /local lo] [
+set 'tool func [title [string!] type [word! block!] content [any-type!] call-back [any-function!] /local layout-content lo] [
 	;-- If already open, find and reuse that window
 	if word? type [
 		foreach window system/view/screen-face/pane [
@@ -98,7 +95,10 @@ set 'tool-color func [content output-func] [tool "Color Tool" 'layout-color cont
 make-button-group: func [buttons] [compose/deep [btn-group [across bar return (buttons)]]]
 
 ; create new request window
-set 'request func [title [string!] type [word! block!] content [any-type!] button-group [word! block!]] [
+set 'request func [
+	title [string!] type [word! block!] content [any-type!] button-group [word! block!]
+	/local call-back layout-content
+] [
 	layout-content: either block? type [type][reduce [type]]
 	layout-content:
 		make-window
