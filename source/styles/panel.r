@@ -42,6 +42,7 @@ stylize/master [
 				size								; user sets size
 				pane/size + (2 * edge-size self)	; content sets size
 			]
+			ctx-resize/resize/no-show/no-springs pane size 0x0
 			pane: pane/pane
 			set-parent-faces self
 		]
