@@ -28,6 +28,15 @@ stylize/master [
 	COMPOUND: IMAGE fill 0x0 spring none with [
 		font: none ; panels do not contain a font object
 		access: ctx-access/compound
+		words: reduce [
+			'data func [new args][
+				all [
+					block? args
+					new/data: args/2 ; [!] - or first?
+				]
+				next args
+			]
+		]
 		init: [
 			pane:
 				layout/styles/tight
@@ -42,9 +51,9 @@ stylize/master [
 				size								; user sets size
 				pane/size + (2 * edge-size self)	; content sets size
 			]
+			set-parent-faces/parent pane self
 			ctx-resize/resize/no-show/no-springs pane size 0x0
 			pane: pane/pane
-			set-parent-faces self
 		]
 	]
 
