@@ -307,7 +307,7 @@ stylize/master [
 ;				area/font: font ; can't propagate it like this, as the font is now determined by the surface
 ;			]
 			;-- Set actor sharing between self and area
-			foreach act [on-key on-return on-escape on-tab] [
+			foreach act [on-key on-return on-escape on-tab on-unfocus] [
 				insert-actor-func self act :set-scroller
 				pass-actor self area act
 			]
