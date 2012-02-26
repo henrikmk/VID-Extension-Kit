@@ -1,22 +1,19 @@
 REBOL [
 	Title:  "REBOL/View: Text Edit Core"
-	Author: ["Carl Sassenrath" "Henrik Mikael Kristensen"]
-	Rights: "Copyright 2000 REBOL Technologies. All rights reserved."
-	Note:   {Improvements to this code are welcome, but all changes preserve the above copyright.}
-	Thanks: {Romano Paolo Tenca (Jan-2004) for fixes and cleanup in 'Edit-Text.}
-	; You are free to use, modify, and distribute this software with any
-	; REBOL Technologies products as long as the above header, copyright,
-	; and this comment remain intact. This software is provided "as is"
-	; and without warranties of any kind. In no event shall the owners or
-	; contributors be liable for any damages of any kind, even if advised
-	; of the possibility of such damage. See license for more information.
+	Version: 2.7.6
+	Rights: "Copyright REBOL Technologies 2008. All rights reserved."
+	Home: http://www.rebol.com
+	Date: 14-Mar-2008
+
+	; You are free to use, modify, and distribute this file as long as the
+	; above header, copyright, and this entire comment remains intact.
+	; This software is provided "as is" without warranties of any kind.
+	; In no event shall REBOL Technologies or source contributors be liable
+	; for any damages of any kind, even if advised of the possibility of such
+	; damage. See license for more information.
 
 	; Please help us to improve this software by contributing changes and
-	; fixes via http://www.rebol.com/feedback.html - Thanks!
-
-	; Changes in this file are contributed by Henrik Mikael Kristensen.
-	; Changes and fixes to this file can be contributed to Github at:
-	; https://github.com/henrikmk/VID-Extension-Kit
+	; fixes. See http://www.rebol.com/support.html for details.
 ]
 
 ctx-text: [
@@ -80,7 +77,7 @@ ctx-text: [
 	left-hilight: does [
 		either left-hilight? [highlight-start][highlight-end]
 	]
-	
+
 	right-hilight: does [
 		either left-hilight? [highlight-end][highlight-start]
 	]
@@ -152,9 +149,9 @@ ctx-text: [
 		/new new-face "New face being unfocused."
 		/local root tmp-face
 	][
-		; (Clears related globals, even if no focal-face.)
 		tmp-face: focal-face
 		focal-face: none
+		; problem here with a face that won't unfocus in build2.r
 		if tmp-face [
 			validate-face tmp-face
 			;-- remove the focal face only if the root-face is the same
@@ -198,7 +195,7 @@ ctx-text: [
 	]
 
 	copy-text: func [face] [
-		; I don't like this function.
+		; I don't like this function, as it will copy everything to the clipboard, when nothing is selected.
 		unless copy-selected-text face [ ; copy all if none selected (!!! should be line)
 			hilight-all face
 			copy-selected-text face
@@ -692,12 +689,7 @@ ctx-text: [
 					]
 				]
 				key [
-					;if flag-face? face hide [insert clear face/text face/data]
 					edit-text face event get in face 'action
-					;if flag-face? face hide [
-					;	face/data: copy face/text
-					;	insert/dup clear face/text #"*" length? face/data
-					;]
 				]
 			]
 		]

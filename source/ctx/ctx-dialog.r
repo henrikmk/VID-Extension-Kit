@@ -1,6 +1,6 @@
 REBOL [
-	Title: "VID Extension Kit Dialog Management"
-	Short: "VID Extension Kit Dialog Management"
+	Title: "Dialog Management Context"
+	Short: "Dialog Management Context"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2011 - HMK Design"
 	Filename: %ctx-dialog.r

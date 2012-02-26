@@ -1,20 +1,24 @@
 REBOL [
-	Title:  "REBOL/View: Tool Tips"
-	Author: "Henrik Mikael Kristensen"
-	Rights: "Copyright 2011 REBOL Technologies. All rights reserved."
-	; You are free to use, modify, and distribute this software with any
-	; REBOL Technologies products as long as the above header, copyright,
-	; and this comment remain intact. This software is provided "as is"
-	; and without warranties of any kind. In no event shall the owners or
-	; contributors be liable for any damages of any kind, even if advised
-	; of the possibility of such damage. See license for more information.
-
-	; Please help us to improve this software by contributing changes and
-	; fixes via http://www.rebol.com/feedback.html - Thanks!
-
-	; Changes in this file are contributed by Henrik Mikael Kristensen.
-	; Changes and fixes to this file can be contributed to Github at:
-	; https://github.com/henrikmk/VID-Extension-Kit
+	Title: "Tool Tips Context"
+	Short: "Tool Tips Context"
+	Author: ["Henrik Mikael Kristensen"]
+	Copyright: "2010 - HMK Design"
+	Filename: %ctx-tool-tip.r
+	Version: 0.0.1
+	Type: 'script
+	Maturity: 'unstable
+	Release: 'internal
+	Created: 09-May-2010
+	Date: 09-May-2010
+	License: {
+		BSD (www.opensource.org/licenses/bsd-license.php)
+		Use at your own risk.
+	}
+	Purpose: {
+		Functions for management and display of tool tips.
+	}
+	History: []
+	Keywords: []
 ]
 
 ctx-tool-tip: context [

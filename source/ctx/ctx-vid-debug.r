@@ -1,6 +1,6 @@
 REBOL [
-	Title: "VID Debugging Tools"
-	Short: "VID Debugging Tools"
+	Title: "Debugging Context"
+	Short: "Debugging Context"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2009, 2010 - HMK Design"
 	Filename: %vid-debug.r
