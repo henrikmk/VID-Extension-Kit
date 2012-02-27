@@ -1,24 +1,24 @@
 REBOL [
-	Title:  "REBOL/View: Face DRAW Core"
-	Author: "Henrik Mikael Kristensen"
-	Rights: "Copyright 2000 REBOL Technologies. All rights reserved."
-	Note:   {Improvements to this code are welcome, but all changes preserve the above copyright.}
-	Purpose: {
-		DRAW context for faces
+	Title: "Face DRAW Core"
+	Short: "Face DRAW Core"
+	Author: ["Henrik Mikael Kristensen"]
+	Copyright: "2009, 2010 - HMK Design"
+	Filename: %ctx-draw.r
+	Version: 0.0.1
+	Type: 'script
+	Maturity: 'unstable
+	Release: 'internal
+	Created: 16-Jul-2009
+	Date: 16-Jul-2009
+	License: {
+		BSD (www.opensource.org/licenses/bsd-license.php)
+		Use at your own risk.
 	}
-	; You are free to use, modify, and distribute this software with any
-	; REBOL Technologies products as long as the above header, copyright,
-	; and this comment remain intact. This software is provided "as is"
-	; and without warranties of any kind. In no event shall the owners or
-	; contributors be liable for any damages of any kind, even if advised
-	; of the possibility of such damage. See license for more information.
-
-	; Please help us to improve this software by contributing changes and
-	; fixes via http://www.rebol.com/feedback.html - Thanks!
-
-	; Changes in this file are contributed by Henrik Mikael Kristensen.
-	; Changes and fixes to this file can be contributed to Github at:
-	; https://github.com/henrikmk/VID-Extension-Kit
+	Purpose: {
+		DRAW context for faces.
+	}
+	History: []
+	Keywords: []
 ]
 
 ; experimental DRAW context. this commandeers DRAW and therefore DRAW approach must be changed.
@@ -96,12 +96,12 @@ draw-body: context [
 ; creates a draw-body object
 set 'make-draw-body does [
 	make draw-body [
-		image-inner: copy
-		image-outer: copy
-		inner: copy
-		outer: array/initial 8 0x0
-		points: copy
-		vertices: make block! 100
+		image-inner:	copy
+		image-outer:	copy
+		inner:			copy
+		outer:			array/initial 8 0x0
+		points:			copy
+		vertices:		make block! 100
 	]
 ]
 
@@ -230,7 +230,7 @@ set 'set-draw-body func [face /init /local debug state state-block see touch val
 ]
 
 ; resizes all vertices in the DRAW body
-set 'resize-draw-body func [face /local fd fdo fdi fdd fdds] [
+set 'resize-draw-body func [face /local debug fd fdo fdi fdd fdds] [
 	unless all [
 		fd: face/draw-body
 		any [fd/template fd/draw]
@@ -286,6 +286,8 @@ set 'resize-draw-body func [face /local fd fdo fdi fdd fdds] [
 		fdi/8 - (fdds * 0x1 / 2) + 0x1			; left center
 	]
 	fd/image-center: either image? fdd [face/size - fdd/size / 2][fd/center]
+	debug: find ctx-vid-debug/debug 'draw-body
+	if debug [print "Resize"]
 	insert clear fd/points reduce fd/vertices
 ]
 

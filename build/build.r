@@ -1,8 +1,8 @@
 REBOL [
-	Title: "VID Build"
-	Short: "VID Build"
+	Title: "Build"
+	Short: "Build"
 	Author: ["Henrik Mikael Kristensen"]
-	Copyright: "2009, 2010 - HMK Design"
+	Copyright: "2009 - 2012 - HMK Design"
 	Filename: %vid-build.r
 	Version: 0.0.2
 	Type: 'script
@@ -25,7 +25,7 @@ print "Building VID Extension Kit"
 
 system/options/binary-base: 64 ; smaller binaries
 
-build-version: 0.0.6
+build-version: 0.0.7
 
 code: make block! []
 
@@ -86,16 +86,17 @@ foreach file [
 	]
 ]
 
-;-- Skin Stock
-foreach file read %../resources/skins/standard/ [
-	unless #"." = first file [
-		add-binary join %../resources/skins/standard/ file
-	]
-]
+skin-dir: %../resources/skins/standard/
 
-append code [
-	read-skin 'standard
-	load-skin 'standard
+;-- Skin Stock
+append code compose/deep/only [
+	store-skin 'standard make ctx-skin/skin-object [
+		colors:		(load skin-dir/colors.r)
+		images:		(load skin-dir/images.r)
+		materials:	(load skin-dir/materials.r)
+		surfaces:	(load skin-dir/surfaces.r)
+	]
+	apply-skin get-skin 'standard
 ]
 
 ;-- Styles
@@ -147,7 +148,7 @@ save/header %../release/vid-ext-kit.r code compose [
 	Version: (build-version)
 	Date: (now)
 	Author: ["Henrik Mikael Kristensen"]
-	Copyright: "2009, 2010 - HMK Design"
+	Copyright: "2009 - 2012 - HMK Design"
 	License: {
 		BSD (www.opensource.org/licenses/bsd-license.php)
 		Use at your own risk.

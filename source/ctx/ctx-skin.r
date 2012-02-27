@@ -1,15 +1,15 @@
 REBOL [
-	Title: "VID Extension Kit SKIN Core"
-	Short: "VID Extension Kit SKIN Core"
+	Title: "SKIN Core"
+	Short: "SKIN Core"
 	Author: ["Henrik Mikael Kristensen"]
-	Copyright: "2011 - HMK Design"
+	Copyright: "2011, 2012 - HMK Design"
 	Filename: %ctx-skin.r
-	Version: 0.0.1
+	Version: 0.0.2
 	Type: 'script
 	Maturity: 'unstable
 	Release: 'internal
 	Created: 09-May-2010
-	Date: 09-May-2010
+	Date: 19-feb-2012
 	License: {
 		BSD (www.opensource.org/licenses/bsd-license.php)
 		Use at your own risk.
@@ -35,41 +35,69 @@ skin-object: make object! [
 		none
 ]
 
-; parse the skin and build images, colors and surfaces in that order
-set 'make-skin func [skin [object!]] [
+; words of the skin object
+types: words-of skin-object
+
+set 'get-skin func [
+	"Returns a skin object from the skin stock. Returns error! if it does not exist."
+	skin [word!] "Skin name as word"
+] [
+	any [
+		select skins skin
+		throw make error! rejoin ["Skin '" skin "' does not exist."]
+	]
+]
+
+set 'append-skin func [
+	"Append a skin object onto another skin object."
+	obj1 [object!] "The skin object to append to."
+	obj2 [object!] "The skin object that is appended."
+] [
+	foreach type types [
+		if all [obj1/:type in obj2 type] [append obj1/:type obj2/:type]
+	]
+]
+
+set 'apply-skin func [
+	"Applies a skin object to the user interface."
+	obj [object!]
+] [
 	;---------- Colors
-	ctx-colors/colors: make object! skin/colors
+	ctx-colors/colors: make object! obj/colors
 	;---------- Images
 	; images are appliable as draw images, which means they must be ready before surfaces
 	;---------- Materials
 	; materials are appliable for draw blocks, which means they must be ready before surfaces
 	;---------- Surfaces
-	append clear ctx-surface/surfaces skin/surfaces
+	append clear ctx-surface/surfaces obj/surfaces
 ]
 
-; clears the old skin and loads a new one from the skin stock
-set 'load-skin func [name] [
-	make-skin select skins name
-]
-
-; reads a skin from disk or memory and appends it to the skin stock. Input is the skin directory.
-set 'read-skin func [file [word! file!] /local item skin p paren-rule word] [
-	skin: make skin-object []
-	; Retrieve colors, images, materials and surfaces from files
-	foreach type [colors images materials surfaces] [
-		case [
-			; Attempt to retrieve from memory
-			word? file [
-				word: to-word join type '.r
-				set in skin type load as-string get word
-				unset word
-			]
-			; Then attempt to load from disk
-			if exists? item: to-file rejoin [dirize file join type '.r] [
-				set in skin type load item
+set 'read-skin func [
+	[catch]
+	"Reads skin files from directory into a skin object."
+	skin [file!] "Directory or word to read from."
+	/local item new-obj
+] [
+	new-obj: make skin-object []
+	; Retrieve colors, images, materials and surfaces from files or skin object
+	either exists? skin [
+		foreach type types [
+			if exists? item: to-file rejoin [dirize form skin join type '.r] [
+				set in new-obj type load item
 			]
 		]
-		; Process parenthesis blocks, except for template and draw
+	][
+		throw make error! rejoin ["Skin '" skin "' not found"]
+	]
+	new-obj
+]
+
+set 'parse-skin func [
+	"Parses a skin object."
+	obj [object!]
+] [
+	; Process parenthesis blocks, except for template and draw from the current processing position
+	foreach type types [
 		switch type [
 			surfaces [
 				; [!] - this executes code in the skin, which is not secure
@@ -82,17 +110,25 @@ set 'read-skin func [file [word! file!] /local item skin p paren-rule word] [
 						| skip
 					]
 				]
-				parse skin/surfaces paren-rule
+				parse obj/surfaces paren-rule
 			]
+			; other types come later
 		]
 	]
-	; Append loaded skin to skin stock
-	append skins either word? file [
-		file
+	obj
+]
+
+set 'store-skin func [
+	"Stores a skin object in the skin stock with the given word."
+	skin [word!] "Name of skin"
+	obj [object!] "Skin object"
+] [
+	either find skins skin [
+		change next find skin skin obj
 	][
-		to-word trim/with form last split-path file "/"
+		append append skins skin obj
 	]
-	append skins skin
+	obj
 ]
 
 ]
