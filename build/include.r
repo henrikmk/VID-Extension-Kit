@@ -60,10 +60,17 @@ foreach file [
 
 ;-- Skins
 foreach file read %../resources/skins/ [
-	if #"/" = last file [read-skin join %../resources/skins/ file]
+	if #"/" = last file [
+		store-skin
+			to-word trim/with to-string file "/"
+			parse-skin
+				read-skin
+					join %../resources/skins/ file
+					none
+	]
 ]
 
-load-skin 'standard
+apply-skin get-skin 'standard
 
 ;-- Styles
 foreach file [
