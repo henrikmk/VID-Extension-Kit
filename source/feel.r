@@ -1,22 +1,19 @@
 REBOL [
 	Title:  "REBOL/View: Visual Interface Dialect - Feelings"
-	Author: "Carl Sassenrath"
-	Rights: "Copyright 2000-2005 REBOL Technologies. All rights reserved."
-	License: {
-		Users can freely modify and publish this code under the condition that it is
-		executed only with languages from REBOL Technologies, and user must include this
-		header as is. All changes may be freely included by other users in their software
-		(even commercial uses) as long as they abide by these conditions.
-	}
-	; You are free to use, modify, and distribute this software with any
-	; REBOL Technologies products as long as the above header, copyright,
-	; and this comment remain intact. This software is provided "as is"
-	; and without warranties of any kind. In no event shall the owners or
-	; contributors be liable for any damages of any kind, even if advised
-	; of the possibility of such damage. See license for more information.
+	Version: 2.7.6
+	Rights: "Copyright REBOL Technologies 2008. All rights reserved."
+	Home: http://www.rebol.com
+	Date: 14-Mar-2008
+
+	; You are free to use, modify, and distribute this file as long as the
+	; above header, copyright, and this entire comment remains intact.
+	; This software is provided "as is" without warranties of any kind.
+	; In no event shall REBOL Technologies or source contributors be liable
+	; for any damages of any kind, even if advised of the possibility of such
+	; damage. See license for more information.
 
 	; Please help us to improve this software by contributing changes and
-	; fixes via http://www.rebol.com/feedback.html - Thanks!
+	; fixes. See http://www.rebol.com/support.html for details.
 ]
 
 svvf: system/view/vid/vid-feel: context [
@@ -739,6 +736,7 @@ edit-face: func [
 	op
 	value
 	/at pos "Positions"
+	/field word "Field"
 	/no-show "Do not show change yet"
 	/local access
 ][
@@ -746,7 +744,7 @@ edit-face: func [
 		access: get in face 'access
 		in access 'edit-face*
 	][
-		access/edit-face* face :op :value :pos
+		access/edit-face* face :op :value :pos :word
 		act-face face none 'on-edit
 	]
 	any [no-show show face]
@@ -881,6 +879,23 @@ move-face: func [
 	face/offset: face/offset + offset
 	if scale [
 		resize/no-show face face/size face/size - offset
+	]
+	any [no-show show face]
+	face
+]
+
+refresh-face: func [
+	"Refresh a face with a data source."
+	face
+	/no-show "Do not show change yet"
+	/local access
+] [
+	if all [
+		access: get in face 'access
+		in access 'refresh-face*
+	][
+		access/refresh-face* face
+		act-face face none 'on-refresh
 	]
 	any [no-show show face]
 	face
@@ -1497,7 +1512,6 @@ ctx-access: context [
 			set-parent-faces face
 		]
 	]
-	
 
 	face-construct: make data-default [
 		setup-face*: func [face setup /local tab-face] [
