@@ -55,7 +55,7 @@ ctx-list: context [
 				;-- Spacer
 				'| (append face/header-face [pad 1x0])
 				;-- Resizer
-				| '|| (append face/header-face [resizer] resize=: true)
+				| '|| (append face/header-face [resizer] resize?: true)
 				;-- Column Header
 				| set w word! (
 					i: i + 1
