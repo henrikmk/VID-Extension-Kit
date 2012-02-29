@@ -1,6 +1,23 @@
-rebol []
-
-; replacement list view. the old one is too complex.
+REBOL [
+	Title: "Lists"
+	Short: "Lists"
+	Author: ["Henrik Mikael Kristensen"]
+	Copyright: "2009, 2012 - HMK Design"
+	Filename: %list.r
+	Version: 0.0.1
+	Type: 'script
+	Maturity: 'unstable
+	Release: 'internal
+	Created: 04-Apr-2009
+	Date: 10-Feb-2012
+	License: {
+		BSD (www.opensource.org/licenses/bsd-license.php)
+		Use at your own risk.
+	}
+	Purpose: {}
+	History: []
+	Keywords: []
+]
 
 stylize/master [
 	; Prototypes for iterated face styles
@@ -273,18 +290,6 @@ stylize/master [
 		render-func: none
 		;-- Empty Cell foreground render function
 		empty-render-func: none
-		;-- Content update function
-		update: func [face] [
-			ctx-list/set-filtered face
-			; what is needed here is to keep the place at where it needs to be when sorting
-			; this means that if the length does not change unreasonably, then there is no need to alter the position
-			; perhaps we should then stick to where it is and then clamp
-;			face/scroll/set-redrag face
-			show face
-			;if in face 'scroll [
-			;	show face/scroll/v-scroller-face
-			;]
-		]
 		;-- Cell selection function for mouse. FACE is cell that is clicked on.
 		select-mode: 'multi
 		start: end: none
@@ -453,14 +458,14 @@ stylize/master [
 					data: ctx-list/object-to-data data
 				]
 				face/data: any [data make block! []]
-				ctx-list/set-filtered face
+				refresh-face/no-show face
 				act-face face none 'on-unselect
 			]
 			; clears the face data block
 			clear-face*: func [face] [
 				clear face/selected
 				clear face/data
-				ctx-list/set-filtered face
+				refresh-face/no-show face
 				act-face face none 'on-unselect
 			]
 			; selects rows in the face
@@ -532,11 +537,11 @@ stylize/master [
 			query-face*: func [face value] [
 				clear face/selected
 				face/filter-func: :value
-				ctx-list/set-filtered face
+				refresh-face/no-show face
 				act-face face none 'on-unselect
 			]
 			; perform edits on the list, when the list is object based
-			edit-face*: func [face op value pos /local j] [
+			edit-face*: func [face op value pos word /local j] [
 				pos:
 					switch/default pos [
 						last [length? face/data]
@@ -548,7 +553,7 @@ stylize/master [
 				switch :op [
 					add [
 						append/only face/data make face/prototype any [:value []]
-						ctx-list/set-filtered face
+						refresh-face/no-show face
 						select-face face 'last
 					]
 					duplicate [
@@ -556,23 +561,27 @@ stylize/master [
 						repeat i length? pos [
 							append/only face/data make face/prototype pick face/data pick pos i
 						]
-						ctx-list/set-filtered face
+						refresh-face/no-show face
 						select-face face array/initial length? pos does [j: j + 1]
 					]
 					edit update [
 						repeat i length? pos [
 							change at face/data pick pos i make pick face/data pick pos i :value
 						]
-						ctx-list/set-filtered face
+						refresh-face/no-show face
 					]
 					delete remove [
 						repeat i length? pos [change at face/data pick pos i ()]
 						remove-each row face/data [not value? 'row]
 						clear pos
 						select-face/no-show face none
-						ctx-list/set-filtered face
+						refresh-face/no-show face
 					]
 				]
+			]
+			refresh-face*: func [face] [
+				ctx-list/set-filtered face
+				act-face face none 'on-refresh
 			]
 		]
 		init: [
@@ -589,7 +598,7 @@ stylize/master [
 			if none? data [data: make block! []]
 			if object? data [data: ctx-list/object-to-data data]
 			output: copy data-sorted: copy data-filtered: copy data-display: make block! length? data
-			ctx-list/set-filtered self
+			refresh-face/no-show self
 			; Prepare selection
 			any [block? selected selected: make block! []]
 			any [block? highlighted highlighted: make block! []]
@@ -921,15 +930,16 @@ stylize/master [
 				face/list/access/query-face* face/list :value
 				set-scroller face
 			]
-			edit-face*: func [face op value pos] [
-				face/list/access/edit-face* face/list :op :value :pos
+			edit-face*: func [face op value pos word] [
+				face/list/access/edit-face* face/list :op :value :pos :word
+				set-scroller face
+			]
+			refresh-face*: func [face] [
+				face/list/access/refresh-face* face/list
 				set-scroller face
 			]
 		]
 		;-- List functions
-		update: func [face] [
-			face/list/update face/list
-		]
 		follow: func [face pos] [
 			face/list/follow face/list pos
 			set-face/no-show face/v-scroller face/list/calc-pos face/list
