@@ -541,12 +541,12 @@ stylize/master [
 				act-face face none 'on-unselect
 			]
 			; perform edits on the list, when the list is object based
-			edit-face*: func [face op value pos word /local j] [
+			edit-face*: func [face op value pos word /local blk j] [
 				pos:
 					switch/default pos [
 						last [length? face/data]
 						first [1]
-						all [repeat i length? face/data [append [] i]]
+						all [blk: make block! length? face/data repeat i length? face/data [append blk i] blk]
 					][
 						face/selected
 					]
