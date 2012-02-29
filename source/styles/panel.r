@@ -71,7 +71,7 @@ stylize/master [
 		size: none; -1x-1 ; none instead?
 		;-- Adds a single pane to the panel
 		; need to find a way to use add-pane outside of init, as face/styles is not available there
-		add-pane: func [[catch] face word pane /local out] [
+		add-pane: func [[catch] face word pane /local err out] [
 			if error? set/any 'err try [
 				; face/styles only works if add-pane is used during init
 				out: either face/styles [layout/styles/tight pane copy face/styles][layout/tight pane]
@@ -177,6 +177,7 @@ stylize/master [
 			none
 		faces: [nav-face h-scroller v-scroller panel-face]	; The collection of faces that exist in the compound
 		panel-pane:											; The content of the panel face
+		word:												; The current sub-pane of the panel
 			none
 		pane-spring: [right bottom]							; Which springs to use for the content
 		pane-fill: 0x0										; Which side of the content to restrict to the size of the panel
