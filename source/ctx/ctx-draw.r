@@ -30,7 +30,7 @@ ctx-draw: context [
 ; [!] - method to bind DRAW blocks on layout, possibly after init, and do this only once
 ; [x] - never restate the DRAW blocks
 ; [x] - test with some face to do this
-; [ ] - figure out when to use set-draw-body, possibly through FEEL
+; [x] - figure out when to use set-draw-body, possibly through FEEL
 ; [x] - apply template to a DRAW block
 ; [x] - need way to set margin easily. possibly the same as setting color and skin information
 ;       we need to do this currently by appending to init
@@ -57,7 +57,7 @@ ctx-draw: context [
 b: v: none
 
 ; Surface parse rules
-word-rule: none
+depth-rule: facet-rule: pure-rule: state-rule: value-rule: word-rule: none
 
 ; DRAW-BODY object
 draw-body: context [
@@ -135,7 +135,7 @@ set-facet-value: func [facet value 'output] [
 ]
 
 ; returns a value from a surface facet by state and event
-get-surface-facet: func [face facet state touch see init /local end-rule depth init-word pure see-word touch-word state-word out] [
+get-surface-facet: func [face facet state touch see init /local end-rule depth init-word pure see-word touch-word state-word value out] [
 	facet: to-lit-word facet					; always a word
 	touch-word: to-lit-word touch				; always a word
 	state-word: to-lit-word state				; always a word
@@ -155,7 +155,7 @@ get-surface-facet: func [face facet state touch see init /local end-rule depth i
 ]
 
 ; determines the draw body from face surface, the data state and the touch state
-set 'set-draw-body func [face /init /local debug state state-block see touch value] [
+set 'set-draw-body func [face /init /local debug state state-block see template-blk draw-blk touch value] [
 	if any [not face/draw-body empty? face/surface] [return false]
 	; Gather state information
 	state-block: reduce [
