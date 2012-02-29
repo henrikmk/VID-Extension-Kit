@@ -1,6 +1,6 @@
 REBOL [
-	Title: "VID Extension Kit SURFACE Core"
-	Short: "VID Extension Kit SURFACE Core"
+	Title: "SURFACE Core"
+	Short: "SURFACE Core"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2010 - HMK Design"
 	Filename: %ctx-surface.r
