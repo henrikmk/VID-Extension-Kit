@@ -27,7 +27,7 @@ ctx-colors: context [
 colors: none
 
 ; interpolate between two colors
-set 'interpolate func [color1 color2 length /local step] [
+set 'interpolate func [color1 color2 length /local blk step] [
 	blk: make block! length
 	color1: color1 + 0.0.0.0
 	color2: color2 + 0.0.0.0
