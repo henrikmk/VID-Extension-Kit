@@ -95,6 +95,7 @@ set 'read-skin func [
 set 'parse-skin func [
 	"Parses a skin object."
 	obj [object!]
+	/local paren-rule
 ] [
 	; Process parenthesis blocks, except for template and draw from the current processing position
 	foreach type types [
