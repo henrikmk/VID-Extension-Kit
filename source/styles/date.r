@@ -79,9 +79,9 @@ stylize/master [
 						on-key [act-face face/parent-face event 'on-key]
 						[do-face face/parent-face none]
 						with [spring: none append flags [auto-tab] font: (make self/font [])]
-			if 28 on-tab day-act on-set day-act
-			if 28 on-tab month-act on-set month-act
-			if 42 on-tab year-act on-set year-act max-length 4
+			if 27 on-tab day-act on-set day-act
+			if 27 on-tab month-act on-set month-act
+			if 41 on-tab year-act on-set year-act max-length 4
 			button 24x0 fill 0x1 "..." on-click calendar-act
 		]
 		access: make access [
