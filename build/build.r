@@ -90,12 +90,14 @@ skin-dir: %../resources/skins/standard/
 
 ;-- Skin Stock
 append code compose/deep/only [
-	store-skin 'standard make ctx-skin/skin-object [
-		colors:		(load skin-dir/colors.r)
-		images:		(load skin-dir/images.r)
-		materials:	(load skin-dir/materials.r)
-		surfaces:	(load skin-dir/surfaces.r)
-	]
+	store-skin 'standard
+		parse-skin
+			make ctx-skin/skin-object [
+				colors:		(load skin-dir/colors.r)
+				images:		(load skin-dir/images.r)
+				materials:	(load skin-dir/materials.r)
+				surfaces:	(load skin-dir/surfaces.r)
+			]
 	apply-skin get-skin 'standard
 ]
 
