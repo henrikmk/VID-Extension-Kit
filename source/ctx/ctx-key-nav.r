@@ -25,13 +25,17 @@ ctx-key-nav: context [
 
 ; ---------- Tab Face
 
-; returns the tab face for the face which exists in a certain window
-set 'get-tab-face func [[catch] face [object!]] [
+set 'get-tab-face func [
+	"Returns the tab face for the face which exists in a certain window."
+	[catch] face [object!]
+] [
 	get in root-face face 'tab-face
 ]
 
-; unsets the tab face for a certain window
-set 'unset-tab-face func [face [none! object!] /local rf] [
+set 'unset-tab-face func [
+	"Unsets the tab face for a certain window."
+	face [none! object!] /local rf
+] [
 	any [face exit]
 	rf: root-face face
 	if in rf 'tab-face [
@@ -42,8 +46,10 @@ set 'unset-tab-face func [face [none! object!] /local rf] [
 	face
 ]
 
-; sets the current tab face for the tabbed face or the nearest tabbed parent
-set 'set-tab-face func [face [object!] /local fc rf] [
+set 'set-tab-face func [
+	"Sets the current tab face for the tabbed face or the nearest tabbed parent."
+	face [object!] /local fc rf
+] [
 	unless flag-face? face tabbed [
 		ascend-face face [all [flag-face? face tabbed fc: face]]
 		either fc [face: fc][return face]
@@ -64,7 +70,10 @@ set 'set-tab-face func [face [object!] /local fc rf] [
 
 ; ---------- Default Face
 
-set 'get-default-face func [face] [
+set 'get-default-face func [
+	"Returns the default face relative to this one."
+	face
+] [
 	find-relative-face face [all [in face 'default face/default]]
 ]
 
