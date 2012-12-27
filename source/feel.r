@@ -17,7 +17,6 @@ REBOL [
 ]
 
 svvf: system/view/vid/vid-feel: context [
-
 	;-- Feel Functions
 
 	; resets related faces in a mutex group
@@ -901,6 +900,39 @@ refresh-face: func [
 	face
 ]
 
+hide-face: func [
+	"Hides a face and any sub-faces from view."
+	face
+	/local tab-face no-focal-face no-tab-face window-face
+] [
+	tab-face: get-tab-face face
+	traverse-face face [
+		if face = system/view/focal-face [no-focal-face: true unfocus face]
+		if face = tab-face [probe no-tab-face: true unset-tab-face face]
+	]
+	; should be the same policy here as for the accordion face
+	if all [no-focal-face no-tab-face] [
+		probe 'a
+		window-face: root-face face
+		any [
+			probe focus-default-input window-face
+			probe focus-first-input window-face
+			focus-first-false window-face
+		]
+	]
+	face/show?: false
+	show face/parent-face
+]
+
+show-face: func [
+	"Shows a hidden face."
+	face
+	/all "Show all hidden sub-faces"
+] [
+	either all [traverse-face face [face/show?: true]][face/show?: true]
+	show face
+]
+
 set 'enable-face func [
 	"Enables a face or a panel of faces with TABBED flag."
 	face
@@ -1345,7 +1377,7 @@ ctx-access: context [
 				]
 			]
 			face/panes: head face/panes
-			user-size?: pair? face/size
+			user-size?: all [not inside-scrollable? face pair? face/size]
 			;-- Panel-size for each panel
 			panel-size: 0x0
 			unless flag-face? face scrollable [
@@ -1359,11 +1391,19 @@ ctx-access: context [
 						panel-size/x: max size/x panel-size/x
 						panel-size/y: max size/y panel-size/y
 					]
-					face/size: max any [face/size 0x0] panel-size
-					if face/edge [face/size: panel-size + (face/edge/size * 2)]
+					;-- Do not set face size, if inside a scrollable face
+					unless inside-scrollable? face [
+						face/size: max any [face/size 0x0] panel-size
+						if face/edge [face/size: panel-size + (face/edge/size * 2)]
+					]
 				]
 			]
 			foreach [word pane] face/panes [pane/size: panel-size]
+		]
+
+		; Refresh any faces inside the currently visible panel
+		refresh-face*: func [face] [
+			traverse-face/skip face [refresh-face/no-show face flag-face? face panel]
 		]
 
 		; Panel SET and GET functions only work on sub-faces flagged as INPUT
@@ -1397,8 +1437,13 @@ ctx-access: context [
 				]
 
 				;-- Switch pane
+				; need to take care of face/size, which should be that of the pane
+				; but there are policies. sometimes the size must be taken care of, and other times, we can't.
+				; the size must be handled here, nowhere else
+				; check that it is not already handled, by checking the format of panes
 				either p: find head face/panes value [
 					face/pane: first next face/panes: p ; an object
+					probe face/pane/size ; 476x476, which is then the wrong size, but probably the right value to fix
 				][
 					throw make error! reform ["Could not find pane" value "in" describe-face face]
 				]
@@ -1705,3 +1750,4 @@ ctx-access: context [
 ]
 
 ;do %/c/build/simple-tests/access.r
+                                            
