@@ -1,8 +1,8 @@
 REBOL [
-	Title: "Improved VID Field"
-	Short: "Improved VID Field"
+	Title: "Field"
+	Short: "Field"
 	Author: ["Henrik Mikael Kristensen"]
-	Copyright: "2007 - HMK Design"
+	Copyright: "2007, 2008 - HMK Design"
 	Filename: %field.r
 	Version: 0.0.6
 	Created: 23-Mar-2007
