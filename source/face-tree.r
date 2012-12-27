@@ -1,24 +1,24 @@
 REBOL [
-	Title:  "REBOL/View: Face Tree Functions"
+	Title: "Face Tree Functions"
+	Short: "Face Tree Functions"
 	Author: ["Brian Hawley" "Henrik Mikael Kristensen"]
-	Rights: "Copyright 2000 REBOL Technologies. All rights reserved."
-	Note:   {Improvements to this code are welcome, but all changes preserve the above copyright.}
+	Copyright: "2010 - HMK Design"
+	Filename: %face-tree.r
+	Version: 0.0.1
+	Type: 'script
+	Maturity: 'unstable
+	Release: 'internal
+	Created: 09-May-2010
+	Date: 27-Dec-2012
+	License: {
+		BSD (www.opensource.org/licenses/bsd-license.php)
+		Use at your own risk.
+	}
 	Purpose: {
 		Various functions to maintain and investigate a face tree.
 	}
-	; You are free to use, modify, and distribute this software with any
-	; REBOL Technologies products as long as the above header, copyright,
-	; and this comment remain intact. This software is provided "as is"
-	; and without warranties of any kind. In no event shall the owners or
-	; contributors be liable for any damages of any kind, even if advised
-	; of the possibility of such damage. See license for more information.
-
-	; Please help us to improve this software by contributing changes and
-	; fixes via http://www.rebol.com/feedback.html - Thanks!
-
-	; Changes in this file are contributed by Henrik Mikael Kristensen.
-	; Changes and fixes to this file can be contributed to Github at:
-	; https://github.com/henrikmk/VID-Extension-Kit
+	History: []
+	Keywords: []
 ]
 
 set-parent-faces: func [
@@ -280,15 +280,16 @@ traverse-face: func [
 	"Traverses a pane for a face deeply and lets you perform a function on each face."
 	face [object!]
 	action
-	/local func-act last-face
+	/skip "Skip pane in face, if the action returns TRUE."
+	/local func-act last-face result
 ] [
 	unless get in face 'pane [exit]
 	if all [block? face/pane empty? face/pane] [exit]
 	last-face: get-tip-face face
 	func-act: func [face] action
 	until [
-		face: next-face/deep face
-		func-act face
+		face: either all [skip result][next-face face][next-face/deep face]
+		result: func-act face
 		same? last-face face
 	]
 ]
@@ -413,7 +414,7 @@ iterated-face?: func [[catch] face] [
 ]
 
 ; determines if the given face exists inside a compound face
-compound-face?: func [face] [
+compound-face?: func [face /local compound-face] [
 	compound-face: face
 	ascend-face face [
 		all [
@@ -910,6 +911,16 @@ adjust-face-scrollers: func [
 			;do-face fc none
 			;get-face fc
 		]
+	]
+]
+
+; determine if the parent of this face is a scrollable face. useful to determine if its size should change or not.
+inside-scrollable?: func [
+	face ; face to determine for
+] [
+	all [
+		object? face/parent-face
+		flag-face? face/parent-face scrollable
 	]
 ]
 
