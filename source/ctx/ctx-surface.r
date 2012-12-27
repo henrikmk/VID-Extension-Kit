@@ -42,7 +42,7 @@ surface: make object! [
 ]
 
 ; sets the skin of the face by applying skin information to the DRAW-BODY
-set 'set-surface func [face /local i parent paren-rule s] [
+set 'set-surface func [face /local i parent paren-rule s p] [
 	unless all [word? face/surface object? face/draw-body] [return false]
 	clear surface-block
 	parent: face/surface
