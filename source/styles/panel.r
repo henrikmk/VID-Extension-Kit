@@ -234,7 +234,9 @@ stylize/master [
 						any [all [face/h-scroller as-pair 0 face/h-scroller/size/y] 0]
 						(2 * edge-size face)
 				]
-				face/pane: face/pane/pane
+				if object? face/pane [
+					face/pane: face/pane/pane
+				]
 			]
 			scroll-face*: func [face x y /local content dsz old sz ssz x-value y-value update wheel] [
 				content: face/panel-face/pane
