@@ -1437,13 +1437,8 @@ ctx-access: context [
 				]
 
 				;-- Switch pane
-				; need to take care of face/size, which should be that of the pane
-				; but there are policies. sometimes the size must be taken care of, and other times, we can't.
-				; the size must be handled here, nowhere else
-				; check that it is not already handled, by checking the format of panes
 				either p: find head face/panes value [
 					face/pane: first next face/panes: p ; an object
-					probe face/pane/size ; 476x476, which is then the wrong size, but probably the right value to fix
 				][
 					throw make error! reform ["Could not find pane" value "in" describe-face face]
 				]
