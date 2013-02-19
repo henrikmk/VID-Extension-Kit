@@ -57,9 +57,10 @@ bind-face-func: func [content call-back] [
 		if get in face 'action [bind second get in face 'action 'call-back]
 		if get in face 'alt-action [bind second get in face 'alt-action 'call-back]
 		; rebind all actors
-		if get in face 'actors [
+		;if get in face 'actors [ ; this needs to be finished, but the cases here are not done
 			; rebind each actor
-		]
+			; bind second get in face 'actor 'call-back
+		;]
 	]
 ]
 
