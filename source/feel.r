@@ -1230,7 +1230,7 @@ ctx-access: context [
 				set-draw-body face
 			]
 		]
-		get-face*: func [face][face/draw-body/draw-image]
+		get-face*: func [face][all [face/draw-body face/draw-body/draw-image]]
 		clear-face*: func [face][set-face* face none]
 		reset-face*: func [face][set-face* face face/default]
 	]
