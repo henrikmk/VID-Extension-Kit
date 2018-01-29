@@ -1059,7 +1059,7 @@ stylize/master [
 		input [key value]
 		output [key | value]
 		widths [100 200]
-		resize-column value
+		resize-column 'value
 	]
 
 ]
