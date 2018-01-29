@@ -13,3 +13,7 @@ do build/build.r
 Tests:
 
 Just DO any one of the files in the tests/ directory. At this time, they may not all work.
+
+Documentation in web form:
+
+http://hmkdesign.dk/project.rsp?id=vid-ext-kit&page=docs
