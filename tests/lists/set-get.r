@@ -35,7 +35,7 @@ view make-window [
 	bar
 	l-data: data-list setup [input [a b c d]]
 	across
-	button "Chars" [set-face l-data list1]
-	button "Numbers" [set-face l-data list2]
-	button "GET-FACE" [probe get-face l-data]
+	bottom-button "Chars" [set-face l-data list1]
+	bottom-button "Numbers" [set-face l-data list2]
+	bottom-button "GET-FACE" [probe get-face l-data]
 ]
