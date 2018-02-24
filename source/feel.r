@@ -1228,6 +1228,7 @@ ctx-access: context [
 				; [s] - this will be a problem with surface overriding this
 				face/draw-body/draw-image: value
 				set-draw-body face
+				resize-draw-body face
 			]
 		]
 		get-face*: func [face][all [face/draw-body face/draw-body/draw-image]]

@@ -86,12 +86,12 @@ stylize/master [
 
 	; cell image for LIST
 	LIST-IMAGE-CELL: IMAGE with [
-		text: none
-		data: none
-		row: none
-		size: 0x20
-		name: none
-		pos: 0x0
+		text:			none
+		data:			none
+		row:			none
+		size:			0x20		; the size of the cell with a particular standard height
+		name:			none
+		pos:			0x0
 		feel: get in get-style 'list-cell 'feel
 	]
 	

@@ -25,7 +25,7 @@ stylize/master [
 	; Base image style
 	IMAGE: FACE with [
 		size: color: image: none
-		surface: none
+		surface: 'image
 		feel: svvf/sensor
 		access: ctx-access/image ; crashes when clicked
 		effect: [fit]
