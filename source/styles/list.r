@@ -85,7 +85,15 @@ stylize/master [
 	]
 
 	; cell image for LIST
-	LIST-IMAGE-CELL: LIST-CELL
+	LIST-IMAGE-CELL: IMAGE with [
+		text: none
+		data: none
+		row: none
+		size: 0x20
+		name: none
+		pos: 0x0
+		feel: get in get-style 'list-cell 'feel
+	]
 	
 	; column resizer for LIST
 	LIST-RESIZER: RESIZER with [
@@ -116,6 +124,8 @@ stylize/master [
 		filter-func:				; filter function
 		sort-direction:				; 'asc, 'ascending or 'desc, 'descending
 		sort-column:				; word name of column to sort by
+		default-sort-direction:		; the direction to sort in, when resetting sorting (ASC, ASCENDING or DESC, DESCENDING) (word)
+		default-sort-column:		; the column to sort on, when resetting sorting or NONE, if DATA-LIST should use the input sorting (word)
 		;-- Data source information
 		prototype:					; row prototype
 		data:						; source data list, always starts at header
@@ -728,7 +738,7 @@ stylize/master [
 		prototype:				; prototype for list row (object)
 		input:					; input words for data source (block of words)
 		output:					; output words for data display (block of words)
-		select-mode:			; selection mode (MULTI, MUTEX, PERSISTENT) (block of words)
+		select-mode:			; selection mode (MULTI, MUTEX, PERSISTENT) (word)
 		widths:					; widths of columns in pixels (block of integers)
 		adjust:					; LEFT, RIGHT or CENTER adjustment of column texts (block of words)
 		modes:					; Column modes (SORT, NO-SORT, FILTER)
@@ -736,6 +746,8 @@ stylize/master [
 		names:					; Column names (block of strings)
 		selected:				; selected rows in list (block of integers)
 		resize-column:			; which single column resizes (word)
+		default-sort-direction:	; the direction to sort in, when resetting sorting (ASC, ASCENDING or DESC, DESCENDING) (word)
+		default-sort-column:	; the column to sort on, when resetting sorting or NONE, if DATA-LIST should use the input sorting (word)
 		follow-size:			; whether to move a PAGE or a LINE, when following the selected row
 			none
 		access: make access [
@@ -835,6 +847,10 @@ stylize/master [
 				if none? face/select-mode [
 					face/select-mode: 'multi
 				]
+				;-- Default Sort Direction
+				if none? face/default-sort-direction [
+					face/default-sort-direction: 'ascending
+				]
 				;-- Follow Size
 				if none? face/follow-size [
 					face/follow-size: 'line
@@ -901,12 +917,14 @@ stylize/master [
 					[v-scroller list]
 				] face face/pane
 				;-- Sharing
-				face/data:				face/list/data
-				face/selected:			face/list/selected
-				face/list/prototype:	face/prototype
-				face/list/v-scroller:	face/v-scroller
-				face/list/select-mode:	face/select-mode
-				face/list/follow-size:	face/follow-size
+				face/data:							face/list/data
+				face/selected:						face/list/selected
+				face/list/prototype:				face/prototype
+				face/list/v-scroller:				face/v-scroller
+				face/list/select-mode:				face/select-mode
+				face/list/follow-size:				face/follow-size
+				face/list/default-sort-direction:	face/default-sort-direction
+				face/list/default-sort-column:		face/default-sort-column
 				if get in face 'back-render [face/list/back-render-func: func [face cell] get in face 'back-render] 
 				if get in face 'empty-render [face/list/empty-render-func: func [face cell] get in face 'empty-render]
 				if get in face 'render [face/list/render-func: func [face cell] get in face 'render]
@@ -918,9 +936,16 @@ stylize/master [
 						pass-actor face face/list actor
 					]
 				]
+				;-- Sort by default settings, if there is a default sort column
+				if face/list/default-sort-column [
+					face/list/sort-direction: face/list/default-sort-direction
+					face/list/sort-column: face/list/default-sort-column
+				]
 				;-- Setup Scroller
 				insert-actor-func face 'on-align get in access 'set-scroller
 				insert-actor-func face 'on-resize get in access 'set-scroller
+				;-- Refresh content
+				refresh-face/no-show face
 			]
 			select-face*: func [face values] [
 				face/list/access/select-face* face/list :values
@@ -936,10 +961,22 @@ stylize/master [
 			]
 			refresh-face*: func [face] [
 				face/list/access/refresh-face* face/list
+				foreach f face/header-face/pane/pane [
+					if all [
+						f/style = 'sort-button
+						f/feel ; find better way to detect a valid sort button
+					] [
+						either f/column = face/list/sort-column [
+							set-face f face/list/sort-direction
+						][
+							clear-face f
+						]
+					]
+				]
 				set-scroller face
 			]
 		]
-		;-- List functions
+		;-- List Functions
 		follow: func [face pos] [
 			face/list/follow face/list pos
 			set-face/no-show face/v-scroller face/list/calc-pos face/list
@@ -954,6 +991,7 @@ stylize/master [
 
 		init: [
 			access/setup-face* self setup
+			access/refresh-face* self
 		]
 	]
 
@@ -997,12 +1035,21 @@ stylize/master [
 				face/list
 				face/list: find-style face/parent-face/parent-face 'list
 			]
-			if face/list/sort-column [
+			if any [
+				face/list/default-sort-column
+				face/list/sort-column
+			] [
+				face/list/sort-direction: face/list/default-sort-direction
+				face/list/sort-column: face/list/default-sort-column
 				foreach f face/parent-face/pane [
-					any [f = face clear-face f]
+					if f <> face [
+						either f/column = face/list/sort-column [
+							set-face f face/list/sort-direction
+						][
+							clear-face f
+						]
+					]
 				]
-				face/list/sort-direction: 'ascending
-				face/list/sort-column: none
 				ctx-list/set-sorting face/list
 				scroll-face/no-show face/list 0 get-face face/list/v-scroller
 				show face/list

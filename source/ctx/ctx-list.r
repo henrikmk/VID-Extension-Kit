@@ -168,7 +168,8 @@ ctx-list: context [
 	; sets the sorting for the given list face
 	set-sorting: func [face /local col values obtain] [
 		set-vars face
-		insert clear sidx*
+		insert
+			clear sidx*
 			either all [sod* soc*] [
 				values: clear []
 				col: index? find cols* soc*
