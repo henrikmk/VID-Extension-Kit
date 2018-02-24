@@ -135,7 +135,10 @@ set-facet-value: func [facet value 'output] [
 ]
 
 ; returns a value from a surface facet by state and event
-get-surface-facet: func [face facet state touch see init /local end-rule depth init-word pure see-word touch-word state-word value out] [
+get-surface-facet: func [
+	face facet state touch see init
+	/local end-rule depth init-word pure see-word touch-word state-word value out
+] [
 	facet: to-lit-word facet					; always a word
 	touch-word: to-lit-word touch				; always a word
 	state-word: to-lit-word state				; always a word
