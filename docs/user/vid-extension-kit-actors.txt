@@ -149,6 +149,10 @@ This is run on FREEZE-FACE.
 
 This is run on THAW-FACE.
 
++++ON-REFRESH
+
+This is run on REFRESH-FACE, whenever the data source of the face has changed.
+
 ---Keyboard
 
 +++ON-KEY
