@@ -551,7 +551,7 @@ stylize/master [
 				act-face face none 'on-unselect
 			]
 			; perform edits on the list, when the list is object based
-			edit-face*: func [face op value pos word /local blk j] [
+			edit-face*: func [face op value pos word /local blk j old-sorted] [
 				pos:
 					switch/default pos [
 						last [length? face/data]
@@ -562,9 +562,25 @@ stylize/master [
 					]
 				switch :op [
 					add [
-						append/only face/data make face/prototype any [:value []]
+						old-sorted: copy face/data-sorted
+						foreach
+							val
+							case [
+								object? :value [
+									reduce [:value]
+								]
+								block? :value [
+									:value
+								]
+								none? :value [
+									[]
+								]
+							]
+							[
+								append/only face/data make face/prototype val
+							]
 						refresh-face/no-show face
-						select-face face 'last
+						select-face face exclude face/data-sorted old-sorted
 					]
 					duplicate [
 						j: length? face/data
