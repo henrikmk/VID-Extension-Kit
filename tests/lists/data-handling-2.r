@@ -2,20 +2,20 @@ REBOL [
 	Title: "Data Handling Test"
 	Short: "Data Handling Test"
 	Author: ["Henrik Mikael Kristensen"]
-	Copyright: "2011 - HMK Design"
+	Copyright: "2011-2018 - HMK Design"
 	Filename: %data-handling.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
 	Release: 'internal
-	Created: 28-May-2011
-	Date: 28-May-2011
+	Created: 09-Mar-2018
+	Date: 09-Mar-2018
 	License: {
 		BSD (www.opensource.org/licenses/bsd-license.php)
 		Use at your own risk.
 	}
 	Purpose: {
-		Test data handling in DATA-LIST using plain blocks and objects.
+		Test EDIT-FACE with multiple rows, copying and moving data between lists.
 	}
 	History: []
 	Keywords: []
