@@ -787,6 +787,37 @@ select-face: func [
 	face
 ]
 
+unselect-face: func [
+	"Unselects a range of data in a face that supports it."
+	face
+	range
+	/no-show "Do not show change yet"
+	/local access
+][
+	if all [
+		access: get in face 'access
+		in access 'unselect-face*
+	][
+		access/unselect-face* face :range
+		act-face face none 'on-unselect
+	]
+	any [no-show show face]
+	face
+]
+
+get-select-face: func [
+	"Return the face selection index in a face that supports it."
+	face
+	/local access
+][
+	if all [
+		access: get in face 'access
+		in access 'get-select-face*
+	][
+		access/get-select-face* face
+	]
+]
+
 attach-face: func [
 	"Attaches the first face to the second, specifying what to do and when."
 	from-face "Face to act with"

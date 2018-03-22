@@ -449,6 +449,10 @@ stylize/master [
 					]
 				]
 			]
+			; returns selection indexes from the list face
+			get-select-face*: func [face] [
+				face/selected
+			]
 			; resizes the sub-face of the list
 			resize-face*: func [face size x y] [
 				;-- Resize main list face and sub-face
@@ -502,6 +506,22 @@ stylize/master [
 							none
 							either empty? face/selected ['on-unselect]['on-select]
 					]
+					;-- Invert Selection
+					'invert = :values [
+						switch face/select-mode [
+							mutex [
+								either empty? face/selected [
+									insert face/selected first face/data-sorted
+								][
+									clear face/selected
+								]
+							]
+							multi persistent [
+								insert face/selected exclude face/data-sorted old-selection
+							]
+						]
+						act-face face none 'on-select
+					]
 					;-- Select First
 					'first = :values [
 						insert face/selected first face/data-sorted
@@ -536,12 +556,27 @@ stylize/master [
 					]
 					;-- Select All
 					true = :values [
-						insert face/selected face/data-sorted
+						switch face/select-mode [
+							mutex [
+								insert face/selected first face/data-sorted
+							]
+							multi persistent [
+								insert face/selected face/data-sorted
+							]
+						]
 						act-face face none 'on-select
 					]
 				]
 				face/start: face/selected/1
 				face/end: all [not empty? face/selected last face/selected]
+			]
+			; unselects rows in the face
+			unselect-face*: func [face values /local old-selection] [
+				old-selection: copy face/selected
+				if any [integer? :values any-block? :values] [
+					insert clear face/selected exclude old-selection to block! :values
+					act-face face none 'on-unselect
+				]
 			]
 			; performs filtering of rows in the list
 			query-face*: func [face value] [
@@ -796,6 +831,9 @@ stylize/master [
 			get-face*: func [face] [
 				face/list/access/get-face* face/list
 			]
+			get-select-face*: func [face] [
+				face/list/access/get-select-face* face/list
+			]
 			clear-face*: func [face] [
 				face/list/access/clear-face* face/list data
 				face/data: face/list/data
@@ -965,6 +1003,10 @@ stylize/master [
 			]
 			select-face*: func [face values] [
 				face/list/access/select-face* face/list :values
+				set-scroller face
+			]
+			unselect-face*: func [face values] [
+				face/list/access/unselect-face* face/list :values
 				set-scroller face
 			]
 			query-face*: func [face value] [

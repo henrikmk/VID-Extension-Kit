@@ -53,6 +53,9 @@ stylize/master [
 		virgin: false
 		states: [state1 state2 state3]
 		feel: svvf/state
+		; should require setting of state via layout as well
+		; we should allow the use of a lit-word to set the value here
+		
 	]
 	; Action button
 	ACT-BUTTON: BUTTON ctx-colors/colors/action-color with [
@@ -341,8 +344,9 @@ stylize/master [
 
 	BOTTOM-BUTTON: BUTTON with [spring: [top right]]
 	CENTER-BUTTON: BUTTON with [align: [left right]]
+	H-FILL-BUTTON: BUTTON with [fill: 1x0]
 	HIGHLIGHT-BUTTON: BUTTON ctx-colors/colors/important-color with [
 		surface: 'highlight-button
 	]
-
+	H-FILL-HIGHLIGHT-BUTTON: HIGHLIGHT-BUTTON with [fill: 1x0]
 ]
