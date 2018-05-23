@@ -359,7 +359,7 @@ stylize/master [
 		color: none
 		multi: make multi [
 			block: func [
-				face 
+				face
 				blks
 				/local frame tt
 			][
@@ -466,7 +466,7 @@ stylize/master [
 				][
 					; not sure this will work properly
 					; but we do need a method to open and close each fold-button programmatically
-					set-face/no-show face/pane/1 value
+					set-face/no-show face value
 				]
 			]
 			get-face*: func [face] [
