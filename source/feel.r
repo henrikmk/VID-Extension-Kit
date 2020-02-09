@@ -893,7 +893,16 @@ resize-face: func [
 		in access 'resize-face*
 	][
 		access/resize-face* face size x y
-		act-face face none 'on-resize
+		either all [
+			in face 'style
+			'window = get in face 'style
+		] [
+			traverse-face face [
+				act-face face none 'on-resize-window
+			]
+		][
+			act-face face none 'on-resize
+		]
 	]
 	any [no-show show face]
 	face

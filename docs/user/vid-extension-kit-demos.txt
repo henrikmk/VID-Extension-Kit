@@ -6,6 +6,16 @@ The VID Extension Kit, when downloaded from Github in the source section, contai
 
 Some files appear incomplete and will contain comments on missing parts in the VID Extension Kit. Some tests will not work.
 
+---Actors
+
++++window-init.r
+
+This tests the ON-WINDOW-INIT actor. Opening the window, will cause the fields to be filled with window offset and size information.
+
++++window-resize-move.r
+
+This tests ON-WINDOW-INIT, ON-RESIZE-WINDOW, ON-MOVE-WINDOW and ON-MAXIMIZE. The fields will change, when moving and resizing the window.
+
 ---Balancers
 
 +++balancer.r

@@ -346,12 +346,25 @@ ctx-resize: context [
 
 	; Enable the resize-face accessor as a global window resize-contents event.
 	handler: insert-event-func [
-		if all [event/face not event/face/parent-face 'resize = event/type] [
-			; used during user window resize
-			svv/resizing?: true ; use this to prevent a face redraw from occurring here
-			resize-face event/face event/face/size
-			svv/resizing?: false
-			set-focus-ring event/face
+		if all [
+			event/face
+			not event/face/parent-face ; should use a more formal method
+		] [
+			switch event/type [
+				resize [
+					; used during user window resize
+					svv/resizing?: true ; use this to prevent a face redraw from occurring here
+					resize-face event/face event/face/size ; performs ON-RESIZE-WINDOW actor
+					svv/resizing?: false
+					set-focus-ring event/face
+				]
+				offset [
+					; used during user window move
+					traverse-face event/face [
+						act-face face none 'on-move-window
+					]
+				]
+			]
 		]
 		event
 	]
