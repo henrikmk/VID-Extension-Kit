@@ -364,6 +364,12 @@ ctx-resize: context [
 						act-face face none 'on-move-window
 					]
 				]
+				close [
+					; used during user window close
+					traverse-face event/face [
+						act-face face none 'on-close-window
+					]
+				]
 			]
 		]
 		event
