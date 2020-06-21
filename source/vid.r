@@ -210,7 +210,9 @@ vid-face/actors: make object! [
 	on-double-click:
 	on-drag:
 	on-set:
+	on-set-default:
 	on-clear:
+	on-clear-default:
 	on-reset:
 	on-escape:
 	on-focus:
