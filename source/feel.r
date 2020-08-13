@@ -38,7 +38,7 @@ svvf: system/view/vid/vid-feel: context [
 
 	; act on the face data state and UI feedback state using an UP method
 	act-on-up: func [face event] [
-		switch event [
+		switch event/type [
 			up [
 				if all [not face/rate find [drag-over pressed] face/touch] [
 					; Update face state information
@@ -71,7 +71,7 @@ svvf: system/view/vid/vid-feel: context [
 
 	; act on face data state and UI feedback state using a DOWN method
 	act-on-down: func [face event] [
-		switch event [
+		switch event/type [
 			down [
 				; Update face state information
 				if all [block? face/states not empty? head face/states] [
@@ -99,7 +99,7 @@ svvf: system/view/vid/vid-feel: context [
 	]
 
 	; set face data state and UI feedback state
-	set-face-state: func [face [object!] event [none! word!]] [
+	set-face-state: func [face [object!] action [none! word!]] [
 		; Update touch/feedback information
 		face/see:
 			case [
@@ -108,7 +108,7 @@ svvf: system/view/vid/vid-feel: context [
 				true ['unfocused]
 			]
 		face/touch:
-			switch/default event [
+			switch/default action [
 				time [
 					face/touch
 				]
@@ -161,7 +161,7 @@ svvf: system/view/vid/vid-feel: context [
 	sensor: make face/feel [
 		cue: blink: none
 		engage: func [face action event][
-			act-on-up face action
+			act-on-up face event
 			set-face-state face action
 			show face
 		]
@@ -208,7 +208,7 @@ svvf: system/view/vid/vid-feel: context [
 					face/data: not face/data
 				]
 			]
-			act-on-up face action
+			act-on-up face event
 			set-face-state face action
 			show face
 		]
@@ -481,7 +481,7 @@ svvf: system/view/vid/vid-feel: context [
 			case [
 				act = 'down [
 					old-offset: face/offset
-					act-on-down face act
+					act-on-down face event
 				]
 				; pose limit on offset
 				find [away over up] act [
