@@ -1,9 +1,9 @@
 REBOL [
-	Title: "ON-INIT-WINDOW Test"
-	Short: "ON-INIT-WINDOW Test"
+	Title: "ON-CLOSE-WINDOW Test"
+	Short: "ON-CLOSE-WINDOW Test"
 	Author: ["Henrik Mikael Kristensen"]
 	Copyright: "2011 - 2020 - HMK Design"
-	Filename: %on-init-window.r
+	Filename: %on-close-window.r
 	Version: 0.0.1
 	Type: 'script
 	Maturity: 'unstable
@@ -15,7 +15,7 @@ REBOL [
 		Use at your own risk.
 	}
 	Purpose: {
-		Test ON-INIT-WINDOW
+		Test ON-CLOSE-WINDOW
 	}
 	History: []
 	Keywords: []

@@ -184,7 +184,10 @@ area: field [
 	para [wrap?: true]
 ]
 code: field [
-	font [name: "courier"]
+	font [
+		name: "courier"
+		valign: 'top
+	]
 ]
 toggle: button [
 	colors state [

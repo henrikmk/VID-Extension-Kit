@@ -1236,7 +1236,8 @@ ctx-access: context [
 			]
 			if system/view/focal-face = face [
 				ctx-text/unlight-text
-				system/view/caret: at face/text index? system/view/caret
+;				system/view/caret: head system/view/caret
+				system/view/caret: tail face/text
 			]
 			ctx-text/set-text-body face form face/text
 			face/line-list: none

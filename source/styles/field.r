@@ -61,7 +61,7 @@ stylize/master [
 				insert-actor-func self 'on-return :action
 			]
 			access/set-face* self copy any [text ""]
-			para: make para [] ; avoid sharing the same para object
+			para: make para [] ; avoid sharing the same para object across faces
 		]
 	]
 
@@ -86,11 +86,21 @@ stylize/master [
 		] system/view
 		key-action: bind [
 			case [
-				'up = event/key [if find/match form pick match -1 copy/part get-face face caret [match: back match complete face]]
-				'down = event/key [if find/match form pick match 2 copy/part get-face face caret [match: next match complete face]]
+				'up = event/key [
+					if find/match form pick match -1 copy/part get-face face caret [
+						match: back match complete face
+					]
+				]
+				'down = event/key [
+					if find/match form pick match 2 copy/part get-face face caret [
+						match: next match complete face
+					]
+				]
 				all [not word? event/key ctrl-keys <> union ctrl-keys make bitset! event/key] [
 					forall list [
-						if find/match form first list get-face face [match: list complete face break]
+						if find/match form first list get-face face [
+							match: list complete face break
+						]
 					]
 					list: head list
 				]
@@ -184,14 +194,14 @@ stylize/master [
 		old-value: none
 		set-old-value: func [face] [face/old-value: copy get-face face]
 		access: make access [
-			origin: none
+			scroll: none
 			scroll-face*: func [face x y /local dsz lh sz ssz] [
 				ssz: face/text-body/size
 				sz: face/text-body/area
 				dsz: ssz - sz
 				lh: face/text-body/line-height
-				origin: any [origin face/para/origin]
-				face/para/origin:
+				scroll: any [scroll face/para/scroll]
+				face/para/scroll:
 					either 1 < abs y [ ; OSX sends only 1 step instead of 3
 						;-- Scroll wheel
 						min
@@ -199,14 +209,14 @@ stylize/master [
 							max
 								negate (dsz - face/para/margin)
 									add
-										face/para/origin
+										face/para/scroll
 											negate lh * as-pair
 												max -1 min 1 x
 												max -1 min 1 y
 					][
 						;-- Scroll bar
 						add
-							origin
+							scroll
 							negate
 								as-pair
 									dsz/x * x ; zero, as it should be
@@ -230,7 +240,7 @@ stylize/master [
 			ft: fc/text-body
 			;-- Adjust vertical scroller
 			fp/v-scroller/redrag ft/v-ratio
-			set-face fp/v-scroller ft/v-scroll
+			set-face/no-show fp/v-scroller ft/v-scroll
 			show fp/v-scroller
 			;-- Adjust horizontal scroller, if used
 			unless in fp 'h-scroller [
@@ -243,6 +253,7 @@ stylize/master [
 			set-face*: func [face value] [
 				;-- Set text
 				set-face/no-show face/area value
+				ctx-text/set-text-body face head face/area/text
 				;-- Set scrollers
 				face/set-scroller face
 			]
