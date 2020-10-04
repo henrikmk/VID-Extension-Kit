@@ -206,13 +206,14 @@ stylize/master [
 						;-- Scroll wheel
 						min
 							face/para/margin
+							; might be wrong here
 							max
-								negate (dsz - face/para/margin)
-									add
-										face/para/scroll
-											negate lh * as-pair
-												max -1 min 1 x
-												max -1 min 1 y
+								negate dsz;(dsz - face/para/margin)
+								add
+									face/para/scroll
+									negate lh * as-pair
+										max -1 min 1 x
+										max -1 min 1 y
 					][
 						;-- Scroll bar
 						add
@@ -293,8 +294,18 @@ stylize/master [
 			;-- Build pane
 			pane: compose/deep/only [
 				across space 0
-				area 100x100 spring none with [surface: (to-lit-word area-surface)]
-				scroller 20x100 spring [left] align [right]
+				area
+					100x100
+					spring none
+					with [surface: (to-lit-word area-surface)]
+					on-scroll [
+							ctx-text/set-text-body face face/text
+							set-scroller face
+					]
+				scroller
+					20x100
+					spring [left]
+					align [right]
 				; this does not scroll
 				; value is passed correctly
 				; scroll-face does not scroll properly

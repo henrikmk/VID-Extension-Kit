@@ -306,7 +306,7 @@ ctx-text: [
 
 		; corrections for View bugs
 		if empty? face/text			[para/scroll: 0x0]
-		if ft/line = 1				[para/scroll/y: 0]
+		;if ft/line = 1				[para/scroll/y: 0] ; turned off for now to allow this function to be used during scrolling
 		if line-info/start = caret	[para/scroll/x: 0]
 
 		; clamping of para/scroll
